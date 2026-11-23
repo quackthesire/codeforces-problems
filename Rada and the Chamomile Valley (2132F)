@@ -1,0 +1,85 @@
+import java.util.*;
+public class Main{
+    static class Node{
+        int v;
+        int index;
+        public Node(int v,int index){
+            this.v=v;
+            this.index=index;
+        }
+    }
+    static int timer;
+    static boolean dfs(int u,int p,ArrayList<Node>[]adj,int[]tin,int[]low,int[]ans,int end){
+        tin[u]=timer;
+        low[u]=timer;
+        timer++;
+        boolean work=false;
+        for(Node edge:adj[u]){
+            if(edge.index==p)
+                continue;
+            if(tin[edge.v]!=-1){
+                low[u]=Math.min(low[u],tin[edge.v]);
+            }
+            else{
+                boolean cur=dfs(edge.v,edge.index,adj,tin,low,ans,end);
+                work|=cur;
+                low[u]=Math.min(low[u],low[edge.v]);
+                if(low[edge.v]>tin[u]&&cur){
+                    ans[u]=Math.min(ans[u],edge.index);
+                    ans[edge.v]=Math.min(ans[edge.v],edge.index);
+                }
+            }
+        }
+        return work|(u==end);
+    }
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int t=scan.nextInt();
+        for(int temp=0;temp<t;temp++){
+            int n=scan.nextInt();
+            int m=scan.nextInt();
+            ArrayList<Node>[]adj=new ArrayList[n];
+            for(int i=0;i<n;i++){
+                adj[i]=new ArrayList<>();
+            }
+            for(int i=0;i<m;i++){
+                int u=scan.nextInt()-1;
+                int v=scan.nextInt()-1;
+                adj[u].add(new Node(v,i));
+                adj[v].add(new Node(u,i));
+            }
+            timer=0;
+            int[]tin=new int[n];
+            int[]low=new int[n];
+            int[]ans=new int[n];
+            Arrays.fill(tin,-1);
+            Arrays.fill(ans,Integer.MAX_VALUE/2);
+            dfs(0,-1,adj,tin,low,ans,n-1);
+            Queue<Node>q=new LinkedList<>();
+            ArrayList<Node>list=new ArrayList<>();
+            for(int i=0;i<n;i++){
+                if(ans[i]!=Integer.MAX_VALUE/2)
+                    list.add(new Node(i,ans[i]));
+            }
+            Collections.sort(list,(a,b)->(a.index-b.index));
+            for(Node node:list){
+                q.add(node);
+            }
+            while(!q.isEmpty()){
+                Node node=q.poll();
+                for(Node v:adj[node.v]){
+                    if(ans[v.v]==Integer.MAX_VALUE/2){
+                        ans[v.v]=node.index;
+                        q.add(new Node(v.v,node.index));
+                    }
+                }
+            }
+            int k=scan.nextInt();
+            for(int i=0;i<k;i++){
+                int index=scan.nextInt()-1;
+                System.out.print(((ans[index]==Integer.MAX_VALUE/2)?-1:(ans[index]+1))+" ");
+            }
+            System.out.println();
+        }
+    }
+}
