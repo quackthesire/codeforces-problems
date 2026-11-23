@@ -1,0 +1,55 @@
+import java.util.*;
+public class Main{
+    static void add(ArrayList<Integer>vals,int x,int[]sub,int[]bits,int m){
+        int[]best=new int[m];
+        for(int i=1;i<sub.length;i++){
+            int count=bits[i];
+            int temp=x&sub[i];
+            best[count-1]=Math.max(best[count-1],x-temp);
+        }
+        for(int i=0;i<m;i++){
+            if(i>0)
+                best[i]=Math.max(best[i],best[i-1]);
+            if(i==0)
+                vals.add(best[i]);
+            else
+                vals.add(best[i]-best[i-1]);
+        }
+    }
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int t=scan.nextInt();
+        for(int temp=0;temp<t;temp++){
+            int n=scan.nextInt();
+            int m=scan.nextInt();
+            int k=scan.nextInt();
+            int[]a=new int[n];
+            int[]b=new int[m];
+            long ans=0;
+            for(int i=0;i<n;i++){
+                a[i]=scan.nextInt();
+                ans+=a[i];
+            }
+            for(int i=0;i<m;i++){
+                b[i]=scan.nextInt();
+            }
+            int[]sub=new int[1<<m];
+            int[]bits=new int[1<<m];
+            sub[0]=-1;
+            for(int i=1;i<sub.length;i++){
+                int bit=Integer.numberOfTrailingZeros(i);
+                sub[i]=sub[i&(i-1)]&b[bit];
+                bits[i]=bits[i&(i-1)]+1;
+            }
+            ArrayList<Integer>vals=new ArrayList<>();
+            for(int i=0;i<n;i++){
+                add(vals,a[i],sub,bits,m);
+            }
+            Collections.sort(vals,Collections.reverseOrder());
+            for(int i=0;i<k;i++){
+                ans-=vals.get(i);
+            }
+            System.out.println(ans);
+        }
+    }
+}
