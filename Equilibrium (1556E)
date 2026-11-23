@@ -1,0 +1,72 @@
+import java.util.*;
+public class Main{
+    static class Node{
+        long min;
+        long max;
+        public Node(long min,long max){
+            this.min=min;
+            this.max=max;
+        }
+    }
+    static class Segtree{
+        int n;
+        Node[]tree;
+        public Segtree(long[]array){
+            this.n=array.length;
+            tree=new Node[4*n];
+            build(array,1,0,n-1);
+        }
+        public void build(long[]array,int node,int l,int r){
+            if(l==r){
+                tree[node]=new Node(array[l],array[l]);
+                return;
+            }
+            int m=(l+r)/2;
+            build(array,node*2,l,m);
+            build(array,node*2+1,m+1,r);
+            tree[node]=new Node(Math.min(tree[node*2].min,tree[node*2+1].min),Math.max(tree[node*2].max,tree[node*2+1].max));
+        }
+        public Node query(int l,int r){
+            return query(1,0,n-1,l,r);
+        }
+        public Node query(int node,int l,int r,int ll,int rr){
+            if(ll>r||rr<l)
+                return new Node(Long.MAX_VALUE,Long.MIN_VALUE);
+            if(ll<=l&&r<=rr)
+                return new Node(tree[node].min,tree[node].max);
+            int m=(l+r)/2;
+            Node left=query(node*2,l,m,ll,rr);
+            Node right=query(node*2+1,m+1,r,ll,rr);
+            return new Node(Math.min(left.min,right.min),Math.max(left.max,right.max));
+        }
+    }
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int n=scan.nextInt();
+        int q=scan.nextInt();
+        long[]pre=new long[n];
+        for(int i=0;i<n;i++){
+            pre[i]-=scan.nextLong();
+        }
+        for(int i=0;i<n;i++){
+            pre[i]+=scan.nextLong();
+            if(i!=0)
+                pre[i]+=pre[i-1];
+        }
+        Segtree segtree=new Segtree(pre);
+        for(int i=0;i<q;i++){
+            int l=scan.nextInt()-1;
+            int r=scan.nextInt()-1;
+            long prev=(l==0?0:pre[l-1]);
+            if(pre[r]-prev!=0){
+                System.out.println(-1);
+                continue;
+            }
+            Node ans=segtree.query(l,r);
+            if(ans.min-prev<0)
+                System.out.println(-1);
+            else
+                System.out.println(ans.max-prev);
+        }
+    }
+}
