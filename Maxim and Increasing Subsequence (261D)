@@ -1,0 +1,29 @@
+import java.util.*;
+public class Main{
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int tests=scan.nextInt();
+        int n=scan.nextInt();
+        int b=scan.nextInt();
+        int t=scan.nextInt();
+        for(int temp=0;temp<tests;temp++){
+            int[]array=new int[n];
+            for(int i=0;i<n;i++){
+                array[i]=scan.nextInt();
+            }
+            int[]dp=new int[b+1];
+            Arrays.fill(dp,0);
+            for(int i=0;i<Math.min(n,Math.min(b,t));i++){
+                for(int j=0;j<n;j++){
+                    dp[array[j]]=dp[array[j]-1]+1;
+                    for(int k=array[j]+1;k<=b;k++){
+                        if(dp[k]>=dp[array[j]])
+                            break;
+                        dp[k]=dp[array[j]];
+                    }
+                }
+            }
+            System.out.println(dp[b]);
+        }
+    }
+}
