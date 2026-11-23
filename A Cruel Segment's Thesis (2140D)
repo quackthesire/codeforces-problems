@@ -1,0 +1,54 @@
+import java.util.*;
+public class Main{
+    static class Node{
+        int index;
+        long loss;
+        long val;
+        public Node(int index,long loss,long val){
+            this.index=index;
+            this.loss=loss;
+            this.val=val;
+        }
+    }
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int t=scan.nextInt();
+        for(int temp=0;temp<t;temp++){
+            int n=scan.nextInt();
+            long sum=0;
+            Node[]array=new Node[n];
+            boolean[]visited=new boolean[n];
+            for(int i=0;i<n;i++){
+                long l=scan.nextLong();
+                long r=scan.nextLong();
+                array[i]=new Node(i,l+r,r);
+                sum+=2*r-l;
+            }
+            Arrays.sort(array,(a,b)->Long.compare(a.loss,b.loss));
+            for(int i=0;i<n/2;i++){
+                sum-=array[i].loss;
+                visited[array[i].index]=true;
+            }
+            long best=sum;
+            long next=array[n/2].loss;
+            if(n%2!=0){
+                Arrays.sort(array,(a,b)->Long.compare(a.val,b.val));
+                for(int i=0;i<n;i++){
+                    if(!visited[array[i].index]){
+                        best-=array[i].val;
+                        break;
+                    }
+                }
+                Arrays.sort(array,(a,b)->Long.compare(a.loss,b.loss));
+                for(int i=0;i<n/2;i++){
+                    long cur=sum;
+                    cur-=next;
+                    cur+=array[i].loss;
+                    cur-=array[i].val;
+                    best=Math.max(best,cur);
+                }
+            }
+            System.out.println(best);
+        }
+    }
+}
