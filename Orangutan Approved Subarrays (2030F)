@@ -1,0 +1,97 @@
+#include <bits/stdc++.h>
+using namespace std;
+using ll=long long;
+struct Segtree{
+    int n;
+    vector<int>tree;
+    Segtree(const vector<int>&array){
+        n=array.size();
+        tree.resize(4*n);
+        build(1,0,n-1,array);
+    }
+    void build(int node,int l,int r,const vector<int>&array){
+        if(l==r){
+            tree[node]=array[l];
+            return;
+        }
+        int m=(l+r)/2;
+        build(node*2,l,m,array);
+        build(node*2+1,m+1,r,array);
+        tree[node]=min(tree[node*2],tree[node*2+1]);
+    }
+    int query(int l,int r){
+        if(l>r)
+            return INT_MAX/2;
+        return query(1,0,n-1,l,r);
+    }
+    int query(int node,int l,int r,int ql,int qr){
+        if(r<ql||qr<l)
+            return INT_MAX/2;
+        if(ql<=l&&r<=qr)
+            return tree[node];
+        int m=(l+r)/2;
+        int left=query(node*2,l,m,ql,qr);
+        int right=query(node*2+1,m+1,r,ql,qr);
+        return min(left,right);
+    }
+    void update(int i,int val){
+        if(i>=n)
+            return;
+        update(1,0,n-1,i,val);
+    }
+    void update(int node,int l,int r,int i,int val){
+        if(l==r){
+            tree[node]=val;
+            return;
+        }
+        int m=(l+r)/2;
+        if(i<=m)
+            update(node*2,l,m,i,val);
+        else
+            update(node*2+1,m+1,r,i,val);
+        tree[node]=min(tree[node*2],tree[node*2+1]);
+    }
+};
+int main(){
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+    int t;
+    cin>>t;
+    while(t--){
+        int n;
+        int q;
+        cin>>n>>q;
+        vector<int>array(n);
+        vector<int>last(n);//last aj=ai for index i
+        vector<int>next(n,INT_MAX/2);//next aj=ai for index i
+        vector<int>index(n,INT_MAX/2);//last occurence of value i
+        for(int i=0;i<n;i++){
+            cin>>array[i];
+            array[i]--;
+            last[i]=index[array[i]];
+            if(index[array[i]]!=INT_MAX/2)
+                next[index[array[i]]]=i;
+            index[array[i]]=i;
+        }
+        int l=0;
+        int r=0;
+        vector<int>right(n);//rightmost j s.t. [i...j] works
+        Segtree segtree(last);//segtree for leftmost aj=ai for index i
+        while(l<n||r<n){
+            r++;
+            while(l<n&&(r>=n||segtree.query(last[r]+1,r)<last[r])){
+                right[l]=r-1;
+                segtree.update(next[l],INT_MAX/2);
+                l++;
+            }
+        }
+        for(int i=0;i<q;i++){
+            int l;
+            int r;
+            cin>>l>>r;
+            l--;
+            r--;
+            cout<<(right[l]>=r?"YES":"NO")<<"\n";
+        }
+    }
+}
