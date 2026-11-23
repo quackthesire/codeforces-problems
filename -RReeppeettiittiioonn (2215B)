@@ -1,0 +1,56 @@
+import java.util.*;
+public class Main{
+    static int check(long n,long b,long p){
+        if(b<2)
+            return 0;
+        ArrayList<Long>digits=new ArrayList<>();
+        while(n>0){
+            digits.add(n%b);
+            n/=b;
+        }
+        if(digits.size()%p!=0)
+            return 0;
+        long cur=digits.get(0);
+        for(int i=1;i<digits.size();i++){
+            if(i%p==0)
+                cur=digits.get(i);
+            else if(digits.get(i)!=cur)
+                return 0;
+        }
+        //System.out.println(b+" "+p);
+        return 1;
+    }
+    static long val(long base,long exp){
+        long ans=0;
+        for(long i=0;i<=exp;i++){
+            ans+=(long)Math.pow(base,i);
+        }
+        return ans;
+    }
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int t=scan.nextInt();
+        for(int temp=0;temp<t;temp++){
+            long n=scan.nextLong();
+            long ans=0;
+            for(long i=1;i<=(long)Math.sqrt(n);i++){
+                if(n%i==0){
+                    ans+=check(n,i-1,2);
+                    ans+=check(n,n/i-1,2);
+                }
+            }
+            for(long i=3;i<=42;i++){
+                long j=1;
+                while(true){
+                    j++;
+                    if(val(j,i-1)>n)
+                        break;
+                    if(n%val(j,i-1)!=0)
+                        continue;
+                    ans+=check(n,j,i);
+                }
+            }
+            System.out.println(ans);
+        }
+    }
+}
