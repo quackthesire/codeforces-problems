@@ -1,0 +1,35 @@
+#include <bits/stdc++.h>
+using namespace std;
+using ll=long long;
+int main(){
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+    int n;
+    cin>>n;
+    vector<int>array(n);
+    for(int i=0;i<n;i++){
+        cin>>array[i];
+    }
+    vector<vector<int>>dpmin(n+1,vector<int>(n+1,INT_MAX));
+    vector<vector<int>>dpmax(n+1,vector<int>(n+1,INT_MIN));
+    dpmin[0][0]=0;
+    dpmax[0][0]=0;
+    for(int i=0;i<n;i++){
+        for(int j=0;j<=n;j++){
+            dpmin[i+1][j]=min(dpmin[i+1][j],dpmin[i][j]);
+            dpmax[i+1][j]=max(dpmax[i+1][j],dpmax[i][j]);
+            if(j>=i&&j<=n-array[i]){
+                if(dpmin[i][j]!=INT_MAX)
+                    dpmin[i+1][j+array[i]]=min(dpmin[i+1][j+array[i]],dpmin[i][j]+1);
+                if(dpmax[i][j]!=INT_MIN)
+                    dpmax[i+1][j+array[i]]=max(dpmax[i+1][j+array[i]],dpmax[i][j]+1);
+            }
+        }
+    }
+    for(int i=1;i<=n;i++){
+        if(dpmin[n][i]==INT_MAX)
+            cout<<-1<<'\n';
+        else
+            cout<<dpmin[n][i]<<" "<<dpmax[n][i]<<'\n';
+    }
+}
