@@ -1,0 +1,98 @@
+import java.util.*;
+public class Main{
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int n=scan.nextInt()-1;
+        long sum=0;
+        long[]array=new long[n];
+        for(int i=0;i<n;i++){
+            array[i]=scan.nextLong();
+            sum+=array[i];
+        }
+        int size=(int)Math.sqrt(n)+1;
+        int blocks=(n+size-1)/size;
+        long[][]cur=new long[2][2];
+        long[][][]dp=new long[blocks][2][2];//block i,prev end j,cur end k
+        for(int i=0;i<n;i++){
+            if(i%size==0){
+                if(i!=0){
+                    dp[i/size-1][0][0]=cur[0][0];
+                    dp[i/size-1][0][1]=cur[0][1];
+                    dp[i/size-1][1][0]=cur[1][0];
+                    dp[i/size-1][1][1]=cur[1][1];
+                }
+                cur=new long[2][2];
+                if(i==0){
+                    cur[0][0]=0;
+                    cur[0][1]=Long.MIN_VALUE/4;
+                    cur[1][0]=Long.MIN_VALUE/4;
+                    cur[1][1]=Long.MIN_VALUE/4;
+                }
+                else{
+                    cur[0][1]=array[i];
+                    cur[1][1]=Long.MIN_VALUE/4;
+                }
+            }
+            else{
+                long[][]temp=new long[2][2];
+                temp[0][0]=cur[0][0];
+                temp[0][1]=cur[0][1];
+                temp[1][0]=cur[1][0];
+                temp[1][1]=cur[1][1];
+                cur[0][0]=Math.max(temp[0][0],temp[0][1]);
+                cur[0][1]=temp[0][0]+array[i];
+                cur[1][0]=Math.max(temp[1][0],temp[1][1]);
+                cur[1][1]=temp[1][0]+array[i];
+            }
+        }
+        dp[blocks-1][0][0]=cur[0][0];
+        dp[blocks-1][0][1]=cur[0][1];
+        dp[blocks-1][1][0]=cur[1][0];
+        dp[blocks-1][1][1]=cur[1][1];
+        int q=scan.nextInt();
+        for(int i=0;i<q;i++){
+            int k=scan.nextInt()-1;
+            long x=scan.nextLong();
+            sum-=array[k];
+            array[k]=x;
+            sum+=array[k];
+            cur=new long[2][2];
+            if(k/size==0){
+                cur[0][0]=0;
+                cur[0][1]=Long.MIN_VALUE/4;
+                cur[1][0]=Long.MIN_VALUE/4;
+                cur[1][1]=Long.MIN_VALUE/4;
+            }
+            else{
+                cur[0][1]=array[size*(k/size)];
+                cur[1][1]=Long.MIN_VALUE/4;
+            }
+            for(int j=size*(k/size)+1;j<Math.min(n,size*(k/size+1));j++){
+                long[][]temp=new long[2][2];
+                temp[0][0]=cur[0][0];
+                temp[0][1]=cur[0][1];
+                temp[1][0]=cur[1][0];
+                temp[1][1]=cur[1][1];
+                cur[0][0]=Math.max(temp[0][0],temp[0][1]);
+                cur[0][1]=temp[0][0]+array[j];
+                cur[1][0]=Math.max(temp[1][0],temp[1][1]);
+                cur[1][1]=temp[1][0]+array[j];
+            }
+            dp[k/size][0][0]=cur[0][0];
+            dp[k/size][0][1]=cur[0][1];
+            dp[k/size][1][0]=cur[1][0];
+            dp[k/size][1][1]=cur[1][1];
+            long[]best=new long[2];
+            best[0]=dp[0][0][0];
+            best[1]=dp[0][0][1];
+            for(int j=1;j<blocks;j++){
+                long[]temp=new long[2];
+                temp[0]=best[0];
+                temp[1]=best[1];
+                best[0]=Math.max(temp[0]+dp[j][0][0],temp[1]+dp[j][1][0]);
+                best[1]=Math.max(temp[0]+dp[j][0][1],temp[1]+dp[j][1][1]);
+            }
+            System.out.println(2*(sum-best[0]));
+        }
+    }
+}
