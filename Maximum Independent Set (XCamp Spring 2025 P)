@@ -1,0 +1,40 @@
+import java.util.*;
+public class Main{
+    static int best=0;
+    static ArrayList<Integer>array=new ArrayList<>();
+    static void dfs(long[]adj,ArrayList<Integer>cur,long mask,int pos,int n){
+        if(pos==n){
+            if(cur.size()>best){
+                best=cur.size();
+                array=new ArrayList<>(cur);
+            }
+            return;
+        }
+        if(cur.size()+n-pos<=best)
+            return;
+        dfs(adj,cur,mask,pos+1,n);
+        if((mask&adj[pos])==0){
+            cur.add(pos);
+            dfs(adj,cur,mask|(1L<<pos),pos+1,n);
+            cur.remove(cur.size()-1);
+        }
+    }
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int n=scan.nextInt();
+        int m=scan.nextInt();
+        long[]adj=new long[n];
+        for(int i=0;i<m;i++){
+            int u=scan.nextInt();
+            int v=scan.nextInt();
+            adj[u]|=(1L<<v);
+            adj[v]|=(1L<<u);
+        }
+        ArrayList<Integer>cur=new ArrayList<>();
+        dfs(adj,cur,0L,0,n);
+        System.out.println(best);
+        for(int i:array){
+            System.out.print(i+" ");
+        }
+    }
+}
