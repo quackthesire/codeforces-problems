@@ -1,0 +1,46 @@
+import java.util.*;
+public class Main{
+    static int bs(long[]best,long val){
+        int l=0;
+        int r=best.length-1;
+        while(l<=r){
+            int m=(l+r)/2;
+            if(best[m]>val)
+                r=m-1;
+            else
+                l=m+1;
+        }
+        if(l==best.length)
+            return -1;
+        return l;
+    }
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int n=scan.nextInt();
+        int c=scan.nextInt();
+        long[]array=new long[c+1];
+        for(int i=0;i<n;i++){
+            int cost=scan.nextInt();
+            array[cost]=Math.max(array[cost],scan.nextLong()*scan.nextLong());
+        }
+        for(int i=1;i<=c;i++){
+            array[i]=Math.max(array[i-1],array[i]);
+        }
+        long[]best=new long[c+1];
+        for(int i=1;i<=c;i++){
+            long cur=0;
+            for(int j=1;j*j<=i;j++){
+                if(i%j!=0)
+                    continue;
+                cur=Math.max(cur,array[j]*i/j);
+                cur=Math.max(cur,array[i/j]*j);
+            }
+            best[i]=Math.max(best[i-1],cur);
+        }
+        int m=scan.nextInt();
+        for(int i=0;i<m;i++){
+            long val=scan.nextLong()*scan.nextLong();
+            System.out.print(bs(best,val)+" ");
+        }
+    }
+}
