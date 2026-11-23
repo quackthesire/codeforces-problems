@@ -1,0 +1,92 @@
+import java.util.*;
+public class Main{
+    static class Node{
+        int x;
+        int y;
+        int t;
+        int index;
+        public Node(int x,int y,int t,int index){
+            this.x=x;
+            this.y=y;
+            this.t=t;
+            this.index=index;
+        }
+    }
+    static class DSU{
+        int[]parent;
+        int[]time;
+        int[]size;
+        public DSU(Node[]array){
+            parent=new int[array.length];
+            time=new int[array.length];
+            size=new int[array.length];
+            for(int i=0;i<array.length;i++){
+                parent[i]=i;
+                time[i]=array[i].t;
+                size[i]=1;
+            }
+        }
+        public int find(int u){
+            if(parent[u]==u)
+                return u;
+            parent[u]=find(parent[u]);
+            return parent[u];
+        }
+        public void merge(int u,int v){
+            u=find(u);
+            v=find(v);
+            if(u==v)
+                return;
+            if(size[u]>size[v]){
+                int temp=u;
+                u=v;
+                v=temp;
+            }
+            parent[u]=v;
+            time[v]=Math.min(time[u],time[v]);
+            time[u]=0;
+            size[v]+=size[u];
+        }
+    }
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int t=scan.nextInt();
+        for(int temp=0;temp<t;temp++){
+            int n=scan.nextInt();
+            int k=scan.nextInt();
+            Node[]array=new Node[n];
+            for(int i=0;i<n;i++){
+                array[i]=new Node(scan.nextInt(),scan.nextInt(),scan.nextInt(),i);
+            }
+            DSU dsu=new DSU(array);
+            Arrays.sort(array,(a,b)->((a.x==b.x)?(a.y-b.y):(a.x-b.x)));
+            for(int i=1;i<n;i++){
+                if((array[i].x==array[i-1].x)&&(array[i].y-array[i-1].y<=k))
+                    dsu.merge(array[i-1].index,array[i].index);
+            }
+            Arrays.sort(array,(a,b)->((a.y==b.y)?(a.x-b.x):(a.y-b.y)));
+            for(int i=1;i<n;i++){
+                if((array[i].y==array[i-1].y)&&(array[i].x-array[i-1].x<=k))
+                    dsu.merge(array[i-1].index,array[i].index);
+            }
+            int l=0;
+            int r=1000000000;
+            int ans=-1;
+            while(l<=r){
+                int m=(l+r)/2;
+                int count=0;
+                for(int i=0;i<n;i++){
+                    if(dsu.time[i]>m)
+                        count++;
+                }
+                if(count<=m+1){
+                    ans=m;
+                    r=m-1;
+                }
+                else
+                    l=m+1;
+            }
+            System.out.println(ans);
+        }
+    }
+}
