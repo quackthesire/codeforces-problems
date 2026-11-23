@@ -1,0 +1,35 @@
+import java.util.*;
+public class Main{
+    static long ans=0;
+    static void solve(long a,long b,long c,long d){
+        if(c<a||d<b){
+            ans=-1;
+            return;
+        }
+        if(c<d){
+    	    if(a==c&&b%a==d%c){
+    	        ans+=(d-b)/a;
+    	        return;
+    	    }
+            ans+=d/c;
+	        solve(b,a,d%c,c);
+        }
+        else{
+            if(b==d&&a%b==c%d){
+                ans+=(c-a)/b;
+                return;
+            }
+            ans+=c/d;
+	        solve(a,b,c%d,d);
+        }
+    }
+	public static void main(String[]args){
+	    Scanner scan=new Scanner(System.in);
+	    int t=scan.nextInt();
+	    for(int temp=0;temp<t;temp++){
+	        ans=0;
+	        solve(scan.nextLong(),scan.nextLong(),scan.nextLong(),scan.nextLong());
+	        System.out.println(ans);
+	    }
+	}
+}
