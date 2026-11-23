@@ -1,0 +1,53 @@
+import java.util.*;
+public class solution{
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int n=scan.nextInt();
+        int t=scan.nextInt();
+        long[]array=new long[n];
+        LinkedList<Integer>[]child=new LinkedList[n];
+        for(int i=0;i<n;i++){
+            child[i]=new LinkedList<>();
+        }
+        for(int i=1;i<n;i++){
+            child[scan.nextInt()-1].add(i);
+            array[i]=scan.nextLong();
+        }
+        long[]dp=new long[n];
+        long[]dp2=new long[n];
+        long[]size=new long[n];
+        long[]depth=new long[n];
+        Arrays.fill(size,1);
+        for(int i=n-1;i>=0;i--){
+            for(int j:child[i]){
+                size[i]+=size[j];
+                array[i]+=array[j];
+                depth[i]=Math.max(depth[i],depth[j]+1);
+            }
+            Collections.sort(child[i],(a,b)->Long.compare((long)array[a]*size[b],(long)array[b]*size[a]));
+            long time=0;
+            for(int j:child[i]){
+                dp[i]+=dp[j]+(2L*size[j])*time;
+                time+=array[j];
+            }
+            dp[i]+=time;
+            dp2[i]=Long.MAX_VALUE;
+            time=0;
+            if(child[i].isEmpty())
+                dp2[i]=0;
+            else{
+                long count=0;
+                for(int j:child[i]){
+                    if(depth[j]+1==depth[i])
+                        dp2[i]=Math.min(dp2[i],dp[i]-((2L*size[j])*time)+(count*array[j])-dp[j]+dp2[j]);
+                    time+=array[j];
+                    count+=2L*size[j];
+                }
+            }
+        }
+        if(t==0)
+            System.out.println(2*(n-1)+" "+dp[0]);
+        else
+            System.out.println((2*(n-1)-depth[0])+" "+dp2[0]);
+    }
+}
