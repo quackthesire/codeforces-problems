@@ -1,0 +1,43 @@
+import java.util.*;
+public class Main{
+    static class Pair{
+        long a;
+        long b;
+        public Pair(long a,long b){
+            this.a=a;
+            this.b=b;
+        }
+    }
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int t=scan.nextInt();
+        for(int temp=0;temp<t;temp++){
+            int n=scan.nextInt();
+            Deque<Pair>dq=new ArrayDeque<>();
+            for(int i=0;i<n;i++){
+                long last=0;
+                Pair cur=new Pair(scan.nextLong(),scan.nextLong());
+                dq.addFirst(cur);
+                while(dq.size()>=2){
+                    Pair first=dq.pollFirst();
+                    Pair second=dq.pollFirst();
+                    //System.out.println(first.a+" "+first.b+" "+second.a+" "+second.b);
+                    if(first.b==second.b){
+                        dq.addFirst(new Pair(first.a+second.a-last,first.b));
+                    }
+                    else if(first.a>=second.a){
+                        last=second.a;
+                        dq.addFirst(first);
+                    }
+                    else{
+                        dq.addFirst(second);
+                        dq.addFirst(first);
+                        break;
+                    }
+                }
+                System.out.print(dq.peekLast().a+" ");
+            }
+            System.out.println();
+        }
+    }
+}
