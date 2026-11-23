@@ -1,0 +1,51 @@
+import java.util.*;
+public class Main{
+    static class DSU{
+        int[]parent;
+        int[]size;
+        long[]count;
+        public DSU(int n,long[]array){
+            parent=new int[n];
+            size=new int[n];
+            count=new long[n];
+            for(int i=0;i<n;i++){
+                parent[i]=i;
+                size[i]=1;
+                count[i]=array[i];
+            }
+        }
+        public int find(int u){
+            if(parent[u]==u)
+                return u;
+            parent[u]=find(parent[u]);
+            return parent[u];
+        }
+        public void union(int u,int v){
+            u=find(u);
+            v=find(v);
+            if(size[u]>size[v]){
+                int temp=u;
+                u=v;
+                v=temp;
+            }
+            parent[u]=v;
+            size[v]+=size[u];
+            count[v]=count[u]+count[v]-2;
+        }
+    }
+  	public static void main(String[]args){
+  		Scanner scan=new Scanner(System.in);
+  		int n=scan.nextInt();
+  		long[]array=new long[n];
+  		for(int i=0;i<n;i++){
+  		    array[i]=scan.nextLong();
+  		}
+  		DSU dsu=new DSU(n,array);
+  		for(int i=0;i<n-1;i++){
+              int u=scan.nextInt()-1;
+              int v=scan.nextInt()-1;
+              dsu.union(u,v);
+              System.out.println(dsu.count[dsu.find(0)]);
+          }
+  	}
+}
