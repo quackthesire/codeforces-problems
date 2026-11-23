@@ -1,0 +1,128 @@
+import java.util.*;
+public class Main{
+    static class Query{
+        int t;
+        int v;
+        long x;
+        public Query(int t,int v,long x){
+            this.t=t;
+            this.v=v;
+            this.x=x;
+        }
+    }
+    static void dfs(int u,ArrayList<Integer>[]adj,int[]tin,int[]tout,int[]timer){
+        tin[u]=timer[0];
+        timer[0]++;
+        for(int v:adj[u]){
+            dfs(v,adj,tin,tout,timer);
+        }
+        tout[u]=timer[0];
+    }
+    static class Segtree{
+        int n;
+        long[]tree;
+        long[]lazy;
+        public Segtree(int n){
+            this.n=n;
+            tree=new long[4*n];
+            lazy=new long[4*n];
+        }
+        public long query(int l,int r){
+            return query(1,0,n-1,l,r);
+        }
+        public long query(int node,int l,int r,int ll,int rr){
+            if(ll>r||rr<l)
+                return 0;
+            if(ll<=l&&r<=rr)
+                return tree[node];
+            push(node,l,r);
+            int m=(l+r)/2;
+            long left=query(node*2,l,m,ll,rr);
+            long right=query(node*2+1,m+1,r,ll,rr);
+            return left+right;
+        }
+        public void add(int l,int r,long val){
+            add(1,0,n-1,l,r,val);
+        }
+        public void add(int node,int l,int r,int ll,int rr,long val){
+            if(ll>r||rr<l)
+                return;
+            if(ll<=l&&r<=rr){
+                tree[node]+=(r-l+1)*val;
+                lazy[node]+=val;
+                return;
+            }
+            push(node,l,r);
+            int m=(l+r)/2;
+            add(node*2,l,m,ll,rr,val);
+            add(node*2+1,m+1,r,ll,rr,val);
+            tree[node]=tree[node*2]+tree[node*2+1];
+        }
+        public void set(int i,long val){
+            set(1,0,n-1,i,val);
+        }
+        public void set(int node,int l,int r,int i,long val){
+            if(l==r){
+                tree[node]=val;
+                lazy[node]=0;
+                return;
+            }
+            push(node,l,r);
+            int m=(l+r)/2;
+            if(i<=m)
+                set(node*2,l,m,i,val);
+            else
+                set(node*2+1,m+1,r,i,val);
+
+            tree[node]=tree[node*2]+tree[node*2+1];
+        }
+        public void push(int node,int l,int r){
+            if(lazy[node]==0||l==r)
+                return;
+            int m=(l+r)/2;
+            tree[node*2]+=(m-l+1)*lazy[node];
+            tree[node*2+1]+=(r-m)*lazy[node];
+            lazy[node*2]+=lazy[node];
+            lazy[node*2+1]+=lazy[node];
+            lazy[node]=0;
+        }
+    }
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int t=scan.nextInt();
+        for(int temp=0;temp<t;temp++){
+            int q=scan.nextInt();
+            int index=1;
+            Query[]array=new Query[q];
+            ArrayList<Integer>[]adj=new ArrayList[q+1];
+            for(int i=0;i<=q;i++){
+                adj[i]=new ArrayList<>();
+            }
+            for(int i=0;i<q;i++){
+                if(scan.nextInt()==1){
+                    int v=scan.nextInt()-1;
+                    adj[v].add(index);
+                    array[i]=new Query(1,index,0);
+                    index++;
+                }
+                else
+                    array[i]=new Query(2,scan.nextInt()-1,scan.nextLong());
+            }
+            int[]timer={0};
+            int[]tin=new int[index];
+            int[]tout=new int[index];
+            dfs(0,adj,tin,tout,timer);
+            Segtree segtree=new Segtree(index);
+            for(int i=0;i<q;i++){
+                if(array[i].t==1)
+                    segtree.set(tin[array[i].v],0);
+                else
+                    segtree.add(tin[array[i].v],tout[array[i].v]-1,array[i].x);
+            }
+            for(int i=0;i<index;i++){
+                System.out.print(segtree.query(tin[i],tin[i])+" ");
+            }
+            System.out.println();
+        }
+    }
+}
