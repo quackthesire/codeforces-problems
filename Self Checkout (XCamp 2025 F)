@@ -1,0 +1,87 @@
+import java.util.*;
+public class Main{
+    static int MOD=998244353;
+    static long[]fact;
+    static long[]inv;
+    static void fact(int n){
+        fact=new long[n+1];
+        inv=new long[n+1];
+        fact[0]=1;
+        for(int i=1;i<=n;i++){
+            fact[i]=(fact[i-1]*i)%MOD;
+        }
+        inv[n]=inv(fact[n],MOD-2);
+        for(int i=n-1;i>=0;i--){
+            inv[i]=(inv[i+1]*(i+1))%MOD;
+        }
+    }
+    static long inv(long base,int exp){
+        long res=1;
+        long cur=base%MOD;
+        while(exp>0){
+            if((exp&1)==1)
+                res=(res*cur)%MOD;
+            cur=(cur*cur)%MOD;
+            exp>>=1;
+        }
+        return res;
+    }
+    static long choose(int n,int r){
+        if(r>n||r<0)
+            return 0;
+        return (((fact[n]*inv[r])%MOD)*inv[n-r])%MOD;
+    }
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int n=scan.nextInt();
+        fact(2*n);
+        int[]array=new int[n];
+        boolean one=false;
+        for(int i=0;i<n;i++){
+            array[i]=scan.nextInt();
+            if(i!=n-1&&array[i]==1){
+                System.out.println("0");
+                System.exit(0);
+            }
+            if(i==n-1&&array[i]==1)
+                one=true;
+        }
+        ArrayList<Integer>runs=new ArrayList<>();
+        int run=0;
+        for(int i=0;i<n;i++){
+            if(array[i]==3)
+                run++;
+            else if(run>0){
+                runs.add(run);
+                run=0;
+            }
+        }
+        if(run>0)
+            runs.add(run);
+        long temp=1;
+        for(int r:runs){
+            temp=temp*((choose(2*r,r)-choose(2*r,r-2)+MOD)%MOD)%MOD;
+        }
+        if(one)
+            System.out.println(temp%MOD);
+        else{
+            long temp2=1;
+            for(int i=0;i<runs.size()-1;i++){
+                int r=runs.get(i);
+                temp2=temp2*((choose(2*r,r)-choose(2*r,r-2)+MOD)%MOD)%MOD;
+            }
+            int three=0;
+            if(runs.size()>0)
+                three=runs.get(runs.size()-1);
+            int two=0;
+            int index=n-1;
+            while(index>=0&&array[index]==2){
+                two++;
+                index--;
+            }
+            long ans=(temp*two)%MOD;
+            ans=(ans+(temp2*((choose(2*three+two,three)-choose(2*three+two,three-2)+MOD)%MOD))%MOD)%MOD;
+            System.out.println(ans);
+        }
+    }
+}
