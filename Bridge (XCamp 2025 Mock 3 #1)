@@ -1,0 +1,81 @@
+import java.util.*;
+public class Main{
+    static class Query{
+        int u;
+        int index;
+        public Query(int u,int index){
+            this.u=u;
+            this.index=index;
+        }
+    }
+    static class DSU{
+        int[]parent;
+        int[]size;
+        ArrayList<Query>[]query;
+        public DSU(int n){
+            parent=new int[n+1];
+            size=new int[n+1];
+            query=new ArrayList[n+1];
+            for(int i=1;i<=n;i++){
+                parent[i]=i;
+                size[i]=1;
+                query[i]=new ArrayList<>();
+            }
+        }
+        public int find(int val){
+            if(parent[val]==val)
+                return val;
+            return find(parent[val]);
+        }
+        public void unite(int u,int v,int val,int[]ans){
+            u=find(u);
+            v=find(v);
+            if(u==v)
+                return;
+            if(size[u]<size[v]){
+                int temp=u;
+                u=v;
+                v=temp;
+            }
+            parent[v]=u;
+            size[u]+=size[v];
+            ArrayList<Query>queryu=query[u];
+            ArrayList<Query>queryv=query[v];
+            for(Query q:queryv){
+                if(ans[q.index]!=-1)
+                    continue;
+                if(find(q.u)==u)
+                    ans[q.index]=val;
+                else
+                    queryu.add(q);
+            }
+        }
+    }
+    public static void main(String[] args){
+        Scanner scan=new Scanner(System.in);
+        int n=scan.nextInt();
+        int m=scan.nextInt();
+        int q=scan.nextInt();
+        int[]ans=new int[q];
+        Arrays.fill(ans,-1);
+        DSU dsu=new DSU(n);
+        for(int i=0;i<q;i++){
+            int u=scan.nextInt();
+            int v=scan.nextInt();
+            if(u==v)
+                ans[i]=0;
+            else{
+                dsu.query[u].add(new Query(v,i));
+                dsu.query[v].add(new Query(u,i));
+            }
+        }
+        for(int i=m;i>=1;i--){
+            for(int j=1;i*(j+1)<=n;j++){
+                dsu.unite(i*j,i*(j+1),m-i+1,ans);
+            }
+        }
+        for(int i=0;i<q;i++){
+            System.out.println(ans[i]);
+        }
+    }
+}
