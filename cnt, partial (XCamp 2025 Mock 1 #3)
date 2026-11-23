@@ -1,0 +1,36 @@
+import java.util.*;
+public class Main{
+    static int MOD=998244353;
+	public static void main(String[]args){
+	    Scanner scan=new Scanner(System.in);
+	    int n=scan.nextInt();
+	    long[][][]array=new long[n][][];//num open,furthest open (1 indexed)
+	    for(int i=0;i<n;i++){
+	        array[i]=new long[i+2][i+2];
+	    }
+	    array[0][0][0]=1;
+	    array[0][1][1]=1;
+	    for(int i=1;i<n;i++){
+	        for(int j=0;j<i+2;j++){
+	            if(j>0){
+    	            for(int k=0;k<i+1;k++){
+    	                array[i][j][i+1]=(array[i][j][i+1]+array[i-1][j-1][k])%MOD;
+    	            }
+	            }
+	            if(j<i+1){
+    	            for(int k=0;k<i+1;k++){
+    	                array[i][j][i+1]=(array[i][j][i+1]+array[i-1][j][k]*k)%MOD;
+    	                array[i][j][k]=(array[i][j][k]+array[i-1][j][k]*(i+1))%MOD;
+    	            }
+	            }
+	        }
+	    }
+	    long ans=0;
+        for(int j=0;j<n+1;j++){
+            for(int k=0;k<n+1;k++){
+                ans=(ans+array[n-1][j][k])%MOD;
+            }
+        }
+        System.out.println(ans);
+	}
+}
