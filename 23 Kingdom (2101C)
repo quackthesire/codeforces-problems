@@ -1,0 +1,55 @@
+import java.util.*;
+public class Main{
+    static class DSU{
+        int[]parent;
+        public DSU(int n){
+            parent=new int[n+1];
+            for(int i=0;i<=n;i++){
+                parent[i]=i;
+            }
+        }
+        public int find(int u){
+            if(parent[u]!=u)
+                parent[u]=find(parent[u]);
+            return parent[u];
+        }
+        public int merge(int u){
+            int v=find(u);
+            if(v!=0)
+                parent[v]=find(v-1);
+            return v;
+        }
+    }
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int t=scan.nextInt();
+        for(int temp=0;temp<t;temp++){
+            int n=scan.nextInt();
+            int[]array=new int[n];
+            for(int i=0;i<n;i++){
+                array[i]=scan.nextInt();
+            }
+            int count=0;
+            DSU dsu=new DSU(n);
+            int[]pre=new int[n];
+            for(int i=0;i<n;i++){
+                if(dsu.merge(array[i])!=0)
+                    count++;
+                pre[i]=count;
+            }
+            count=0;
+            dsu=new DSU(n);
+            int[]suff=new int[n];
+            for(int i=n-1;i>=0;i--){
+                if(dsu.merge(array[i])!=0)
+                    count++;
+                suff[i]=count;
+            }
+            long ans=0;
+            for(int i=0;i<n-1;i++){
+                ans+=Math.min(pre[i],suff[i+1]);
+            }
+            System.out.println(ans);
+        }
+    }
+}
