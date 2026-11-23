@@ -1,0 +1,129 @@
+import java.util.*;
+public class Main{
+    static long min;
+    static long max;
+    static long min(long[]array,long[]pre,long m){
+        long l=array[0];
+        long r=array[0]+m+1;
+        while(l<r-1){
+            long mid=(l+r)/2;
+            int ll=0;
+            int rr=array.length;
+            while(ll<rr){
+                if(array[(ll+rr)/2]<mid)
+                    ll=(ll+rr)/2+1;
+                else
+                    rr=(ll+rr)/2;
+            }
+            long sum=(ll==0?0:pre[ll-1]);
+            long cost=mid*ll-sum;
+            if(cost<=m)
+                l=mid;
+            else
+                r=mid;
+        }
+        return l;
+    }
+    static long max(long[]array,long[]pre,long m){
+        long l=array[array.length-1]-m-1;
+        long r=array[array.length-1];
+        while(l<r-1){
+            long mid=(l+r)/2;
+            int ll=0;
+            int rr=array.length;
+            while(ll<rr){
+                if(array[(ll+rr)/2]<=mid)
+                    ll=(ll+rr)/2+1;
+                else
+                    rr=(ll+rr)/2;
+            }
+            long sum=(ll==0?0:pre[ll-1]);
+            long cost=(pre[array.length-1]-sum)-mid*(array.length-ll);
+            if(cost<=m)
+                r=mid;
+            else
+                l=mid;
+        }
+        return r;
+    }
+    static boolean solve(long[]array,long[]pre,long m,long range){
+        long l=min(array,pre,m);
+        long r=max(array,pre,m);
+        if(r-l<range){
+            min=l;
+            max=r;
+        }
+        //System.out.println("res: "+l+" "+r+" "+m);
+        return r-l>=range;
+    }
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int t=scan.nextInt();
+        for(int temp=0;temp<t;temp++){
+            int n=scan.nextInt();
+            long k=scan.nextLong();
+            long[]array=new long[n];
+            for(int i=0;i<n;i++){
+                array[i]=scan.nextLong();
+            }
+            Arrays.sort(array);
+            min=array[0];
+            max=array[n-1];
+            long[]pre=new long[n];
+            pre[0]=array[0];
+            for(int i=1;i<n;i++){
+                pre[i]=pre[i-1]+array[i];
+            }
+            long l=0;
+            long r=1000000000000L;
+            while(l<=r){
+                long m=(l+r)/2;
+                if(solve(array,pre,m,k+1))
+                    l=m+1;
+                else
+                    r=m-1;
+            }
+            long cur=l;
+            for(int i=n-1;i>=0;i--){
+                if(array[i]>max){
+                    cur-=(array[i]-max);
+                    array[i]=max;
+                }
+                else
+                    break;
+            }
+            for(int i=n-1;i>=0;i--){
+                if(cur<=0)
+                    break;
+                array[i]--;
+                cur--;
+            }
+            cur=l;
+            for(int i=0;i<n;i++){
+                if(array[i]<min){
+                    cur-=(min-array[i]);
+                    array[i]=min;
+                }
+                else
+                    break;
+            }
+            for(int i=0;i<n;i++){
+                if(cur<=0)
+                    break;
+                array[i]++;
+                cur--;
+            }
+            Arrays.sort(array);
+            //System.out.println("vals: "+min+" "+max+" "+l+" "+(1+k));
+            /*for(int i=0;i<n;i++){
+                System.out.print(array[i]+" ");
+            }
+            System.out.println();*/
+            long ans=k*l;
+            for(int i=0;i<n;i++){
+                ans+=(array[i]*(array[i]+1))/2;
+            }
+            System.out.println(ans);
+        }
+    }
+}
