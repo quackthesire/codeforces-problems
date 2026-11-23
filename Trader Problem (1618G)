@@ -1,0 +1,106 @@
+import java.util.*;
+public class Main{
+    static class Node implements Comparable<Node>{
+        long val;
+        int count;
+        public Node(long val,int count){
+            this.val=val;
+            this.count=count;
+        }
+        public int compareTo(Node other){
+            return Long.compare(this.val,other.val);
+        }
+    }
+    static class DSU{
+        int[]parent;
+        int[]size;
+        int[]min;
+        int[]max;
+        public DSU(int n) {
+            parent=new int[n];
+            size=new int[n];
+            min=new int[n];
+            max=new int[n];
+            for(int i=0;i<n;i++){
+                parent[i]=i;
+                size[i]=1;
+                min[i]=i;
+                max[i]=i;
+            }
+        }
+        public int find(int u){
+            if(parent[u]!=u)
+                parent[u]=find(parent[u]);
+            return parent[u];
+        }
+        public void union(int u,int v,long[]pre,int[]count){
+            u=find(u);
+            v=find(v);
+            if(u==v)
+                return;
+            int lenu=count[max[u]]-(min[u]==0?0:count[min[u]-1]);
+            int lenv=count[max[v]]-(min[v]==0?0:count[min[v]-1]);
+            cur-=pre[max[u]]-(max[u]-lenu==-1?0:pre[max[u]-lenu]);
+            cur-=pre[max[v]]-(max[v]-lenv==-1?0:pre[max[v]-lenv]);
+            if(size[u]<size[v]){
+                parent[u]=v;
+                size[v]+=size[u];
+                min[v]=Math.min(min[v],min[u]);
+                max[v]=Math.max(max[v],max[u]);
+                cur+=pre[max[v]]-(max[v]-lenu-lenv==-1?0:pre[max[v]-lenu-lenv]);
+            }
+            else{
+                parent[v]=u;
+                size[u]+=size[v];
+                min[u]=Math.min(min[u],min[v]);
+                max[u]=Math.max(max[u],max[v]);
+                cur+=pre[max[u]]-(max[u]-lenu-lenv==-1?0:pre[max[u]-lenu-lenv]);
+            }
+        }
+    }
+    static long cur=0;
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int n=scan.nextInt();
+        int m=scan.nextInt();
+        int q=scan.nextInt();
+        int[]count=new int[n+m];
+        long[]pre=new long[n+m];
+        Node[]array=new Node[n+m];
+        Node[]query=new Node[q];
+        for(int i=0;i<n;i++){
+            array[i]=new Node(scan.nextLong(),1);
+            cur+=array[i].val;
+        }
+        for(int i=0;i<m;i++){
+            array[n+i]=new Node(scan.nextLong(),0);
+        }
+        for(int i=0;i<q;i++){
+            query[i]=new Node(scan.nextLong(),i);
+        }
+        Arrays.sort(array);
+        Arrays.sort(query);
+        PriorityQueue<Node>pq=new PriorityQueue<>();
+        for(int i=0;i<n+m;i++){
+            count[i]=array[i].count;
+            pre[i]=array[i].val;
+            if(i!=0){
+                count[i]+=count[i-1];
+                pre[i]+=pre[i-1];
+                pq.add(new Node(array[i].val-array[i-1].val,i-1));
+            }
+        }
+        long[]ans=new long[q];
+        DSU dsu=new DSU(n+m);
+        for(int i=0;i<q;i++){
+            while(!pq.isEmpty()&&pq.peek().val<=query[i].val){
+                Node node=pq.poll();
+                dsu.union(node.count,node.count+1,pre,count);
+            }
+            ans[query[i].count]=cur;
+        }
+        for(int i=0;i<q;i++){
+            System.out.println(ans[i]);
+        }
+    }
+}
