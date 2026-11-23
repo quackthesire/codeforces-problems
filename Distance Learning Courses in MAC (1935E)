@@ -1,0 +1,63 @@
+#include <bits/stdc++.h>
+using namespace std;
+using ll=long long;
+int main(){
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+    int t;
+    cin>>t;
+    while(t--){
+        int n;
+        cin>>n;
+        vector<vector<int>>a(n,vector<int>(30));
+        vector<vector<int>>b(n,vector<int>(30));
+        for(int i=0;i<n;i++){
+            int x;
+            int y;
+            cin>>x>>y;
+            bool work=false;
+            for(int j=29;j>=0;j--){
+                bool xx=(x&(1<<j))!=0;
+                bool yy=(y&(1<<j))!=0;
+                if(xx&&yy){
+                    if(work)
+                        b[i][j]++;
+                    else
+                        a[i][j]++;
+                }
+                if(!xx&&yy){
+                    b[i][j]++;
+                    work=true;
+                }
+            }
+            if(i!=0){
+                for(int j=29;j>=0;j--){
+                    a[i][j]+=a[i-1][j];
+                    b[i][j]+=b[i-1][j];
+                }
+            }
+        }
+        int q;
+        cin>>q;
+        for(int i=0;i<q;i++){
+            int l;
+            int r;
+            cin>>l>>r;
+            l--;
+            r--;
+            int ans=0;
+            for(int j=29;j>=0;j--){
+                int aa=a[r][j]-(l==0?0:a[l-1][j]);
+                int bb=b[r][j]-(l==0?0:b[l-1][j]);
+                if(aa+bb>1&&bb>0){
+                    ans+=(1<<(j+1))-1;
+                    break;
+                }
+                if(aa+bb>0)
+                    ans+=(1<<j);
+            }
+            cout<<ans<<" ";
+        }
+        cout<<"\n";
+    }
+}
