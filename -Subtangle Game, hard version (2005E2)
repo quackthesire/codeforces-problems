@@ -1,0 +1,61 @@
+import java.util.*;
+public class Main{
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int t=scan.nextInt();
+        for(int tempvar=0;tempvar<t;tempvar++){
+            int l=scan.nextInt();
+            int n=scan.nextInt();
+            int m=scan.nextInt();
+            int[]array=new int[l];
+            for(int i=0;i<l;i++){
+                array[i]=scan.nextInt()-1;
+            }
+            int[][]grid=new int[n][m];
+            for(int i=0;i<n;i++){
+                for(int j=0;j<m;j++){
+                    grid[i][j]=scan.nextInt()-1;
+                }
+            }
+            BitSet[]pos=new BitSet[n*m];
+            for(int i=0;i<l;i++){
+                if(pos[array[i]]==null)
+                    pos[array[i]]=new BitSet(l);
+                pos[array[i]].set(i);
+            }
+            BitSet set=new BitSet(l);
+            set.set(0,l);
+            BitSet[][]next=new BitSet[m+1][];
+            BitSet[][]cur=new BitSet[m+1][];
+            for(int i=0;i<=m;i++){
+                next[i]=new BitSet[]{(BitSet)set.clone()};
+                cur[i]=new BitSet[]{(BitSet)set.clone()};
+            }
+            boolean work=false;
+            for(int i=n-1;i>=0;i--){
+                for(int j=m-1;j>=0;j--){
+                    BitSet win=null;
+                    if(pos[grid[i][j]]!=null){
+                        win=(BitSet)pos[grid[i][j]].clone();
+                        win.and(next[j+1][0].get(1,l));
+                    }
+                    if(grid[i][j]==array[l-1]){
+                        if(win==null)
+                            win=new BitSet(l);
+                        win.set(l-1);
+                    }
+                    cur[j][0]=(BitSet)next[j][0].clone();
+                    cur[j][0].and(cur[j+1][0]);
+                    if(win!=null)
+                        cur[j][0].andNot(win);
+                    if(grid[i][j]==array[0]&&(l==1||next[j+1][0].get(1)))
+                        work=true;
+                }
+                BitSet[][]temp=next;
+                next=cur;
+                cur=temp;
+            }
+            System.out.println(work?'T':'N');
+        }
+    }
+}
