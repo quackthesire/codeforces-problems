@@ -1,0 +1,226 @@
+import java.util.*;
+public class Main{
+    static class Node{
+        int l;
+        int r;
+        public Node(int l,int r){
+            this.l=l;
+            this.r=r;
+        }
+        @Override
+        public boolean equals(Object other){
+            return l==((Node)other).l&&r==((Node)other).r;
+        }
+        @Override
+        public int hashCode(){
+            return Objects.hash(l,r);
+        }
+    }
+    static class Segtree{
+        int n;
+        long[]tree;
+        public Segtree(long[]array){
+            this.n=array.length;
+            tree=new long[4*n];
+            build(array,1,0,n-1);
+        }
+        public void build(long[]array,int node,int l,int r){
+            if(l==r){
+                tree[node]=array[l];
+                return;
+            }
+            int m=(l+r)/2;
+            build(array,node*2,l,m);
+            build(array,node*2+1,m+1,r);
+            tree[node]=Math.max(tree[node*2],tree[node*2+1]);
+        }
+        public ArrayList<Integer> query(int l,int r){
+            return query(1,0,n-1,l,r,this.max(l,r));
+        }
+        public ArrayList<Integer> query(int node,int l,int r,int ll,int rr,long val){
+            if(ll>r||rr<l)
+                return new ArrayList<>();
+            if(ll<=l&&r<=rr){
+                if(tree[node]<val)
+                    return new ArrayList<>();
+                else if(l==r&&tree[node]==val)
+                    return new ArrayList<>(Arrays.asList(l));
+            }
+            int m=(l+r)/2;
+            ArrayList<Integer>left=query(node*2,l,m,ll,rr,val);
+            ArrayList<Integer>right=query(node*2+1,m+1,r,ll,rr,val);
+            left.addAll(right);
+            return left;
+        }
+        public long max(int l,int r){
+            return max(1,0,n-1,l,r);
+        }
+        public long max(int node,int l,int r,int ll,int rr){
+            if(ll>r||rr<l)
+                return Long.MIN_VALUE/2;
+            if(ll<=l&&r<=rr)
+                return tree[node];
+            int m=(l+r)/2;
+            long left=max(node*2,l,m,ll,rr);
+            long right=max(node*2+1,m+1,r,ll,rr);
+            return Math.max(left,right);
+        }
+    }
+    static class Lazytree{
+        int n;
+        long[]tree;
+        boolean[]lazy;
+        public Lazytree(long[]array){
+            this.n=array.length;
+            tree=new long[4*n];
+            lazy=new boolean[4*n];
+            build(array,1,0,n-1);
+        }
+        public void build(long[]array,int node,int l,int r){
+            if(l==r){
+                tree[node]=array[l];
+                return;
+            }
+            int m=(l+r)/2;
+            build(array,node*2,l,m);
+            build(array,node*2+1,m+1,r);
+            tree[node]=tree[node*2]+tree[node*2+1];
+        }
+        public void push(int node){
+            if(!lazy[node])
+                return;
+            tree[node*2]=0;
+            tree[node*2+1]=0;
+            lazy[node*2]=true;
+            lazy[node*2+1]=true;
+            lazy[node]=false;
+        }
+        public long query(int l,int r){
+            return query(1,0,n-1,l,r);
+        }
+        public long query(int node,int l,int r,int ll,int rr){
+            if(ll>r||rr<l)
+                return 0;
+            if(ll<=l&&r<=rr)
+                return tree[node];
+            push(node);
+            int m=(l+r)/2;
+            long left=query(node*2,l,m,ll,rr);
+            long right=query(node*2+1,m+1,r,ll,rr);
+            return left+right;
+        }
+        public void update(int l,int r){
+            if(l>r)
+                return;
+            update(1,0,n-1,l,r);
+        }
+        public void update(int node,int l,int r,int ll,int rr){
+            if(ll>r||rr<l)
+                return;
+            if(ll<=l&&r<=rr){
+                tree[node]=0;
+                lazy[node]=true;
+                return;
+            }
+            push(node);
+            int m=(l+r)/2;
+            update(node*2,l,m,ll,rr);
+            update(node*2+1,m+1,r,ll,rr);
+            tree[node]=tree[node*2]+tree[node*2+1];
+        }
+    }
+    static long solve(int l,int r,long val,long[]a,long[]c,Segtree segtree,HashMap<Node,Long>map,HashMap<Node,ArrayList<Node>>adj){
+        if(l>r)
+            return 0L;
+        ArrayList<Integer>list=segtree.query(l,r);
+        for(int i:list){
+            val=Math.min(val,c[i]);
+        }
+        int next=l;
+        long ans=val*(list.size()-((l==0&&r==a.length-1)?1:0));
+        ArrayList<Node>child=new ArrayList<>();
+        for(int i:list){
+            if(next<=i-1){
+                child.add(new Node(next,i-1));
+                ans+=solve(next,i-1,val,a,c,segtree,map,adj);
+            }
+            next=i+1;
+        }
+        if(next<=r){
+            child.add(new Node(next,r));
+            ans+=solve(next,r,val,a,c,segtree,map,adj);
+        }
+        adj.put(new Node(l,r),child);
+        map.put(new Node(l,r),val*(list.size()-((l==0&&r==a.length-1)?1:0)));
+        return ans;
+    }
+    static void dfs(Node cur,HashMap<Node,ArrayList<Node>>adj,HashMap<Node,Integer>tin,HashMap<Node,Integer>tout,int[]timer){
+        tin.put(cur,timer[0]);
+        timer[0]++;
+        for(Node prev:adj.getOrDefault(cur,new ArrayList<>())){
+            dfs(prev,adj,tin,tout,timer);
+        }
+        tout.put(cur,timer[0]-1);
+    }
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int t=scan.nextInt();
+        for(int temp=0;temp<t;temp++){
+            int n=scan.nextInt();
+            long[]a=new long[n];
+            long[]c=new long[n];
+            for(int i=0;i<n;i++){
+                a[i]=scan.nextLong();
+            }
+            for(int i=0;i<n;i++){
+                c[i]=scan.nextLong();
+            }
+            int[]next=new int[n];
+            Arrays.fill(next,n);
+            Stack<Integer>s=new Stack<>();
+            for(int i=n-1;i>=0;i--){
+                while(!s.isEmpty()&&a[s.peek()]<=a[i]){
+                    s.pop();
+                }
+                if(!s.isEmpty()){
+                    next[i]=s.peek();
+                }
+                s.push(i);
+            }
+            int[]prev=new int[n];
+            Arrays.fill(prev,-1);
+            s=new Stack<>();
+            for(int i=0;i<n;i++){
+                while(!s.isEmpty()&&a[s.peek()]<=a[i]){
+                    s.pop();
+                }
+                if(!s.isEmpty()){
+                    prev[i]=s.peek();
+                }
+                s.push(i);
+            }
+            Segtree segtree=new Segtree(a);
+            HashMap<Node,Long>map=new HashMap<>();
+            HashMap<Node,ArrayList<Node>>adj=new HashMap<>();
+            long tot=solve(0,n-1,Long.MAX_VALUE/2,a,c,segtree,map,adj);
+            System.out.print(tot+" ");
+            int[]timer={0};
+            HashMap<Node,Integer>tin=new HashMap<>();
+            HashMap<Node,Integer>tout=new HashMap<>();
+            dfs(new Node(0,n-1),adj,tin,tout,timer);
+            long[]vals=new long[timer[0]];
+            for(Map.Entry<Node,Integer>entry:tin.entrySet()){
+                vals[entry.getValue()]=map.get(entry.getKey());
+            }
+            Lazytree lazytree=new Lazytree(vals);
+            for(int i=0;i<n;i++){
+                int index=scan.nextInt()-1;
+                Node node=new Node(prev[index]+1,next[index]-1);
+                tot-=lazytree.query(tin.get(node),tout.get(node));
+                lazytree.update(tin.get(node),tout.get(node));
+                System.out.print(tot+" ");
+            }
+            System.out.println();
+        }
+    }
+}
