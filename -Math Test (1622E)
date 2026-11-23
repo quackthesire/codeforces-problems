@@ -1,0 +1,67 @@
+import java.util.*;
+public class Main{
+    static class Node implements Comparable<Node>{
+        int index;
+        long val;
+        public Node(int index,long val){
+            this.index=index;
+            this.val=val;
+        }
+        public int compareTo(Node other){
+            return Long.compare(this.val,other.val);
+        }
+    }
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int t=scan.nextInt();
+        for(int temp=0;temp<t;temp++){
+            int n=scan.nextInt();
+            int m=scan.nextInt();
+            long[]array=new long[n];
+            for(int i=0;i<n;i++){
+                array[i]=scan.nextLong();
+            }
+            long[][]vals=new long[n][m];
+            for(int i=0;i<n;i++){
+                String s=scan.next();
+                for(int j=0;j<m;j++){
+                    vals[i][j]=s.charAt(j)-'0';
+                }
+            }
+            long max=-1;
+            int[]ans=new int[m];
+            for(int i=0;i<(1<<n);i++){
+                int[]mult=new int[n];
+                for(int j=0;j<n;j++){
+                    mult[j]=(((i>>(n-j-1))&1)==1)?1:-1;
+                }
+                Node[]nodes=new Node[m];
+                for(int j=0;j<m;j++){
+                    long sum=0;
+                    for(int k=0;k<n;k++){
+                        sum+=mult[k]*vals[k][j];
+                    }
+                    nodes[j]=new Node(j,-sum);
+                }
+                Arrays.sort(nodes);
+                long res=0;
+                for(int j=0;j<n;j++){
+                    res+=mult[j]*array[j];
+                }
+                for(int j=0;j<m;j++){
+                    res+=(j+1)*nodes[j].val;
+                }
+                if(res>max){
+                    max=res;
+                    for(int j=0;j<m;j++){
+                        ans[nodes[j].index]=(j+1);
+                    }
+                }
+            }
+            for(int i=0;i<m;i++){
+                System.out.print(ans[i]+" ");
+            }
+            System.out.println();
+        }
+    }
+}
