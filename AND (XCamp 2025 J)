@@ -1,0 +1,37 @@
+import java.util.*;
+public class Main{
+	public static void main(String[]args){
+	    Scanner scan=new Scanner(System.in);
+	    int t=scan.nextInt();
+	    for(int temp=0;temp<t;temp++){
+	        int n=scan.nextInt();
+	        int[]array=new int[n];
+            int common=0;
+	        boolean zero=false;
+	        boolean contains=false;
+	        for(int i=0;i<n;i++){
+	            array[i]=scan.nextInt();
+	            if(array[i]==0)
+                    zero=true;
+                if(i!=0)
+                    common&=array[i];
+                else
+                    common=array[i];
+	        }
+            for(int i=0;i<n;i++){
+                if(array[i]==common)
+                    contains=true;
+            }
+	        if(!zero&&!contains){
+	            System.out.println("-1");
+	            continue;
+	        }
+            System.out.println(2*n-1);
+            System.out.print(array[0]+" ");
+            for(int i=1;i<n;i++){
+                System.out.print(common+" "+array[i]+" ");
+            }
+            System.out.println();
+	    }
+	}
+}
