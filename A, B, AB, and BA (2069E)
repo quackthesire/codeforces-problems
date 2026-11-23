@@ -1,0 +1,79 @@
+import java.util.*;
+public class Main{
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int t=scan.nextInt();
+        for(int temp=0;temp<t;temp++){
+            String s=scan.next();
+            int a=scan.nextInt();
+            int b=scan.nextInt();
+            int ab=scan.nextInt();
+            int ba=scan.nextInt();
+            int n=s.length();
+            int count=0;
+            int[]array=new int[n];
+            for(int i=0;i<n;i++){
+                array[i]=s.charAt(i)=='A'?0:1;
+                if(array[i]==0)
+                    count++;
+            }
+            ArrayList<Integer>bonusa=new ArrayList<>();
+            ArrayList<Integer>bonusb=new ArrayList<>();
+            int tot=0;
+            int odd=0;
+            int len=1;
+            int cur=array[0];
+            int prev=array[0];
+            for(int i=1;i<n;i++){
+                if(array[i]!=prev){
+                    prev=array[i];
+                    len++;
+                }
+                else{
+                    if(len%2==1)
+                        odd+=len/2;
+                    else if(cur==0)
+                        bonusa.add(len/2);
+                    else
+                        bonusb.add(len/2);
+                    cur=array[i];
+                    prev=array[i];
+                    len=1;
+                }
+            }
+            if(len%2==1)
+                odd+=len/2;
+            else if(cur==0)
+                bonusa.add(len/2);
+            else
+                bonusb.add(len/2);
+            Collections.sort(bonusa);
+            Collections.sort(bonusb);
+            for(int i=0;i<bonusa.size();i++){
+                int x=Math.min(ab,bonusa.get(i));
+                ab-=x;
+                bonusa.set(i,bonusa.get(i)-x);
+                tot+=x;
+            }
+            for(int i=0;i<bonusb.size();i++){
+                int x=Math.min(ba,bonusb.get(i));
+                ba-=x;
+                bonusb.set(i,bonusb.get(i)-x);
+                tot+=x;
+            }
+            for(int i:bonusa){
+                tot+=Math.min(ba,Math.max(0,i-1));
+                ba-=Math.min(ba,Math.max(0,i-1));
+            }
+            for(int i:bonusb){
+                tot+=Math.min(ab,Math.max(0,i-1));
+                ab-=Math.min(ab,Math.max(0,i-1));
+            }
+            tot+=Math.min(ab+ba,odd);
+            if(count-tot<=a&&n-count-tot<=b)
+                System.out.println("YES");
+            else
+                System.out.println("NO");
+        }
+    }
+}
