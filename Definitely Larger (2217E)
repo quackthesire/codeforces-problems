@@ -1,0 +1,49 @@
+import java.util.*;
+public class Main{
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int t=scan.nextInt();
+        for(int temp=0;temp<t;temp++){
+            int n=scan.nextInt();
+            int[]array=new int[n];
+            for(int i=0;i<n;i++){
+                array[scan.nextInt()-1]=i;
+            }
+            int[]dom=new int[n];
+            for(int i=0;i<n;i++){
+                dom[i]=scan.nextInt();
+            }
+            boolean work=true;
+            ArrayList<Integer>ans=new ArrayList<>();
+            for(int i=n-1;i>=0;i--){
+                int count=0;
+                if(dom[array[i]]==0)
+                    ans.add(array[i]);
+                else{
+                    for(int j=ans.size()-1;j>=0;j--){
+                        if(ans.get(j)>array[i])
+                            count++;
+                        if(count==dom[array[i]]){
+                            ans.add(j,array[i]);
+                            break;
+                        }
+                    }
+                }
+                if(count<dom[array[i]])
+                    work=false;
+            }
+            if(!work)
+                System.out.println("-1");
+            else{
+                int[]pos=new int[n];
+                for(int i=0;i<ans.size();i++){
+                    pos[ans.get(i)]=i+1;
+                }
+                for(int i=0;i<n;i++){
+                    System.out.print(pos[i]+" ");
+                }
+                System.out.println();
+            }
+        }
+    }
+}
