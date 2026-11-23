@@ -1,0 +1,118 @@
+import java.util.*;
+public class Main{
+    static class DSU{
+        int[]size;
+        int[]parent;
+        public DSU(int n){
+            size=new int[n];
+            parent=new int[n];
+            for(int i=0;i<n;i++){
+                size[i]=1;
+                parent[i]=i;
+            }
+        }
+        public int find(int u){
+            if(parent[u]==u)
+                return u;
+            parent[u]=find(parent[u]);
+            return parent[u];
+        }
+        public void unite(int u,int v){
+            u=find(u);
+            v=find(v);
+            if(u==v)
+                return;
+            if(size[u]<size[v]){
+                int temp=u;
+                u=v;
+                v=temp;
+            }
+            size[u]+=size[v];
+            parent[v]=u;
+        }
+    }
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int t=scan.nextInt();
+        for(int temp=0;temp<t;temp++){
+            int n=scan.nextInt();
+            int k=scan.nextInt();
+            DSU dsu=new DSU(n);
+            for(int i=0;i<n;i++){
+                dsu.unite(i,scan.nextInt()-1);
+            }
+            boolean[]visited=new boolean[n];
+            ArrayList<Integer>sizes=new ArrayList<>();
+            for(int i=0;i<n;i++){
+                int root=dsu.find(i);
+                if(visited[root])
+                    continue;
+                visited[root]=true;
+                sizes.add(dsu.size[root]);
+            }
+            Collections.sort(sizes,Collections.reverseOrder());
+            if(sizes.get(sizes.size()-1)>k||sizes.get(0)>k+1){
+                System.out.println("Bob");
+                continue;
+            }
+            int sum=0;
+            for(int i=0;i<Math.min(k,sizes.size());i++){
+                sum+=sizes.get(i);
+            }
+            boolean[][]dp=new boolean[k+1][k+1];//remove i elements, sum j
+            dp[0][0]=true;
+            for(int i=0;i<Math.min(k,sizes.size());i++){
+                for(int j=k;j>=0;j--){
+                    for(int kk=0;kk<=k;kk++){
+                        if(!dp[j][kk]||kk+sizes.get(i)>k)
+                            continue;
+                        dp[j+1][kk+sizes.get(i)]=true;
+                    }
+                }
+            }
+            boolean work=false;
+            for(int i=0;i<=k;i++){
+                int max=0;
+                int add=0;
+                int count=sizes.size()-i;
+                for(int j=0;j<=k;j++){
+                    if(dp[i][j])
+                        max=j;
+                }
+                for(int j=Math.min(k,sizes.size());j<Math.min(k+i,sizes.size());j++){
+                    add+=sizes.get(j);
+                }
+                if(sum-max+add<=Math.min(k,count)+k){
+                    work=true;
+                    break;
+                }
+            }
+            if(!work){
+                System.out.println("Bob");
+                continue;
+            }
+            if(sizes.get(0)<=k){
+                System.out.println("Alice");
+                continue;
+            }
+            if(k>=2&&sizes.size()>=2&&sizes.get(0)==k+1&&sizes.get(1)==k+1){
+                System.out.println("Bob");
+                continue;
+            }
+            int one=0;
+            int tot=0;
+            for(int i=0;i<sizes.size();i++){
+                if(sizes.get(i)==k+1)
+                    continue;
+                if(sizes.get(i)==1)
+                    one++;
+                else
+                    tot+=sizes.get(i);
+            }
+            if(k-tot<one%(k+1)||(tot==0&&one%(k+1)==0))
+                System.out.println("Bob");
+            else
+                System.out.println("Alice");
+        }
+    }
+}
