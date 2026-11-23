@@ -1,0 +1,86 @@
+import java.util.*;
+public class Main{
+    static int block;
+    static TreeSet<Integer>work=new TreeSet<>();
+    static class Node implements Comparable<Node>{
+        int l;
+        int r;
+        int index;
+        public Node(int l,int r,int index){
+            this.l=l;
+            this.r=r;
+            this.index=index;
+        }
+        public int compareTo(Node other){
+            if(this.l/block==other.l/block)
+                return this.r-other.r;
+            else
+                return this.l-other.l;
+        }
+    }
+    static void update(int[]array,int val,int sign,int[]freq){
+        for(int i=1;i<=(int)Math.sqrt(array[val]);i++){
+            if(array[val]%i==0){
+                freq[i]+=sign;
+                if(freq[i]>=2)
+                    work.add(i);
+                else if(freq[i]<2)
+                    work.remove(i);
+                if(i!=array[val]/i){
+                    freq[array[val]/i]+=sign;
+                    if(freq[array[val]/i]>=2)
+                        work.add(array[val]/i);
+                    else if(freq[array[val]/i]<2)
+                        work.remove(array[val]/i);
+                }
+            }
+        }
+    }
+    public static void main(String[]args){
+	    Scanner scan=new Scanner(System.in);
+	    int n=scan.nextInt();
+	    block=(int)Math.sqrt(n);
+	    int[]array=new int[n];
+	    for(int i=0;i<n;i++){
+	        array[i]=scan.nextInt();
+	    }
+	    int m=scan.nextInt();
+	    Node[]query=new Node[m];
+	    for(int i=0;i<m;i++){
+	        query[i]=new Node(scan.nextInt()-1,scan.nextInt()-1,i);
+	    }
+	    Arrays.sort(query);
+        int curl=0;
+        int curr=-1;
+        int[]ans=new int[m];
+        int[]freq=new int[200001];
+	    for(int i=0;i<m;i++){
+	        int l=query[i].l;
+	        int r=query[i].r;
+	        while(curr<r){
+                curr++;
+                update(array,curr,1,freq);
+            }
+            while(curr>r){
+                update(array,curr,-1,freq);
+                curr--;
+            }
+            while(curl<l){
+                update(array,curl,-1,freq);
+                curl++;
+            }
+            while(curl>l){
+                curl--;
+                update(array,curl,1,freq);
+            }
+            ans[i]=work.last();
+	    }
+	    int[]pos=new int[m];
+	    for(int i=0;i<m;i++){
+	        pos[query[i].index]=i;
+	    }
+	    for(int i=0;i<m;i++){
+	        System.out.println(ans[pos[i]]);
+	    }
+	}
+}
