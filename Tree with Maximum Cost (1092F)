@@ -1,0 +1,49 @@
+import java.util.*;
+public class Main{
+    static long ans=Long.MIN_VALUE;
+    static long tot=0;
+    static long[]array;
+    static long[]sum;
+    static long[]cost;
+    static void dfs(int u,int parent,int depth,LinkedList<Integer>[]adj){
+        sum[u]=array[u];
+        cost[0]+=array[u]*depth;
+        for(int v:adj[u]){
+            if(v!=parent){
+                dfs(v,u,depth+1,adj);
+                sum[u]+=sum[v];
+            }
+        }
+    }
+    static void solve(int u,int parent,LinkedList<Integer>[]adj){
+        ans=Math.max(ans,cost[u]);
+        for(int v:adj[u]){
+            if(v!=parent){
+                cost[v]=cost[u]+(tot-2*sum[v]);
+                solve(v,u,adj);
+            }
+        }
+    }
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int n=scan.nextInt();
+        array=new long[n];
+        sum=new long[n];
+        cost=new long[n];
+        LinkedList<Integer>[]adj=new LinkedList[n];
+        for(int i=0;i<n;i++){
+            adj[i]=new LinkedList<>();
+            array[i]=scan.nextLong();
+            tot+=array[i];
+        }
+        for(int i=0;i<n-1;i++){
+            int a=scan.nextInt()-1;
+            int b=scan.nextInt()-1;
+            adj[a].add(b);
+            adj[b].add(a);
+        }
+        dfs(0,-1,0,adj);
+        solve(0,-1,adj);
+        System.out.println(ans);
+    }
+}
