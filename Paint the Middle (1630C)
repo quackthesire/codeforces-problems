@@ -1,0 +1,58 @@
+import java.util.*;
+public class Main{
+    static class Node implements Comparable<Node>{
+        int pos;
+        int index;
+        boolean start;
+        public Node(int pos,int index,boolean start){
+            this.pos=pos;
+            this.index=index;
+            this.start=start;
+        }
+        public int compareTo(Node other){
+            return this.pos-other.pos;
+        }
+    }
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int n=scan.nextInt();
+        int[]array=new int[n];
+        int[]first=new int[n];
+        int[]last=new int[n];
+        Arrays.fill(first,n);
+        Arrays.fill(last,-1);
+        for(int i=0;i<n;i++){
+            array[i]=scan.nextInt()-1;
+            first[array[i]]=Math.min(first[array[i]],i);
+            last[array[i]]=Math.max(last[array[i]],i);
+        }
+        ArrayList<Node>segs=new ArrayList<>();
+        for(int i=0;i<n;i++){
+            if(last[i]-first[i]<1)
+                continue;
+            segs.add(new Node(first[i],i,true));
+            segs.add(new Node(last[i],i,false));
+        }
+        Collections.sort(segs);
+        int ans=0;
+        int cur=-1;
+        PriorityQueue<Node>pq=new PriorityQueue<>((a,b)->b.pos-a.pos);
+        for(int i=0;i<segs.size();i++){
+            Node node=segs.get(i);
+            if(cur!=-1)
+                ans+=node.pos-segs.get(i-1).pos;
+            if(node.start)
+                pq.add(new Node(last[node.index],node.index,true));
+            if(cur==-1)
+                cur=pq.peek().index;
+            else if(!node.start&&node.index==cur){
+                ans--;
+                if(pq.peek().pos<=node.pos)
+                    cur=-1;
+                else
+                    cur=pq.peek().index;
+            }
+        }
+        System.out.println(ans);
+    }
+}
