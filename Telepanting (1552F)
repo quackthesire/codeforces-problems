@@ -1,0 +1,46 @@
+import java.util.*;
+public class Main{
+    static long MOD=998244353;
+    static class Node{
+        long x;
+        long y;
+        int s;
+        public Node(long x,long y,int s){
+            this.x=x;
+            this.y=y;
+            this.s=s;
+        }
+    }
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int n=scan.nextInt();
+        Node[]array=new Node[n];
+        for(int i=0;i<n;i++){
+            array[i]=new Node(scan.nextLong(),scan.nextLong(),scan.nextInt());
+        }
+        long[]dp=new long[n];
+        long[]pre=new long[n];
+        for(int i=0;i<n;i++){
+            dp[i]=(array[i].x-array[i].y)%MOD;
+            int l=0;
+            int r=i;
+            while(l<=r){
+                int m=(l+r)/2;
+                if(array[m].x>=array[i].y)
+                    r=m-1;
+                else
+                    l=m+1;
+            }
+            long first=(i==0?0:pre[i-1]);
+            long second=(l==0?0:pre[l-1]);
+            dp[i]=((dp[i]+(first-second))%MOD+MOD)%MOD;
+            pre[i]=(first+dp[i])%MOD;
+        }
+        long ans=(array[n-1].x+1)%MOD;
+        for(int i=0;i<n;i++){
+            if(array[i].s==1)
+                ans=(ans+dp[i])%MOD;
+        }
+        System.out.print(ans);
+    }
+}
