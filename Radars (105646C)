@@ -1,0 +1,66 @@
+import java.util.*;
+public class Main{
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int t=scan.nextInt();
+        for(int temp=0;temp<t;temp++){
+            int n=scan.nextInt();
+            long[][]array=new long[n][n];
+            for(int i=0;i<n;i++){
+                for(int j=0;j<n;j++){
+                    array[i][j]=scan.nextLong();
+                }
+            }
+            long u=Long.MAX_VALUE/4;
+            long d=Long.MAX_VALUE/4;
+            long l=Long.MAX_VALUE/4;
+            long r=Long.MAX_VALUE/4;
+            long ul=Long.MAX_VALUE/4;
+            long ur=Long.MAX_VALUE/4;
+            long dl=Long.MAX_VALUE/4;
+            long dr=Long.MAX_VALUE/4;
+            for(int i=0;i<n;i++){
+                for(int j=0;j<n;j++){
+                    if(i<n/2&&j==n/2)
+                        u=Math.min(u,array[i][j]);
+                    else if(i>n/2&&j==n/2)
+                        d=Math.min(d,array[i][j]);
+                    else if(i==n/2&&j<n/2)
+                        l=Math.min(l,array[i][j]);
+                    else if(i==n/2&&j>n/2)
+                        r=Math.min(r,array[i][j]);
+                    else if(i<n/2&&j<n/2)
+                        ul=Math.min(ul,array[i][j]);
+                    else if(i<n/2&&j>n/2)
+                        ur=Math.min(ur,array[i][j]);
+                    else if(i>n/2&&j<n/2)
+                        dl=Math.min(dl,array[i][j]);
+                    else if(i>n/2&&j>n/2)
+                        dr=Math.min(dr,array[i][j]);
+                }
+            }
+            long ans=array[n/2][n/2];
+            for(int i=0;i<16;i++){
+                long cost=0;
+                if((i&1)!=0)
+                    cost+=u;
+                if((i&2)!=0)
+                    cost+=d;
+                if((i&4)!=0)
+                    cost+=l;
+                if((i&8)!=0)
+                    cost+=r;
+                if((i&1)==0&&(i&4)==0)
+                    cost+=ul;
+                if((i&1)==0&&(i&8)==0)
+                    cost+=ur;
+                if((i&2)==0&&(i&4)==0)
+                    cost+=dl;
+                if((i&2)==0&&(i&8)==0)
+                    cost+=dr;
+                ans=Math.min(ans,cost);
+            }
+            System.out.println(ans);
+        }
+    }
+}
