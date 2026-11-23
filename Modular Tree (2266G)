@@ -1,0 +1,61 @@
+import java.util.*;
+public class Main{
+    static class Node{
+        long val;
+        long add;
+        long mod;
+        public Node(long val,long mod){
+            this.val=val;
+            this.add=mod;
+            this.mod=mod;
+        }
+    }
+    static long gcd(long a,long b){
+        while(b!=0){
+            long temp=a%b;
+            a=b;
+            b=temp;
+        }
+        return a;
+    }
+    static long dfs(int u,int p,Node[]array,ArrayList<Integer>[]adj){
+        long sum=0;
+        long ans=0;
+        long gcd=array[u].mod;
+        for(int v:adj[u]){
+            if(v==p)
+                continue;
+            ans+=dfs(v,u,array,adj);
+            sum+=array[v].val;
+            if(array[v].add<array[v].mod)
+                gcd=gcd(gcd,array[v].add);
+        }
+        array[u].add=gcd(gcd,sum);
+        return ans+array[u].mod-array[u].add+array[u].val%array[u].add;
+    }
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int t=scan.nextInt();
+        for(int temp=0;temp<t;temp++){
+            int n=scan.nextInt();
+            Node[]array=new Node[n];
+            ArrayList<Integer>[]adj=new ArrayList[n];
+            for(int i=0;i<n;i++){
+                array[i]=new Node(scan.nextLong(),0);
+            }
+            for(int i=0;i<n;i++){
+                array[i]=new Node(array[i].val,scan.nextLong());
+            }
+            for(int i=0;i<n;i++){
+                adj[i]=new ArrayList<>();
+            }
+            for(int i=0;i<n-1;i++){
+                int u=scan.nextInt()-1;
+                int v=scan.nextInt()-1;
+                adj[u].add(v);
+                adj[v].add(u);
+            }
+            System.out.println(dfs(0,-1,array,adj));
+        }
+    }
+}
