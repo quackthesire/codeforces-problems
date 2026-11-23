@@ -1,0 +1,151 @@
+#include <bits/stdc++.h>
+using namespace std;
+struct Node{
+    int index;
+    bool row;
+    int colour;
+    Node(int index,bool row,int colour):index(index),row(row),colour(colour){}
+};
+int main(){
+    int n;
+    int m;
+    cin>>n>>m;
+    vector<vector<int>>array(n,vector<int>(m));
+    for(int i=0;i<n;i++){
+        string s;
+        cin>>s;
+        for(int j=0;j<m;j++)
+            array[i][j]=s[j]-'a';
+    }
+    stack<Node>ans;
+    bool worktot=false;
+    for(int tempvar=0;tempvar<2;tempvar++){
+        vector<unordered_map<int,int>>rows(n);
+        vector<unordered_map<int,int>>cols(m);
+        vector<bool>rowvis(n);
+        vector<bool>colvis(m);
+        stack<Node>temp;
+        int rowleft=n;
+        int colleft=m;
+        for(int i=0;i<n;i++){
+            for(int j=0;j<m;j++)
+                rows[i][array[i][j]]++;
+        }
+        for(int j=0;j<m;j++){
+            for(int i=0;i<n;i++)
+                cols[j][array[i][j]]++;
+        }
+        bool work=true;
+        while(rowleft>0&&colleft>0){
+            int index=-1;
+            bool row=false;
+            if(tempvar==0){
+                for(int i=0;i<n;i++){
+                    if(!rowvis[i]&&rows[i].size()==1){
+                        index=i;
+                        row=true;
+                        break;
+                    }
+                }
+                if(index==-1){
+                    int count[26]={};
+                    for(int j=0;j<m;j++){
+                        if(!colvis[j]&&cols[j].size()==1)
+                            count[cols[j].begin()->first]++;
+                    }
+                    int best=-1;
+                    for(int c=0;c<26;c++){
+                        if(count[c]>0&&(best==-1||count[c]<count[best]))
+                            best=c;
+                    }
+                    for(int j=0;j<m;j++){
+                        if(!colvis[j]&&cols[j].size()==1&&cols[j].begin()->first==best){
+                            index=j;
+                            break;
+                        }
+                    }
+                }
+            }
+            else{
+                for(int j=0;j<m;j++){
+                    if(!colvis[j]&&cols[j].size()==1){
+                        index=j;
+                        break;
+                    }
+                }
+                if(index==-1){
+                    int count[26]={};
+                    for(int i=0;i<n;i++){
+                        if(!rowvis[i]&&rows[i].size()==1)
+                            count[rows[i].begin()->first]++;
+                    }
+                    int best=-1;
+                    for(int c=0;c<26;c++){
+                        if(count[c]>0&&(best==-1||count[c]<count[best]))
+                            best=c;
+                    }
+                    row=true;
+                    for(int i=0;i<n;i++){
+                        if(!rowvis[i]&&rows[i].size()==1&&rows[i].begin()->first==best){
+                            index=i;
+                            break;
+                        }
+                    }
+                }
+            }
+            if(index==-1){
+                work=false;
+                break;
+            }
+            if(row){
+                temp.push(Node(index,true,rows[index].begin()->first));
+                rowvis[index]=true;
+                rowleft--;
+                for(int j=0;j<m;j++){
+                    if(colvis[j])
+                        continue;
+                    auto it=cols[j].find(array[index][j]);
+                    if(--it->second==0)
+                        cols[j].erase(it);
+                    if(cols[j].empty()){
+                        colvis[j]=true;
+                        colleft--;
+                    }
+                }
+            }
+            else{
+                temp.push(Node(index,false,cols[index].begin()->first));
+                colvis[index]=true;
+                colleft--;
+                for(int i=0;i<n;i++){
+                    if(rowvis[i])
+                        continue;
+                    auto it=rows[i].find(array[i][index]);
+                    if(--it->second==0)
+                        rows[i].erase(it);
+                    if(rows[i].empty()){
+                        rowvis[i]=true;
+                        rowleft--;
+                    }
+                }
+            }
+        }
+        if(work&&(!worktot||temp.size()<ans.size())){
+            ans=temp;
+            worktot=true;
+        }
+    }
+    if(!worktot){
+        cout<<"impossible";
+        return 0;
+    }
+    cout<<ans.size()<<"\n";
+    while(!ans.empty()){
+        Node cur=ans.top();
+        ans.pop();
+        if(cur.row)
+            cout<<"y="<<(cur.index+1)<<" "<<(char)(cur.colour+'a')<<"\n";
+        else
+            cout<<"x="<<(cur.index+1)<<" "<<(char)(cur.colour+'a')<<"\n";
+    }
+}
