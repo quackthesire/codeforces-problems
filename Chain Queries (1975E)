@@ -1,0 +1,112 @@
+import java.util.*;
+public class Main{
+    static void dfs(int u,int p,ArrayList<Integer>[]adj,int[]parent){
+        parent[u]=p;
+        for(int v:adj[u]){
+            if(v==p)
+                continue;
+            dfs(v,u,adj,parent);
+        }
+    }
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int t=scan.nextInt();
+        for(int temp=0;temp<t;temp++){
+            int n=scan.nextInt();
+            int q=scan.nextInt();
+            int[]array=new int[n+1];
+            int[]child=new int[n+1];
+            int[]parent=new int[n+1];
+            ArrayList<Integer>[]adj=new ArrayList[n+1];
+            for(int i=1;i<=n;i++){
+                array[i]=scan.nextInt();
+                adj[i]=new ArrayList<>();
+            }
+            adj[0]=new ArrayList<>();
+            array[0]=0;
+            parent[1]=0;
+            for(int i=0;i<n-1;i++){
+                int u=scan.nextInt();
+                int v=scan.nextInt();
+                adj[u].add(v);
+                adj[v].add(u);
+            }
+            dfs(1,0,adj,parent);
+            int black=0;
+            int three=0;
+            int white=0;
+            HashSet<Integer>two=new HashSet<>();
+            for(int i=1;i<=n;i++){
+                if(array[i]==1)
+                    black++;
+            }
+            for(int i=1;i<=n;i++){
+                for(int v:adj[i]){
+                    if(parent[v]==i&&array[v]==1)
+                        child[i]++;
+                }
+                if(array[i]==1){
+                    if(array[parent[i]]==0)
+                        white++;
+                    if(child[i]==2)
+                        two.add(i);
+                    if(child[i]>2)
+                        three++;
+                }
+            }
+            for(int i=0;i<q;i++){
+                int u=scan.nextInt();
+                int d=array[u]==1?-1:1;
+                array[u]^=1;
+                black+=d;
+                if(array[parent[u]]==0)
+                    white+=d;
+                if(child[u]==2){
+                    if(d==1)
+                        two.add(u);
+                    else
+                        two.remove(u);
+                }
+                if(child[u]>2)
+                    three+=d;
+                white-=d*child[u];
+                if(array[u]==1){
+                    if(array[parent[u]]==1&&child[parent[u]]==2)
+                        two.remove(parent[u]);
+                    if(array[parent[u]]==1&&child[parent[u]]==2)
+                        three++;
+                    child[parent[u]]++;
+                    if(array[parent[u]]==1&&child[parent[u]]==2)
+                        two.add(parent[u]);
+                }
+                else{
+                    if(array[parent[u]]==1&&child[parent[u]]==2)
+                        two.remove(parent[u]);
+                    child[parent[u]]--;
+                    if(array[parent[u]]==1&&child[parent[u]]==2){
+                        two.add(parent[u]);
+                        three--;
+                    }
+                }
+                boolean good=true;
+                if(black==0)
+                    good=false;
+                if(three>0)
+                    good=false;
+                if(two.size()>1)
+                    good=false;
+                if(white>1)
+                    good=false;
+                if(two.size()==1){
+                    int v=two.iterator().next();
+                    if(array[parent[v]]==1)
+                        good=false;
+                }
+                if(good)
+                    System.out.println("Yes");
+                else
+                    System.out.println("No");
+            }
+        }
+    }
+}
