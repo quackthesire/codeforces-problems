@@ -1,0 +1,153 @@
+#include <bits/stdc++.h>
+using namespace std;
+using ll=long long;
+struct Node{
+    bool type;
+    int index;
+    ll height;
+    Node(bool type,int index,ll height):type(type),index(index),height(height){}
+};
+struct Comp{
+    bool operator()(const Node& a,const Node& b) const{
+        return a.height>b.height;
+    }
+};
+struct Segtree{
+    int n;
+    vector<ll>tree;
+    vector<ll>lazya;
+    vector<ll>lazyb;
+    Segtree(int n):n(n){
+        tree.assign(n*4,0);
+        lazya.assign(n*4,0);
+        lazyb.assign(n*4,0);
+    }
+    ll query(int l,int r){
+        if(l>r)
+            return 0;
+        return query(1,0,n-1,l,r);
+    }
+    ll query(int node,int l,int r,int ql,int qr){
+        if(qr<l||r<ql)
+            return 0;
+        if(ql<=l&&r<=qr)
+            return tree[node];
+        push(node,l,r);
+        int m=(l+r)/2;
+        ll left=query(node*2,l,m,ql,qr);
+        ll right=query(node*2+1,m+1,r,ql,qr);
+        return left+right;
+    }
+    void update(int l,int r,ll a,ll b){
+        if(l>r)
+            return;
+        update(1,0,n-1,l,r,a,b);
+    }
+    void update(int node,int l,int r,int ql,int qr,ll a,ll b){
+        if(qr<l||r<ql)
+            return;
+        if(ql<=l&&r<=qr){
+            tree[node]+=a*sum(l,r)+b*(r-l+1);
+            lazya[node]+=a;
+            lazyb[node]+=b;
+            return;
+        }
+        push(node,l,r);
+        int m=(l+r)/2;
+        update(node*2,l,m,ql,qr,a,b);
+        update(node*2+1,m+1,r,ql,qr,a,b);
+        tree[node]=tree[node*2]+tree[node*2+1];
+    }
+    void push(int node,int l,int r){
+        if(l==r||(lazya[node]==0&&lazyb[node]==0))
+            return;
+        int m=(l+r)/2;
+        tree[node*2]+=lazya[node]*sum(l,m)+lazyb[node]*(m-l+1);
+        lazya[node*2]+=lazya[node];
+        lazyb[node*2]+=lazyb[node];
+        tree[node*2+1]+=lazya[node]*sum(m+1,r)+lazyb[node]*(r-m);
+        lazya[node*2+1]+=lazya[node];
+        lazyb[node*2+1]+=lazyb[node];
+        lazya[node]=0;
+        lazyb[node]=0;
+    }
+    ll sum(int l,int r){
+        return (ll)(r+l+2)*(r-l+1)/2;
+    }
+};
+struct DSU{
+    int n;
+    vector<int>parent;
+    vector<int>size;
+    DSU(int n):n(n){
+        parent.reserve(n);
+        for(int i=0;i<n;i++){
+            parent.push_back(i);
+        }
+        size.assign(n,0);
+    }
+    int find(int u){
+        if(u==parent[u])
+            return u;
+        return parent[u]=find(parent[u]);
+    }
+    void merge(int u,int v){
+        u=find(u);
+        v=find(v);
+        if(u==v)
+            return;
+        if(size[u]<size[v])
+            swap(size[u],size[v]);
+        parent[v]=u;
+        size[u]+=size[v];
+    }
+};
+int main(){
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+    int n;
+    ll p;
+    cin>>n>>p;
+    vector<ll>array(n);
+    for(int i=0;i<n;i++){
+        cin>>array[i];
+    }
+    vector<Node>events;
+    events.reserve(n*2);
+    for(int i=0;i<n;i++){
+        events.push_back(Node(false,i,array[i]));
+    }
+    for(int i=1;i<=n;i++){
+        events.push_back(Node(true,0,(p-1)/i));
+    }
+    sort(events.begin(),events.end(),Comp());
+    ll ans=0;
+    int cur=1;
+    vector<int>active(n);
+    DSU dsu(n);
+    Segtree segtree(n);
+    for(int i=0;i<n*2;i++){
+        Node node=events[i];
+        if(!node.type){
+            active[node.index]=1;
+            dsu.size[node.index]=1;
+            if(node.index!=0&&active[node.index-1]){
+                int root=dsu.find(node.index-1);
+                segtree.update(0,dsu.size[root]-1,1,-dsu.size[root]-1);
+                dsu.merge(node.index-1,node.index);
+            }
+            if(node.index!=n-1&&active[node.index+1]){
+                int root=dsu.find(node.index+1);
+                segtree.update(0,dsu.size[root]-1,1,-dsu.size[root]-1);
+                dsu.merge(node.index,node.index+1);
+            }
+            int root=dsu.find(node.index);
+            segtree.update(0,dsu.size[root]-1,-1,dsu.size[root]+1);
+        }
+        else{
+            cur++;
+        }
+        ans+=(node.height-(i==(n*2-1)?0:events[i+1].height))*segtree.query(cur-1,n-1);
+    }
+    cout<<ans;
+}
