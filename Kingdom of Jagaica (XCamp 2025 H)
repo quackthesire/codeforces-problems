@@ -1,0 +1,190 @@
+import java.util.*;
+public class Main{
+    static int max=100000;
+    static class Edge{
+        int u;
+        int v;
+        public Edge(int u,int v){
+            this.u=u;
+            this.v=v;
+        }
+    }
+    static class Query{
+        int type;
+        int u;
+        int v;
+        public Query(int temp,int u,int v){
+            this.type=temp;
+            this.u=u;
+            this.v=v;
+        }
+    }
+    static class DSU{
+        int[]parent;
+        int[]size;
+        int[]color;
+        int[]bipartite;
+        Deque<long[]>hist=new ArrayDeque<>();
+        public DSU(int n){
+            parent=new int[n+1];
+            size=new int[n+1];
+            color=new int[n+1];
+            bipartite=new int[n+1];
+            for(int i=1;i<=n;i++){
+                parent[i]=i;
+                size[i]=1;
+                color[i]=0;
+                bipartite[i]=0;
+            }
+        }
+        public int find(int val){
+            while(val!=parent[val])
+                val=parent[val];
+            return val;
+        }
+        public int parity(int val){
+            int parity=0;
+            while(val!=parent[val]){
+                parity^=color[val];
+                val=parent[val];
+            }
+            return parity;
+        }
+        public void union(int u,int v){
+            int parentu=find(u);
+            int parentv=find(v);
+            int parityu=parity(u);
+            int parityv=parity(v);
+            if(parentu==parentv){
+                if(parityu==parityv){
+                    hist.push(new long[]{-2,parentu,bipartite[parentu]});
+                    bipartite[parentu]=1;
+                }
+                else
+                    hist.push(new long[]{-1});
+                return;
+            }
+            if(size[parentu]<size[parentv]){
+                int temp=parentu;
+                parentu=parentv;
+                parentv=temp;
+                temp=parityu;
+                parityu=parityv;
+                parityv=temp;
+            }
+            hist.push(new long[]{parentv,parent[parentv],color[parentv],size[parentu],bipartite[parentu],bipartite[parentv]});
+            parent[parentv]=parentu;
+            color[parentv]=parityu^parityv^1;
+            size[parentu]+=size[parentv];
+            bipartite[parentu]=(bipartite[parentu]==1||bipartite[parentv]==1)?1:0;
+        }
+        public void rollback(int maxsize){
+            while(hist.size()>maxsize){
+                long[]change=hist.pop();
+                if(change[0]==-1)
+                    continue;
+                if(change[0]==-2){
+                    bipartite[(int)change[1]]=(int)change[2];
+                    continue;
+                }
+                size[parent[(int)change[0]]]=(int)change[3];
+                bipartite[parent[(int)change[0]]]=(int)change[4];
+                parent[(int)change[0]]=(int)change[1];
+                color[(int)change[0]]=(int)change[2];
+                bipartite[(int)change[0]]=(int)change[5];
+            }
+        }
+    }
+    static class Segtree{
+        int n;
+        ArrayList<Edge>[]tree;
+        public Segtree(int n){
+            this.n=n;
+            tree=new ArrayList[4*n+5];
+            for(int i=0;i<4*n+5;i++){
+                tree[i]=new ArrayList<>();
+            }
+        }
+        public void add(int node,Edge edge,int l,int r,int ll,int rr){
+            if(r<ll||rr<l)
+                return;
+            if(l<=ll&&rr<=r){
+                tree[node].add(edge);
+                return;
+            }
+            int m=(ll+rr)/2;
+            add(node*2,edge,l,r,ll,m);
+            add(node*2+1,edge,l,r,m+1,rr);
+        }
+        public void dfs(int node,int l,int r,DSU dsu,Query[]queries,int n){
+            int size=dsu.hist.size();
+            for(Edge edge:tree[node]){
+                dsu.union(edge.u,edge.v);
+            }
+            if(l==r){
+                if(queries[l].type==2){
+                    int u=dsu.find(queries[l].u);
+                    int v=dsu.find(queries[l].v);
+                    if(u!=v)
+                        System.out.println("No");
+                    else{
+                        if(dsu.size[u]!=n)
+                            System.out.println("No");
+                        else if(dsu.bipartite[u]==1)
+                            System.out.println("Yes");
+                        else{
+                            int parityu=dsu.parity(queries[l].u);
+                            int parityv=dsu.parity(queries[l].v);
+                            System.out.println((parityu^parityv^1)==(n%2)?"Yes":"No");
+                        }
+                    }
+                }
+            }
+            else{
+                int m=(l+r)/2;
+                dfs(node*2,l,m,dsu,queries,n);
+                dfs(node*2+1,m+1,r,dsu,queries,n);
+            }
+            dsu.rollback(size);
+        }
+    }
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int n=scan.nextInt();
+        int m=scan.nextInt();
+        int q=scan.nextInt();
+        HashMap<Long,Integer>points=new HashMap<>();
+        Segtree segtree=new Segtree(q);
+        DSU dsu=new DSU(n);
+        for(int i=0;i<m;i++){
+            int u=scan.nextInt();
+            int v=scan.nextInt();
+            points.put(Math.max(u,v)+(long)(max+1)*Math.min(u,v),0);
+        }
+        Query[]queries=new Query[q];
+        for(int i=0;i<q;i++){
+            int t=scan.nextInt();
+            int u=scan.nextInt();
+            int v=scan.nextInt();
+            queries[i]=new Query(t,u,v);
+            if(t==1){
+                long key=Math.max(u,v)+(long)(max+1)*Math.min(u,v);
+                if(points.get(key)!=null){
+                    if(points.get(key)<=i-1)
+                        segtree.add(1,new Edge(u,v),points.get(key),i-1,0,q-1);
+                    points.remove(key);
+                }
+                else
+                    points.put(key,i);
+            }
+        }
+        for(Map.Entry<Long,Integer>edge:points.entrySet()){
+            long key=edge.getKey();
+            int u=(int)(key%(max+1));
+            int v=(int)(key/(max+1));
+            if(edge.getValue()<=q-1)
+                segtree.add(1,new Edge(u,v),edge.getValue(),q-1,0,q-1);
+        }
+        segtree.dfs(1,0,q-1,dsu,queries,n);
+    }
+}
