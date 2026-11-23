@@ -1,0 +1,41 @@
+import java.util.*;
+public class Main{
+    static final int MOD=998244353;
+    static long inv(long x,int exp){
+        long res=1;
+        while(exp>0){
+            if((exp&1)!=0)
+                res=res*x%MOD;
+            x=x*x%MOD;
+            exp>>=1;
+        }
+        return res;
+    }
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int n=scan.nextInt();
+        int m=scan.nextInt();
+        int k=scan.nextInt();
+        long[]array=new long[k+1];
+        array[0]=1;
+        for(int i=1;i<=k;i++){
+            long[]temp=new long[k+1];
+            for(int j=1;j<=i;j++){
+                temp[j]=(array[j-1]+(long)j*array[j])%MOD;
+            }
+            array=temp;
+        }
+        long[]fact=new long[k+1];
+        fact[0]=1;
+        for(int i=1;i<=k;i++){
+            fact[i]=(fact[i-1]*((n-i+1+MOD)%MOD))%MOD;
+        }
+        long tot=1;
+        long res=0;
+        for(int i=1;i<=k;i++){
+            tot=tot*m%MOD;
+            res=(res+array[i]*fact[i]%MOD*inv(tot%MOD,MOD-2)%MOD)%MOD;
+        }
+        System.out.println(res);
+    }
+}
