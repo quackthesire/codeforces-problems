@@ -1,0 +1,69 @@
+import java.util.*;
+public class Main{
+    static class Segtree{
+        int n;
+        int[]tree;
+        public Segtree(int n){
+            this.n=n*2+1;
+            tree=new int[n*4+2];
+        }
+        public void add(int index,int val){
+            index+=n;
+            tree[index]+=val;
+            for(int i=index;i>1;i/=2){
+                tree[i/2]=tree[i]+tree[i^1];
+            }
+        }
+        public int query(int l,int r){
+            int sum=0;
+            l+=n;
+            r+=n;
+            for(;l<=r;l/=2,r/=2){
+                if(l%2==1){
+                    sum+=tree[l];
+                    l++;
+                }
+                if(r%2==0){
+                    sum+=tree[r];
+                    r--;
+                }
+            }
+            return sum;
+        }
+    }
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int t=scan.nextInt();
+        for(int temp=0;temp<t;temp++){
+            int n=scan.nextInt();
+            String s=scan.next();
+            int[]diff=new int[n+1];//minus-plus
+            for(int i=1;i<=n;i++){
+                if(s.charAt(i-1)=='+')
+                    diff[i]=diff[i-1]-1;
+                else
+                    diff[i]=diff[i-1]+1;
+            }
+            long ans=0;
+            Segtree zero=new Segtree(n);
+            Segtree one=new Segtree(n);
+            Segtree two=new Segtree(n);
+            zero.add(n,1);
+            for(int i=1;i<=n;i++){
+                if(diff[i]%3==0){
+                    ans+=zero.query(0,diff[i]+n);
+                    zero.add(diff[i]+n,1);
+                }
+                if(diff[i]%3==1||diff[i]%3==-2){
+                    ans+=one.query(0,diff[i]+n);
+                    one.add(diff[i]+n,1);
+                }
+                if(diff[i]%3==2||diff[i]%3==-1){
+                    ans+=two.query(0,diff[i]+n);
+                    two.add(diff[i]+n,1);
+                }
+            }
+            System.out.println(ans);
+        }
+    }
+}
