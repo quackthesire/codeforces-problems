@@ -1,0 +1,49 @@
+import java.util.*;
+public class Main{
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int t=scan.nextInt();
+        for(int temp=0;temp<t;temp++){
+            int n=scan.nextInt();
+            int c=scan.nextInt();
+            int k=scan.nextInt();
+            String s=scan.next();
+            int[]array=new int[n];
+            for(int i=0;i<n;i++){
+                array[i]=s.charAt(i)-'A';
+            }
+            int[]freq=new int[c];
+            for(int i=0;i<k;i++){
+                freq[array[i]]++;
+            }
+            int[]mask=new int[n-k+1];
+            for(int i=0;i<c;i++){
+                if(freq[i]==0)
+                    mask[0]+=(1<<i);
+            }
+            for(int i=0;i<n-k;i++){
+                freq[array[i]]--;
+                freq[array[i+k]]++;
+                for(int j=0;j<c;j++){
+                    if(freq[j]==0)
+                        mask[i+1]+=(1<<j);
+                }
+            }
+            int min=c;
+            boolean[]work=new boolean[1<<c];
+            Arrays.fill(work,true);
+            for(int i=0;i<=n-k;i++){
+                work[mask[i]]=false;
+            }
+            for(int i=(1<<c)-1;i>=0;i--){
+                for(int j=0;j<c;j++){
+                    if(!work[i|(1<<j)])
+                        work[i]=false;
+                }
+                if(work[i]&&(i&(1<<array[n-1]))!=0)
+                    min=Math.min(min,Integer.bitCount(i));
+            }
+            System.out.println(min);
+        }
+    }
+}
