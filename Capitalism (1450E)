@@ -1,0 +1,114 @@
+import java.util.*;
+public class Main{
+    static class Edge{
+        int node;
+        int w;
+        public Edge(int node,int w){
+            this.node=node;
+            this.w=w;
+        }
+    }
+    static void solve(LinkedList<Edge>[]adj){
+        int[][]dist=new int[adj.length][adj.length];
+        for(int i=0;i<adj.length;i++){
+            Arrays.fill(dist[i],Integer.MAX_VALUE/2);
+            dist[i][i]=0;
+            for(Edge j:adj[i]){
+                dist[i][j.node]=j.w;
+            }
+        }
+        for(int k=0;k<adj.length;k++){
+            for(int i=0;i<adj.length;i++){
+                for(int j=0;j<adj.length;j++){
+                    dist[i][j]=Math.min(dist[i][j],dist[i][k]+dist[k][j]);
+                }
+            }
+        }
+        int best=Integer.MIN_VALUE;
+        for(int i=0;i<adj.length;i++){
+            for(int j=0;j<adj.length;j++){
+                best=Math.max(best,dist[i][j]);
+            }
+        }
+        if(!bipartite(adj)||cycle(dist))
+            System.out.println("NO");
+        else{
+            int root=0;
+            int gap=Integer.MIN_VALUE;
+            for(int i=0;i<adj.length;i++){
+                boolean work=true;
+                int min=Integer.MAX_VALUE;
+                int max=Integer.MIN_VALUE;
+                for(int j=0;j<adj.length;j++){
+                    if(dist[i][j]==Integer.MAX_VALUE/2){
+                        work=false;
+                        break;
+                    }
+                    min=Math.min(min,dist[i][j]);
+                    max=Math.max(max,dist[i][j]);
+                }
+                if(work&&max-min>gap){
+                    root=i;
+                    gap=max-min;
+                }
+            }
+            System.out.println("YES");
+            System.out.println(best);
+            int min=Integer.MAX_VALUE;
+            for(int i=0;i<adj.length;i++){
+                min=Math.min(min,dist[root][i]);
+            }
+            for(int i=0;i<adj.length;i++){
+                System.out.print((dist[root][i]-min)+" ");
+            }
+            System.out.println();
+        }
+    }
+    static boolean bipartite(LinkedList<Edge>[]adj){
+        int[]array=new int[adj.length];
+        Arrays.fill(array,-1);
+        for(int i=0;i<adj.length;i++){
+            if(array[i]==-1){
+                array[i]=0;
+                Queue<Integer>q=new LinkedList<>();
+                q.add(i);
+                while(!q.isEmpty()){
+                    int u=q.poll();
+                    for(Edge e:adj[u]){
+                        int v=e.node;
+                        if(array[v]==-1){
+                            array[v]=(array[u]==0)?1:0;
+                            q.add(v);
+                        }
+                        else if(array[v]==array[u])
+                            return false;
+                    }
+                }
+            }
+        }
+        return true;
+    }
+    static boolean cycle(int[][]dist){
+        for(int i=0;i<dist.length;i++){
+            if(dist[i][i]<0)
+                return true;
+        }
+        return false;
+    }
+	public static void main(String[]args){
+	    Scanner scan=new Scanner(System.in);
+	    int n=scan.nextInt();
+	    int m=scan.nextInt();
+	    LinkedList<Edge>[]adj=new LinkedList[n];
+	    for(int i=0;i<n;i++){
+	        adj[i]=new LinkedList<Edge>();
+	    }
+	    for(int i=0;i<m;i++){
+	        int a=scan.nextInt()-1;
+	        int b=scan.nextInt()-1;
+	        adj[a].add(new Edge(b,1));
+	        adj[b].add(new Edge(a,scan.nextInt()==0?1:-1));
+	    }
+	    solve(adj);
+	}
+}
