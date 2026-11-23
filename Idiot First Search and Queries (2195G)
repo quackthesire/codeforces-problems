@@ -1,0 +1,79 @@
+import java.util.*;
+public class Main{
+    static void dfs(int u,long[]val,int[][]adj){
+        long sum=1;
+        if(adj[u][0]!=-1){
+            dfs(adj[u][0],val,adj);
+            sum+=val[adj[u][0]]+1;
+        }
+        if(adj[u][1]!=-1){
+            dfs(adj[u][1],val,adj);
+            sum+=val[adj[u][1]]+1;
+        }
+        val[u]=sum;
+    }
+    static void walk(int u,int[][]adj,ArrayList<Integer>order,int[]first){
+        first[u]=order.size();
+        order.add(u);
+        if(adj[u][0]==-1)
+            return;
+        walk(adj[u][0],adj,order,first);
+        order.add(u);
+        walk(adj[u][1],adj,order,first);
+        order.add(u);
+    }
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int t=scan.nextInt();
+        for(int temp=0;temp<t;temp++){
+            int n=scan.nextInt();
+            int q=scan.nextInt();
+            long[]val=new long[n];
+            int[]first=new int[n];
+            int[]parent=new int[n];
+            int[][]adj=new int[n][2];
+            ArrayList<Integer>order=new ArrayList<>();
+            Arrays.fill(parent,-1);
+            for(int i=0;i<n;i++){
+                adj[i][0]=scan.nextInt()-1;
+                adj[i][1]=scan.nextInt()-1;
+                if(adj[i][0]!=-1)
+                    parent[adj[i][0]]=i;
+                if(adj[i][1]!=-1)
+                    parent[adj[i][1]]=i;
+            }
+            dfs(0,val,adj);
+            walk(0,adj,order,first);
+            int[][]up=new int[n][20];
+            long[][]sum=new long[n][20];
+            for(int i=0;i<n;i++){
+                up[i][0]=parent[i];
+                sum[i][0]=val[i];
+            }
+            for(int j=1;j<20;j++){
+                for(int i=0;i<n;i++){
+                    if(up[i][j-1]!=-1){
+                        up[i][j]=up[up[i][j-1]][j-1];
+                        sum[i][j]=sum[i][j-1]+sum[up[i][j-1]][j-1];
+                    }
+                    else{
+                        up[i][j]=-1;
+                        sum[i][j]=sum[i][j-1];
+                    }
+                }
+            }
+            for(int i=0;i<q;i++){
+                int node=scan.nextInt()-1;
+                long cur=scan.nextLong();
+                for(int j=19;j>=0;j--){
+                    if(up[node][j]==-1||sum[node][j]>cur)
+                        continue;
+                    cur-=sum[node][j];
+                    node=up[node][j];
+                }
+                System.out.print((order.get(first[node]+(int)cur)+1)+" ");
+            }
+            System.out.println();
+        }
+    }
+}
