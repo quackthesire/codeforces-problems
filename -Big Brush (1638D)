@@ -1,0 +1,81 @@
+import java.util.*;
+public class Main{
+    static class Node{
+        int x;
+        int y;
+        int c;
+        public Node(int x,int y,int c){
+            this.x=x;
+            this.y=y;
+            this.c=c;
+        }
+    }
+    static int[]dx={0,0,1,1};
+    static int[]dy={0,1,0,1};
+    static int work(int[][]array,int x,int y){
+        int val=0;
+        for(int i=0;i<4;i++){
+            if(val==0)
+                val=array[x+dx[i]][y+dy[i]];
+            else if(array[x+dx[i]][y+dy[i]]!=val&&array[x+dx[i]][y+dy[i]]!=0)
+                return 0;
+        }
+        return val;
+    }
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int n=scan.nextInt();
+        int m=scan.nextInt();
+        int[][]array=new int[n][m];
+        for(int i=0;i<n;i++){
+            for(int j=0;j<m;j++){
+                array[i][j]=scan.nextInt();
+            }
+        }
+        Queue<Node>pos=new LinkedList<>();
+        ArrayList<Node>ans=new ArrayList<>();
+        for(int i=0;i<n;i++){
+            for(int j=0;j<m;j++){
+                if(i==n-1||j==m-1)
+                    continue;
+                int c=work(array,i,j);
+                if(c!=0)
+                    pos.add(new Node(i,j,c));
+            }
+        }
+        while(!(pos.size()==0)){
+            Node node=pos.poll();
+            if(work(array,node.x,node.y)==0)
+                continue;
+            ans.add(node);
+            for(int i=0;i<4;i++){
+                array[node.x+dx[i]][node.y+dy[i]]=0;
+            }
+            for(int i=-1;i<=1;i++){
+                for(int j=-1;j<=1;j++){
+                    if(node.x+i==-1||node.x+i==n-1||node.y+j==-1||node.y+j==m-1)
+                        continue;
+                    int c=work(array,node.x+i,node.y+j);
+                    if(c!=0)
+                        pos.add(new Node(node.x+i,node.y+j,c));
+                }
+            }
+        }
+        boolean work=true;
+        for(int i=0;i<n;i++){
+            for(int j=0;j<m;j++){
+                if(array[i][j]!=0)
+                    work=false;
+            }
+        }
+        if(!work){
+            System.out.println(-1);
+            System.exit(0);
+        }
+        System.out.println(ans.size());
+        for(int i=1;i<=ans.size();i++){
+            Node node=ans.get(ans.size()-i);
+            System.out.println((node.x+1)+" "+(node.y+1)+" "+node.c);
+        }
+    }
+}
