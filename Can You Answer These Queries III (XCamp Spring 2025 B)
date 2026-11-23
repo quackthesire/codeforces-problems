@@ -1,0 +1,73 @@
+import java.util.*;
+public class Main{
+    static class Node{
+        long sum=Long.MIN_VALUE;
+        long pre=Long.MIN_VALUE;
+        long suff=Long.MIN_VALUE;
+        long max=Long.MIN_VALUE;
+        public Node(long a,long b,long c,long d){
+            sum=a;
+            pre=b;
+            suff=c;
+            max=d;
+        }
+    }
+    static Scanner scan=new Scanner(System.in);
+    static int n=scan.nextInt();
+    static int[]array=new int[n];
+    static Node[]tree=new Node[2*n];
+    static void segtree(){
+        for(int i=0;i<n;i++){
+            tree[i+n]=new Node(array[i],array[i],array[i],array[i]);
+        }
+        for(int i=n-1;i>0;--i){
+            Node l=tree[i<<1];
+            Node r=tree[i<<1|1];
+            tree[i]=new Node(l.sum+r.sum,Math.max(l.pre,l.sum+r.pre),Math.max(r.suff,r.sum+l.suff),Math.max(Math.max(l.max,r.max),l.suff+r.pre));
+        }
+    }
+    static void add(int p,int x){
+        tree[p+n]=new Node(x,x,x,x);
+        for(int i=(p+n)>>1;i>0;i>>=1){
+            Node l=tree[i<<1];
+            Node r=tree[i<<1|1];
+            tree[i]=new Node(l.sum+r.sum,Math.max(l.pre,l.sum+r.pre),Math.max(r.suff,r.sum+l.suff),Math.max(Math.max(l.max,r.max),l.suff+r.pre));
+        }
+    }
+    static long sum(int l,int r){
+        Node left=null;
+        Node right=null;
+        for(l+=n,r+=n;l<r;l>>=1,r>>=1){
+            if((l&1)>0){
+                left=merge(left,tree[l++]);
+            }
+            if((r&1)>0){
+                right=merge(tree[--r],right);
+            }
+        }
+        return merge(left,right).max;
+    }
+    static Node merge(Node l,Node r){
+        if(l==null)
+            return r;
+        if(r==null)
+            return l;
+        return new Node(l.sum+r.sum,Math.max(l.pre,l.sum+r.pre),Math.max(r.suff,r.sum+l.suff),Math.max(Math.max(l.max,r.max),l.suff+r.pre));
+    }
+    public static void main(String[]args){
+        for(int i=0;i<n;i++){
+            array[i]=scan.nextInt();
+        }
+        segtree();
+        int q=scan.nextInt();
+        for(int i=0;i<q;i++){
+            int a=scan.nextInt();
+            int b=scan.nextInt();
+            int c=scan.nextInt();
+            if(a==0)
+                add(b-1,c);
+            else
+                System.out.println(sum(b-1,c));
+        }
+    }
+}
