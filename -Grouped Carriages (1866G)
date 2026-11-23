@@ -1,0 +1,54 @@
+import java.util.*;
+public class Main{
+    static boolean solve(long[]array,int[]dist,long m){
+        int n=array.length;
+        ArrayList<ArrayList<Integer>>vals=new ArrayList<>();
+        for(int i=0;i<n;i++){
+            vals.add(new ArrayList<>());
+        }
+        for(int i=0;i<n;i++){
+            vals.get(Math.max(0,i-dist[i])).add(i);
+        }
+        long[]temp=array.clone();
+        PriorityQueue<Integer>pq=new PriorityQueue<>((a,b)->Math.min(n-1,a+dist[a])-Math.min(n-1,b+dist[b]));
+        for(int i=0;i<n;i++){
+            for(int j:vals.get(i)){
+                pq.add(j);
+            }
+            long val=m;
+            while(val>0&&!pq.isEmpty()){
+                int node=pq.peek();
+                if(node+dist[node]<i)
+                    return false;
+                long min=Math.min(val,temp[node]);
+                val-=min;
+                temp[node]-=min;
+                if(temp[node]==0)
+                    pq.poll();
+            }
+        }
+        return pq.isEmpty();
+    }
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int n=scan.nextInt();
+        long[]array=new long[n];
+        int[]dist=new int[n];
+        for(int i=0;i<n;i++){
+            array[i]=scan.nextLong();
+        }
+        for(int i=0;i<n;i++){
+            dist[i]=scan.nextInt();
+        }
+        long l=0;
+        long r=1000000000;
+        while(l<=r){
+            long m=(l+r)/2;
+            if(solve(array,dist,m))
+                r=m-1;
+            else
+                l=m+1;
+        }
+        System.out.println(l);
+    }
+}
