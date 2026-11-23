@@ -1,0 +1,119 @@
+import java.util.*;
+public class Main{
+    static class Node{
+        boolean self;
+        boolean parent;
+        ArrayList<Integer>moves;
+        public Node(boolean self,boolean parent,ArrayList<Integer>moves){
+            this.self=self;
+            this.parent=parent;
+            this.moves=moves;
+        }
+    }
+    static Node dfs(int u,int p,int[]array,ArrayList<Integer>[]adj,Node[]dp){
+        ArrayList<Integer>moves=new ArrayList<>();
+        int val=0;
+        boolean work=true;
+        boolean both=false;
+        for(int v:adj[u]){
+            if(v==p)
+                continue;
+            Node node=dfs(v,u,array,adj,dp);
+            if(!node.self&&!node.parent)
+                work=false;
+            else if(node.self&&!node.parent){
+                moves.add(v);
+                val^=array[v];
+            }
+            else if(node.self&&node.parent&&array[v]==1)
+                both=true;
+        }
+        boolean self=work&&(val==(array[u]^1)||both);
+        boolean parent=work&&(val==(p==-1?array[u]^1:array[u]^array[p]^1)||both);
+        dp[u]=new Node(self,parent,moves);
+        return dp[u];
+    }
+    static void build(int u,int p,boolean active,int[]array,ArrayList<Integer>[]adj,ArrayList<Integer>ans,boolean[]afterchild,Node[]dp){
+        int val=0;
+        ArrayList<Integer>after=new ArrayList<>();
+        ArrayList<Integer>before=new ArrayList<>();
+        for(int v:dp[u].moves){
+            val^=array[v];
+            after.add(v);
+            afterchild[v]=true;
+        }
+        for(int v:adj[u]){
+            if(v==p)
+                continue;
+            if(!afterchild[v])
+                before.add(v);
+        }
+        if(val!=(!active||p==-1?array[u]^1:array[u]^array[p]^1)){
+            for(int i=0;i<before.size();i++){
+                int v=before.get(i);
+                if(dp[v].self&&dp[v].parent&&array[v]==1){
+                    after.add(v);
+                    afterchild[v]=true;
+                    before.remove(i);
+                    break;
+                }
+            }
+        }
+        for(int v:before){
+            build(v,u,true,array,adj,ans,afterchild,dp);
+        }
+        ans.add(u);
+        for(int v:after){
+            build(v,u,false,array,adj,ans,afterchild,dp);
+        }
+    }
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int t=scan.nextInt();
+        for(int temp=0;temp<t;temp++){
+            int n=scan.nextInt();
+            int[]array=new int[n];
+            ArrayList<Integer>[]adj=new ArrayList[n];
+            for(int i=0;i<n;i++){
+                array[i]=scan.nextInt()%2;
+                adj[i]=new ArrayList<>();
+            }
+            for(int i=0;i<n-1;i++){
+                int u=scan.nextInt()-1;
+                int v=scan.nextInt()-1;
+                adj[u].add(v);
+                adj[v].add(u);
+            }
+            boolean work=true;
+            for(int i=0;i<n;i++){
+                if(array[i]==1)
+                    continue;
+                int count=0;
+                for(int j:adj[i]){
+                    if(array[j]==1)
+                        count++;
+                }
+                if(count==0)
+                    work=false;
+            }
+            if(!work){
+                System.out.println("NO");
+                continue;
+            }
+            Node[]dp=new Node[n];
+            dfs(0,-1,array,adj,dp);
+            if(!dp[0].self){
+                System.out.println("NO");
+                continue;
+            }
+            boolean[]afterchild=new boolean[n];
+            ArrayList<Integer>ans=new ArrayList<>();
+            build(0,-1,false,array,adj,ans,afterchild,dp);
+            System.out.println("YES");
+            for(int i=0;i<ans.size();i++){
+                System.out.print((ans.get(i)+1)+" ");
+            }
+            System.out.println();
+        }
+    }
+}
