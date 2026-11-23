@@ -1,0 +1,62 @@
+import java.util.*;
+public class Main{
+    static boolean check(int lena,int enda){
+        if(lena>=enda){
+            return true;
+        }
+        else{
+            return false;
+        }
+    }
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int n=scan.nextInt();
+        int[]array2=new int[n];
+        int[]g=new int[n];
+        int gh=0;
+        int[]h=new int[n];
+        int count=0;
+        int index=0;
+        int index2=0;
+        String scann=scan.next();
+        for(int i=0;i<n;i++){
+            if(scann.charAt(i)=='G'){
+                g[index]=i;
+                gh++;
+                index++;
+            }
+            else{
+                h[index2]=i;
+                index2++;
+            }
+        }
+        for(int i=0;i<n;i++){
+            array2[i]=scan.nextInt();
+        }
+        boolean first=true;
+        for(int i=0;i<n-gh;i++){
+            if(check(array2[g[0]]-1,g[index-1])&&h[i]<g[0]&&array2[h[i]]-1>=g[0]){
+                if(i==0){
+                    first=false;
+                }
+                count++;
+            }
+        }
+        for(int i=0;i<gh;i++){
+            if(check(array2[h[0]]-1,h[index2-1])&&g[i]<h[0]&&array2[g[i]]-1>=h[0]){
+                if(first||i!=0){
+                    count++;
+                    if(i==0){
+                        first=false;
+                    }
+                }
+            }
+        }
+        if(check(array2[h[0]]-1,h[index2-1])&&check(array2[g[0]]-1,g[index-1])){
+            if(first){
+                count++;
+            }
+        }
+        System.out.println(count);
+    }
+}
