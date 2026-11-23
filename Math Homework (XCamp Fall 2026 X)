@@ -1,0 +1,85 @@
+#include <bits/stdc++.h>
+using namespace std;
+using ll=long long;
+struct Segtree{
+    int n;
+    vector<int>tree;
+    Segtree(vector<int>&array){
+        n=array.size();
+        tree.resize(4*n);
+        build(1,0,n-1,array);
+    }
+    void build(int node,int l,int r,vector<int>&array){
+        if(l==r){
+            tree[node]=array[l];
+            return;
+        }
+        int m=(l+r)/2;
+        build(node*2,l,m,array);
+        build(node*2+1,m+1,r,array);
+        tree[node]=gcd(tree[node*2],tree[node*2+1]);
+    }
+    int query(int l,int r){
+        return query(1,0,n-1,l,r);
+    }
+    int query(int node,int l,int r,int ql,int qr){
+        if(qr<l||r<ql)
+            return 0;
+        if(ql<=l&&r<=qr)
+            return tree[node];
+        int m=(l+r)/2;
+        int left=query(node*2,l,m,ql,qr);
+        int right=query(node*2+1,m+1,r,ql,qr);
+        return gcd(left,right);
+    }
+};
+struct Node{
+    int l;
+    int r;
+    int val;
+    Node(int l,int r,int val):l(l),r(r),val(val){}
+};
+int main(){
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+    int n;
+    int m;
+    cin>>n>>m;
+    vector<int>array(n,1);
+    vector<Node>queries;
+    vector<vector<int>>pre(17,vector<int>(n+1));
+    for(int i=0;i<m;i++){
+        int l;
+        int r;
+        int val;
+        cin>>l>>r>>val;
+        l--;
+        r--;
+        pre[val][l]++;
+        pre[val][r+1]--;
+        queries.push_back(Node(l,r,val));
+    }
+    for(int i=0;i<17;i++){
+        int count=0;
+        for(int j=0;j<n;j++){
+            count+=pre[i][j];
+            if(count!=0)
+                array[j]=array[j]*i/gcd(array[j],i);
+        }
+    }
+    bool work=true;
+    Segtree segtree=Segtree(array);
+    for(int i=0;i<m;i++){
+        if(segtree.query(queries[i].l,queries[i].r)!=queries[i].val){
+            work=false;
+            break;
+        }
+    }
+    if(!work){
+        cout<<"Impossible"<<"\n";
+        return 0;
+    }
+    for(int i=0;i<n;i++){
+        cout<<array[i]<<" ";
+    }
+}
