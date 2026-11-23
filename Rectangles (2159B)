@@ -1,0 +1,77 @@
+import java.util.*;
+public class Main{
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int t=scan.nextInt();
+        for(int temp=0;temp<t;temp++){
+            int tempn=scan.nextInt();
+            int tempm=scan.nextInt();
+            int n=Math.min(tempn,tempm);
+            int m=Math.max(tempn,tempm);
+            int[][]array=new int[n][m];
+            for(int i=0;i<tempn;i++){
+                String s=scan.next();
+                for(int j=0;j<tempm;j++){
+                    if(tempn==n)
+                        array[i][j]=s.charAt(j)-'0';
+                    else
+                        array[j][i]=s.charAt(j)-'0';
+                }
+            }
+            int[][][]dp=new int[m][n][n];
+            for(int i=0;i<m;i++){
+                for(int j=0;j<n;j++){
+                    Arrays.fill(dp[i][j],Integer.MAX_VALUE/2);
+                }
+            }
+            for(int i=0;i<n;i++){
+                for(int j=i+1;j<n;j++){
+                    int prev=-1;
+                    for(int k=0;k<m;k++){
+                        if(array[i][k]!=1||array[j][k]!=1)
+                            continue;
+                        if(prev!=-1){
+                            int a=(j-i+1)*(k-prev+1);
+                            for(int l=prev;l<=k;l++){
+                                dp[l][i][j]=Math.min(dp[l][i][j],a);
+                            }
+                        }
+                        prev=k;
+                    }
+                }
+            }
+            for(int i=0;i<m;i++){
+                for(int j=n-1;j>=1;j--){
+                    for(int k=0;k+j<n;k++){
+                        dp[i][k+1][k+j]=Math.min(dp[i][k+1][k+j],dp[i][k][k+j]);
+                        dp[i][k][k+j-1]=Math.min(dp[i][k][k+j-1],dp[i][k][k+j]);
+                    }
+                }
+            }
+            int[][]ans=new int[n][m];
+            for(int i=0;i<n;i++){
+                for(int j=0;j<m;j++){
+                    ans[i][j]=dp[j][i][i];
+                    if(ans[i][j]==Integer.MAX_VALUE/2)
+                        ans[i][j]=0;
+                }
+            }
+            if(tempn==n){
+                for(int i=0;i<tempn;i++){
+                    for(int j=0;j<tempm;j++){
+                        System.out.print(ans[i][j]+" ");
+                    }
+                    System.out.println();
+                }
+            }
+            else{
+                for(int i=0;i<tempn;i++){
+                    for(int j=0;j<tempm;j++){
+                        System.out.print(ans[j][i]+" ");
+                    }
+                    System.out.println();
+                }
+            }
+        }
+    }
+}
