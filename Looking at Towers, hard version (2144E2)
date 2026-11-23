@@ -1,0 +1,126 @@
+import java.util.*;
+public class Main{
+    static long MOD=998244353;
+    static class Segtree{
+        int n;
+        long[]tree;
+        long[]lazy;
+        public Segtree(int n){
+            this.n=n;
+            tree=new long[4*n];
+            lazy=new long[4*n];
+            Arrays.fill(lazy,1);
+        }
+        public void push(int node){
+            if(lazy[node]==1)
+                return;
+            tree[node*2]=(tree[node*2]*lazy[node])%MOD;
+            tree[node*2+1]=(tree[node*2+1]*lazy[node])%MOD;
+            lazy[node*2]=(lazy[node*2]*lazy[node])%MOD;
+            lazy[node*2+1]=(lazy[node*2+1]*lazy[node])%MOD;
+            lazy[node]=1;
+        }
+        public void mult(int l,int r,long val){
+            mult(1,0,n-1,l,r,val%MOD);
+        }
+        public void mult(int node,int l,int r,int ll,int rr,long val){
+            if(ll>r||rr<l)
+                return;
+            if(ll<=l&&r<=rr){
+                tree[node]=(tree[node]*val)%MOD;
+                lazy[node]=(lazy[node]*val)%MOD;
+                return;
+            }
+            push(node);
+            int m=(l+r)/2;
+            mult(node*2,l,m,ll,rr,val);
+            mult(node*2+1,m+1,r,ll,rr,val);
+        }
+        public void add(int i,long val){
+            add(1,0,n-1,i,val%MOD);
+        }
+       public  void add(int node,int l,int r,int i,long val){
+            if(l==r){
+                tree[node]=(tree[node]+val)%MOD;
+                return;
+            }
+            push(node);
+            int m=(l+r)/2;
+            if(i<=m)
+                add(node*2,l,m,i,val);
+            else
+                add(node*2+1,m+1,r,i,val);
+        }
+        public long query(int i){
+            return query(1,0,n-1,i);
+        }
+        public long query(int node,int l,int r,int i){
+            if(l==r)
+                return tree[node];
+            push(node);
+            int m=(l+r)/2;
+            if(i<=m)
+                return query(node*2,l,m,i);
+            return query(node*2+1,m+1,r,i);
+        }
+    }
+    static void solve(ArrayList<Integer>view,int[]array,long[]dp,int max){
+        Segtree segtree=new Segtree(view.size()+1);
+        segtree.add(0,1);
+        for(int i=0;i<array.length;i++){
+            int l=0;
+            int r=view.size()-1;
+            while(l<=r){
+                int m=(l+r)/2;
+                if(view.get(m)>=array[i])
+                    r=m-1;
+                else
+                    l=m+1;
+            }
+            if(array[i]==max)
+                dp[i]=segtree.query(view.size()-1);
+            segtree.mult(l+1,view.size(),2);
+            if(l!=view.size()&&view.get(l)==array[i])
+                segtree.add(l+1,segtree.query(l));
+        }
+    }
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int t=scan.nextInt();
+        for(int temp=0;temp<t;temp++){
+            int n=scan.nextInt();
+            int max=0;
+            int[]array=new int[n];
+            for(int i=0;i<n;i++){
+                array[i]=scan.nextInt();
+                max=Math.max(max,array[i]);
+            }
+            ArrayList<Integer>l=new ArrayList<>();
+            ArrayList<Integer>r=new ArrayList<>();
+            for(int i=0;i<n;i++){
+                if(l.isEmpty()||array[i]>l.get(l.size()-1))
+                    l.add(array[i]);
+            }
+            for(int i=n-1;i>=0;i--){
+                if(r.isEmpty()||array[i]>r.get(r.size()-1))
+                    r.add(array[i]);
+            }
+            long[]dpl=new long[n];
+            long[]dpr=new long[n];
+            solve(l,array,dpl,max);
+            int[]rev=new int[n];
+            for(int i=0;i<n;i++){
+                rev[i]=array[n-i-1];
+            }
+            solve(r,rev,dpr,max);
+            long ans=0;
+            long count=0;
+            for(int i=0;i<n;i++){
+                ans=(ans+(count+dpl[i])*dpr[n-i-1])%MOD;
+                count=(count*2)%MOD;
+                count=(count+dpl[i])%MOD;
+            }
+            System.out.println(ans);
+        }
+    }
+}
