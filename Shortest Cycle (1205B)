@@ -1,0 +1,61 @@
+import java.util.*;
+public class Main{
+	public static void main(String[]args){
+		Scanner scan=new Scanner(System.in);
+		int n=scan.nextInt();
+		int count=0;
+		long[]temp=new long[n];
+		for(int i=0;i<n;i++){
+		    temp[i]=scan.nextLong();
+		    if(temp[i]!=0)
+		        count++;
+		}
+		if(count>=121){
+      System.out.print("3");
+      System.exit(0);
+    }
+    int index=0;
+    long[]array=new long[count];
+    for(int i=0;i<n;i++){
+        if(temp[i]!=0){
+            array[index]=temp[i];
+            index++;
+        }
+    }
+		ArrayList<Integer>[]adj=new ArrayList[count];
+		for(int i=0;i<count;i++){
+		    adj[i]=new ArrayList<>();
+		}
+		for(int i=0;i<count;i++){
+		    for(int j=i+1;j<count;j++){
+		        if((array[i]&array[j])!=0){
+    		        adj[i].add(j);
+    		        adj[j].add(i);
+		        }
+		    }
+		}
+		int best=Integer.MAX_VALUE;
+    for(int i=0;i<count;i++){
+        int[]dist=new int[count];
+        Arrays.fill(dist,-1);
+        dist[i]=0;
+        Queue<Integer>q=new LinkedList<>();
+        q.add(i);
+        while(!q.isEmpty()){
+            int u=q.poll();
+            for(int v:adj[u]){
+                if(dist[v]==-1){
+                    dist[v]=dist[u]+1;
+                    q.add(v);
+                }
+                else if(dist[v]>=dist[u])
+                    best=Math.min(best,dist[u]+dist[v]+1);
+            }
+        }
+    }
+    if(best==Integer.MAX_VALUE)
+        System.out.print("-1");
+    else
+        System.out.print(best);
+	}
+}
