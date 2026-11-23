@@ -1,0 +1,66 @@
+import java.util.*;
+public class Main{
+    static class Node{
+        int pre;
+        int net;
+        int len;
+        public Node(int pre,int net,int len){
+            this.pre=pre;
+            this.net=net;
+            this.len=len;
+        }
+    }
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int n=scan.nextInt();
+        int count=0;
+        ArrayList<Node>array=new ArrayList<>();
+        for(int i=0;i<n;i++){
+            String s=scan.next();
+            int pre=0;
+            int net=0;
+            for(int j=0;j<s.length();j++){
+                if(s.charAt(j)=='(')
+                    net++;
+                else
+                    net--;
+                pre=Math.min(pre,net);
+            }
+            if(net>=0)
+                count+=net;
+            array.add(new Node(pre,net,s.length()));
+        }
+        ArrayList<Node>pos=new ArrayList<>();
+        ArrayList<Node>neg=new ArrayList<>();
+        for(Node node:array){
+            if(node.net>=0)
+                pos.add(node);
+            else
+                neg.add(node);
+        }
+        pos.sort((a,b)->Integer.compare(b.pre,a.pre));
+        neg.sort((a,b)->Integer.compare((a.pre-a.net),(b.pre-b.net)));
+        int[]dp=new int[count+1];
+        Arrays.fill(dp,Integer.MIN_VALUE);
+        dp[0]=0;
+        for(Node node:pos){
+            int[]temp=Arrays.copyOf(dp,dp.length);
+            for(int i=0;i<count+1;i++){
+                if(dp[i]==Integer.MIN_VALUE||i<-node.pre||i+node.net<0||i+node.net>count)
+                    continue;
+                temp[i+node.net]=Math.max(temp[i+node.net],dp[i]+node.len);
+            }
+            dp=temp;
+        }
+        for(Node node:neg){
+            int[]temp=Arrays.copyOf(dp,dp.length);
+            for(int i=0;i<count+1;i++){
+                if(dp[i]==Integer.MIN_VALUE||i<-node.pre||i+node.net<0||i+node.net>count)
+                    continue;
+                temp[i+node.net]=Math.max(temp[i+node.net],dp[i]+node.len);
+            }
+            dp=temp;
+        }
+        System.out.println(dp[0]>0?dp[0]:0);
+    }
+}
