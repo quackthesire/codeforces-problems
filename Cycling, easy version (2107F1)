@@ -1,0 +1,29 @@
+import java.util.*;
+public class Main{
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int t=scan.nextInt();
+        for(int temp=0;temp<t;temp++){
+            int n=scan.nextInt();
+            int[]min=new int[n];
+            long[]array=new long[n];
+            for(int i=0;i<n;i++){
+                array[i]=scan.nextLong();
+            }
+            for(int i=n-1;i>=0;i--){
+                min[i]=i;
+                if(i!=n-1&&array[min[i+1]]<array[min[i]])
+                    min[i]=min[i+1];
+            }
+            long[]dp=new long[n+1];//how long to get ahead of ith cyclist
+            Arrays.fill(dp,Long.MAX_VALUE);
+            dp[n]=0;
+            for(int i=n-1;i>=0;i--){
+                for(int j=min[i];j<n;j++){
+                    dp[i]=Math.min(dp[i],dp[j+1]+(j-i)+(j-min[i])+(j-i+1)*array[min[i]]);
+                }
+            }
+            System.out.println(dp[0]);
+        }
+    }
+}
