@@ -1,0 +1,35 @@
+import java.util.*;
+public class Main{
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int t=scan.nextInt();
+        for(int temp=0;temp<t;temp++){
+            int n=scan.nextInt();
+            int m=scan.nextInt();
+            String sn=scan.next();
+            String sm=scan.next();
+            Queue<Integer>[]array=new LinkedList[26];
+            for(int i=0;i<26;i++){
+                array[i]=new LinkedList<>();
+            }
+            for(int i=0;i<n;i++){
+                array[sn.charAt(i)-'a'].add(i);
+            }
+            boolean work=true;
+            for(int i=0;i<m;i++){
+                int val=sm.charAt(i)-'a';
+                if(array[val].isEmpty()){
+                    work=false;
+                    break;
+                }
+                int index=array[val].poll();
+                for(int j=0;j<val;j++){
+                    while(!array[j].isEmpty()&&array[j].peek()<index){
+                        array[j].poll();
+                    }
+                }
+            }
+            System.out.println(work?"YES":"NO");
+        }
+    }
+}
