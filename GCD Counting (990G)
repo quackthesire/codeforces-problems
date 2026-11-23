@@ -1,0 +1,99 @@
+import java.util.*;
+public class Main{
+    static class Edge{
+        int u;
+        int v;
+        public Edge(int u,int v){
+            this.u=u;
+            this.v=v;
+        }
+    }
+    static int gcd(int a,int b){
+        while(b!=0){
+            int temp=b;
+            b=a%b;
+            a=temp;
+        }
+        return a;
+    }
+    static class DSU{
+        int[]parent;
+        int[]size;
+        public DSU(int n){
+            parent=new int[n];
+            size=new int[n];
+            for(int i=0;i<n;i++){
+                parent[i]=i;
+                size[i]=1;
+            }
+        }
+        public void reset(int i){
+            parent[i]=i;
+            size[i]=1;
+        }
+        public int find(int u){
+            if(parent[u]!=u)
+                parent[u]=find(parent[u]);
+            return parent[u];
+        }
+        public long union(int u,int v){
+            u=find(u);
+            v=find(v);
+            if(u==v)
+                return 0;
+            if(size[u]<size[v]){
+                int temp=u;
+                u=v;
+                v=temp;
+            }
+            long val=(long)size[u]*size[v];
+            parent[v]=u;
+            size[u]+=size[v];
+            return val;
+        }
+    }
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int n=scan.nextInt();
+        int[]array=new int[n];
+        for(int i=0;i<n;i++){
+            array[i]=scan.nextInt();
+        }
+        ArrayList<Edge>[]edges=new ArrayList[200001];
+        ArrayList<Integer>[]nodes=new ArrayList[200001];
+        for(int i=0;i<=200000;i++){
+            edges[i]=new ArrayList<>();
+            nodes[i]=new ArrayList<>();
+        }
+        for(int i=0;i<n-1;i++){
+            int u=scan.nextInt()-1;
+            int v=scan.nextInt()-1;
+            edges[gcd(array[u],array[v])].add(new Edge(u,v));
+        }
+        for(int i=0;i<n;i++){
+            nodes[array[i]].add(i);
+        }
+        DSU dsu=new DSU(n);
+        long[]ans=new long[200001];
+        for(int i=200000;i>=1;i--){
+            for(int j=i;j<=200000;j+=i){
+                for(int node:nodes[j]){
+                    dsu.reset(node);
+                    ans[i]++;
+                }
+            }
+            for(int j=i;j<=200000;j+=i){
+                for(Edge edge:edges[j]){
+                    ans[i]+=dsu.union(edge.u,edge.v);
+                }
+            }
+            for(int j=i*2;j<=200000;j+=i){
+                ans[i]-=ans[j];
+            }
+        }
+        for(int i=1;i<=200000;i++){
+            if(ans[i]!=0)
+                System.out.println(i+" "+ans[i]);
+        }
+    }
+}
