@@ -1,0 +1,61 @@
+import java.util.*;
+public class Main{
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int n=scan.nextInt();
+        int m=scan.nextInt();
+        int[]array=new int[n];
+        for(int i=0;i<n;i++){
+            array[i]=scan.nextInt();
+            if(i!=0)
+                array[i]+=array[i-1];
+        }
+        if(n==1){
+            System.out.println(0);
+            return;
+        }
+        int[][]dp=new int[m+1][m+1];//current, last
+        int[][]pre=new int[m+1][m+1];
+        for(int i=0;i<=m;i++){
+            Arrays.fill(dp[i],Integer.MAX_VALUE/2);
+            Arrays.fill(pre[i],Integer.MAX_VALUE/2);
+            for(int j=0;j<=i;j++){
+                if(2*j<i)
+                    continue;
+                dp[i][j]=Math.abs(array[0]-j)+Math.abs(array[1]-i);
+                pre[i][j]=dp[i][j];
+                if(j!=0)
+                    pre[i][j]=Math.min(pre[i][j],pre[i][j-1]);
+            }
+        }
+        for(int i=2;i<n-1;i++){
+            int[][]temp=new int[m+1][m+1];
+            for(int j=0;j<=m;j++){
+                Arrays.fill(temp[j],Integer.MAX_VALUE/2);
+                for(int k=0;k<=j;k++){
+                    if(2*k-j<0)
+                        continue;
+                    temp[j][k]=Math.abs(array[i]-j)+pre[k][2*k-j];
+                    //System.out.println(i+" "+j+" "+k+" "+temp[j][k]);
+                }
+            }
+            dp=temp;
+            for(int j=0;j<=m;j++){
+                Arrays.fill(pre[j],Integer.MAX_VALUE/2);
+                for(int k=0;k<=j;k++){
+                    pre[j][k]=dp[j][k];
+                    if(k!=0)
+                        pre[j][k]=Math.min(pre[j][k],pre[j][k-1]);
+                }
+            }
+        }
+        int min=Integer.MAX_VALUE/2;
+        for(int i=0;i<=m;i++){
+            for(int j=0;j<=m;j++){
+                if(2*i-j>=array[n-1])
+                    min=Math.min(min,dp[i][j]);
+            }
+        }
+        System.out.print(min);
+    }
+}
