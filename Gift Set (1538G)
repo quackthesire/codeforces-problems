@@ -1,0 +1,33 @@
+import java.util.*;
+public class Main{
+    static boolean check(long num,int x,int y,int base,int extra){
+        if(x-num*base<0||y-num*base<0)
+            return false;
+        if(extra==0)
+            return true;
+        return (x-num*base)/extra+(y-num*base)/extra>=num;
+    }
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int t=scan.nextInt();
+        for(int temp=0;temp<t;temp++){
+            int x=scan.nextInt();
+            int y=scan.nextInt();
+            int a=scan.nextInt();
+            int b=scan.nextInt();
+            long l=0;
+            long r=1000000005;
+            long ans=r;
+            while(l<=r){
+                long m=(l+r)/2;
+                if(check(m,x,y,Math.min(a,b),Math.abs(a-b))){
+                    ans=m;
+                    l=m+1;
+                }
+                else
+                    r=m-1;
+            }
+            System.out.println(ans);
+        }
+    }
+}
