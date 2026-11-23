@@ -1,0 +1,63 @@
+import java.util.*;
+public class Main{
+    static class Node{
+        long val;
+        int root;
+        public Node(long val,int root){
+            this.val=val;
+            this.root=root;
+        }
+    }
+    static void solve(int[]parent,Node[][]best,int u,int l,int r){
+        if(l>r)
+            return;
+        int root=best[l][r].root;
+        parent[root]=u;
+        solve(parent,best,root,l,root-1);
+        solve(parent,best,root,root+1,r);
+    }
+    static long count(long[][]pre,int i,int j,int n){
+        long l=pre[j][i-1]-pre[i-1][i-1];
+        long r=pre[j][n]-pre[j][j]-pre[i-1][n]+pre[i-1][j];
+        return l+r;
+    }
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int n=scan.nextInt();
+        long[][]array=new long[n+1][n+1];
+        long[][]pre=new long[n+1][n+1];
+        for(int i=1;i<=n;i++){
+            for(int j=1;j<=n;j++){
+                array[i][j]=scan.nextLong();
+                pre[i][j]=pre[i-1][j]+pre[i][j-1]-pre[i-1][j-1]+array[i][j];
+            }
+        }
+        Node[][]best=new Node[n+1][n+1];
+        for(int i=1;i<=n;i++){
+            for(int j=1;j<=n;j++){
+                best[i][j]=new Node(Long.MAX_VALUE/4,-1);
+            }
+            best[i][i]=new Node(0,i);
+        }
+        for(int len=1;len<n;len++){
+            for(int i=1;i<=n-len;i++){
+                for(int j=i;j<=i+len;j++){
+                    long val=0;
+                    if(j!=i)
+                        val+=best[i][j-1].val+count(pre,i,j-1,n);
+                    if(j!=i+len)
+                        val+=best[j+1][i+len].val+count(pre,j+1,i+len,n);
+                    if(val<best[i][i+len].val){
+                        best[i][i+len].val=val;
+                        best[i][i+len].root=j;
+                    }
+                }
+            }
+        }
+        int[]parent=new int[n+1];
+        solve(parent,best,0,1,n);
+        for(int i=1;i<=n;i++){
+            System.out.print(parent[i]+" ");
+        }
+    }
+}
