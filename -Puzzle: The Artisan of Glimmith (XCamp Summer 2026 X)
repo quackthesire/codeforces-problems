@@ -1,0 +1,120 @@
+import java.util.*;
+public class Main{
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int t=scan.nextInt();
+        for(int temp=0;temp<t;temp++){
+            int n=scan.nextInt();
+            int[]array=new int[n];
+            for(int i=0;i<n;i++){
+                array[i]=scan.nextInt();
+            }
+            int last=-1;
+            int diff=0;
+            int[]dp=new int[n+1];
+            int[]first=new int[n+1];
+            int[]second=new int[n+1];
+            Arrays.fill(dp,-1);
+            int count=0;
+            int wildcount=0;
+            int[]wild=new int[2];
+            int[]next=new int[3];
+            int[]prev=new int[3];
+            dp[0]=0;
+            wild[wildcount]=0;
+            wildcount++;
+            for(int i=0;i<n;i++){
+                if(array[i]!=0){
+                    if(last==-1||array[last]!=array[i])
+                        diff=last+1;
+                    last=i;
+                }
+                dp[i+1]=-1;
+                first[i+1]=-1;
+                second[i+1]=-1;
+                if(last!=-1){
+                    int left=i+1-array[last];
+                    if(left>=diff&&left<=last){
+                        if(left==0||(dp[left]!=-1&&(dp[left]==0||dp[left]!=array[last]))){
+                            if(dp[i+1]==-1){
+                                dp[i+1]=array[last];
+                                first[i+1]=left;
+                            }
+                            else if(dp[i+1]!=array[last]){
+                                dp[i+1]=0;
+                                second[i+1]=left;
+                            }
+                        }
+                    }
+                }
+                if(array[i]==0){
+                    for(int j=0;j<wildcount;j++){
+                        int len=i+1-wild[j];
+                        if(dp[i+1]==-1){
+                            dp[i+1]=len;
+                            first[i+1]=wild[j];
+                        }
+                        else if(dp[i+1]!=len){
+                            dp[i+1]=0;
+                            second[i+1]=wild[j];
+                        }
+                    }
+                    for(int j=0;j<count;j++){
+                        if(next[j]==i+1)
+                            continue;
+                        int len=i+1-prev[j];
+                        if(dp[i+1]==-1){
+                            dp[i+1]=len;
+                            first[i+1]=prev[j];
+                        }
+                        else if(dp[i+1]!=len){
+                            dp[i+1]=0;
+                            second[i+1]=prev[j];
+                        }
+                    }
+                }
+                if(array[i]!=0){
+                    wildcount=0;
+                    count=0;
+                }
+                if(dp[i+1]==0&&wildcount<2){
+                    wild[wildcount]=i+1;
+                    wildcount++;
+                }
+                else if(dp[i+1]>0){
+                    boolean work=false;
+                    for(int j=0;j<count;j++){
+                        if(next[j]==dp[i+1]+i+1)
+                            work=true;
+                    }
+                    if(!work&&count<3){
+                        next[count]=dp[i+1]+i+1;
+                        prev[count++]=i+1;
+                    }
+                }
+            }
+            if(dp[n]==-1){
+                System.out.println("No");
+                continue;
+            }
+            int cur=n;
+            int nextval=-1;
+            int[]ans=new int[n];
+            while(cur>0){
+                int val=first[cur];
+                if(dp[cur]==0&&nextval!=-1&&cur-val==nextval)
+                    val=second[cur];
+                for(int i=val;i<cur;i++){
+                    ans[i]=cur-val;
+                }
+                nextval=cur-val;
+                cur=val;
+            }
+            System.out.println("Yes");
+            for(int i=0;i<n;i++){
+                System.out.print(ans[i]+" ");
+            }
+            System.out.println();
+        }
+    }
+}
