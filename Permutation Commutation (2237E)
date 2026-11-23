@@ -1,0 +1,128 @@
+#include <bits/stdc++.h>
+using namespace std;
+using ll=long long;
+struct comp{
+    bool operator()(const vector<int>&a,const vector<int>&b) const{
+        if(a.empty())
+            return false;
+        if(b.empty())
+            return true;
+        return a[0]<b[0];
+    }
+};
+int main(){
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+    int t;
+    cin>>t;
+    while(t--){
+        int n;
+        cin>>n;
+        vector<int>a(n);
+        vector<int>b(n);
+        for(int i=0;i<n;i++){
+            cin>>a[i];
+            if(a[i]!=-1)
+                a[i]--;
+        }
+        for(int i=0;i<n;i++){
+            cin>>b[i];
+            if(b[i]!=-1)
+                b[i]--;
+        }
+        vector<bool>visited(n,false);
+        vector<vector<int>>cycles;
+        for(int i=0;i<n;i++){
+            if(visited[i])
+                continue;
+            int cur=i;
+            vector<int>cycle;
+            while(!visited[cur]){
+                visited[cur]=true;
+                cycle.push_back(cur);
+                cur=a[cur];
+            }
+            cycles.push_back(cycle);
+        }
+        int temp=0;
+        vector<int>next(n);
+        vector<int>index(n);
+        for(vector<int>cycle:cycles){
+            for(int i=0;i<cycle.size();i++){
+                if(i!=cycle.size()-1)
+                    next[cycle[i]]=cycle[i+1];
+                else
+                    next[cycle[i]]=cycle[0];
+                index[cycle[i]]=temp;
+            }
+            temp++;
+        }
+        bool work=true;
+        vector<bool>used(cycles.size());
+        for(vector<int>cycle:cycles){
+            int cur=-1;
+            int curindex=-1;
+            for(int i=0;i<2*cycle.size();i++){
+                int& val=b[cycle[i%cycle.size()]];
+                if(val==-1)
+                    val=cur;
+                else{
+                    if(val!=cur&&cur!=-1){
+                        work=false;
+                        break;
+                    }
+                    else{
+                        cur=val;
+                        curindex=index[val];
+                        if(used[curindex]||cycles[curindex].size()!=cycle.size()){
+                            work=false;
+                            break;
+                        }
+                    }
+                }
+                if(cur!=-1)
+                    cur=next[cur];
+            }
+            if(!work)
+                break;
+            if(curindex!=-1)
+                used[curindex]=true;
+        }
+        if(!work){
+            cout<<"NO"<<"\n";
+            continue;
+        }
+        for(vector<int>&cycle:cycles){
+            rotate(cycle.begin(),min_element(cycle.begin(),cycle.end()),cycle.end());
+        }
+        set<int>bset;
+        for(int i=0;i<n;i++){
+            if(b[i]==-1)
+                bset.insert(index[i]);
+        }
+        vector<vector<vector<int>>>none(n+1);
+        vector<vector<vector<int>>>bnone(n+1);
+        for(int i=0;i<cycles.size();i++){
+            if(!used[i])
+                none[cycles[i].size()].push_back(cycles[i]);
+            if(bset.count(i))
+                bnone[cycles[i].size()].push_back(cycles[i]);
+        }
+        for(int i=1;i<=n;i++){
+            sort(none[i].begin(),none[i].end(),comp());
+            sort(bnone[i].begin(),bnone[i].end(),comp());
+        }
+        for(int i=0;i<none.size();i++){
+            for(int j=0;j<none[i].size();j++){
+                for(int k=0;k<none[i][j].size();k++){
+                    b[bnone[i][j][k]]=none[i][j][k];
+                }
+            }
+        }
+        cout<<"YES"<<"\n";
+        for(int i=0;i<n;i++){
+            cout<<(b[i]+1)<<" ";
+        }
+        cout<<"\n";
+    }
+}
