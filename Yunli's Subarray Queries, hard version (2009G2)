@@ -1,0 +1,149 @@
+import java.util.*;
+public class Main{
+    static class Segtree{
+        int n;
+        long[]tree;
+        long[]lazy;
+        public Segtree(int n){
+            this.n=n;
+            tree=new long[4*n];
+            lazy=new long[4*n];
+            Arrays.fill(tree,Integer.MAX_VALUE);
+            Arrays.fill(lazy,Long.MIN_VALUE);
+        }
+        public long query(int l,int r){
+            return query(1,0,n-1,l,r);
+        }
+        public long query(int node,int l,int r,int ll,int rr){
+            if(ll>r||rr<l)
+                return 0;
+            if(ll<=l&&r<=rr)
+                return tree[node];
+            push(node,l,r);
+            int m=(l+r)/2;
+            long left=query(node*2,l,m,ll,rr);
+            long right=query(node*2+1,m+1,r,ll,rr);
+            return left+right;
+        }
+        public void update(int l,int r,long val){
+            if(l>r)
+                return;
+            update(1,0,n-1,l,r,val);
+        }
+        public void update(int node,int l,int r,int ll,int rr,long val){
+            if(ll>r||rr<l)
+                return;
+            if(ll<=l&&r<=rr){
+                tree[node]=(r-l+1)*val;
+                lazy[node]=val;
+                return;
+            }
+            push(node,l,r);
+            int m=(l+r)/2;
+            update(node*2,l,m,ll,rr,val);
+            update(node*2+1,m+1,r,ll,rr,val);
+            tree[node]=tree[node*2]+tree[node*2+1];
+        }
+        public void push(int node,int l,int r){
+            if(lazy[node]==Long.MIN_VALUE||l==r)
+                return;
+            int m=(l+r)/2;
+            tree[node*2]=(m-l+1)*lazy[node];
+            tree[node*2+1]=(r-m)*lazy[node];
+            lazy[node*2]=lazy[node];
+            lazy[node*2+1]=lazy[node];
+            lazy[node]=Long.MIN_VALUE;
+        }
+    }
+    static class Node implements Comparable<Node>{
+        int l;
+        int r;
+        int index;
+        public Node(int l,int r,int index){
+            this.l=l;
+            this.r=r;
+            this.index=index;
+        }
+        public int compareTo(Node other){
+            if(this.l==other.l)
+                return this.r-other.r;
+            return other.l-this.l;
+        }
+    }
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int t=scan.nextInt();
+        for(int temp=0;temp<t;temp++){
+            int n=scan.nextInt();
+            int k=scan.nextInt();
+            int q=scan.nextInt();
+            int[]array=new int[n];
+            for(int i=0;i<n;i++){
+                array[i]=scan.nextInt()-i;
+            }
+            int max=0;
+            int[]vals=new int[n-k+1];
+            HashMap<Integer,Integer>freq=new HashMap<>();
+            HashMap<Integer,Integer>count=new HashMap<>();
+            for(int i=0;i<k;i++){
+                int prev=freq.getOrDefault(array[i],0);
+                if(prev!=0)
+                    count.put(prev,count.get(prev)-1);
+                int cur=prev+1;
+                freq.put(array[i],cur);
+                count.put(cur,count.getOrDefault(cur,0)+1);
+                max=Math.max(max,cur);
+            }
+            vals[0]=k-max;
+            for(int i=k;i<n;i++){
+                int prev=freq.get(array[i-k]);
+                count.put(prev,count.get(prev)-1);
+                if(prev==1)
+                    freq.remove(array[i-k]);
+                else{
+                    freq.put(array[i-k],prev-1);
+                    count.put(prev-1,count.getOrDefault(prev-1,0)+1);
+                }
+                prev=freq.getOrDefault(array[i],0);
+                if(prev!=0)
+                    count.put(prev,count.get(prev)-1);
+                int cur=prev+1;
+                freq.put(array[i],cur);
+                count.put(cur,count.getOrDefault(cur,0)+1);
+                max=Math.max(max,cur);
+                while(max>0&&count.getOrDefault(max,0)==0){
+                    max--;
+                }
+                vals[i-k+1]=k-max;
+            }
+            int index=0;
+            long[]ans=new long[q];
+            Node[]queries=new Node[q];
+            for(int i=0;i<q;i++){
+                queries[i]=new Node(scan.nextInt()-1,scan.nextInt()-k,i);
+            }
+            Arrays.sort(queries);
+            Segtree segtree=new Segtree(n);
+            for(int i=n-k;i>=0;i--){
+                int l=i;
+                int r=n-1;
+                while(l<=r){
+                    int m=(l+r)/2;
+                    if(segtree.query(m,m)>=vals[i])
+                        l=m+1;
+                    else
+                        r=m-1;
+                }
+                segtree.update(i,r,vals[i]);
+                while(index<q&&queries[index].l==i){
+                    Node node=queries[index];
+                    ans[node.index]=segtree.query(node.l,node.r);
+                    index++;
+                }
+            }
+            for(int i=0;i<q;i++){
+                System.out.println(ans[i]);
+            }
+        }
+    }
+}
