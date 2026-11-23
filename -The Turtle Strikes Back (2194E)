@@ -1,0 +1,81 @@
+import java.util.*;
+public class Main{
+  	public static void main(String[]args){
+    		Scanner scan=new Scanner(System.in);
+    		int t=scan.nextInt();
+    		for(int temp=0;temp<t;temp++){
+            int n=scan.nextInt();
+            int m=scan.nextInt();
+            int[][]array=new int[n][m];
+            for(int i=0;i<n;i++){
+                for(int j=0;j<m;j++){
+                    array[i][j]=scan.nextInt();
+                }
+            }
+            long[][]dps=new long[n][m];
+            long[][]dpe=new long[n][m];
+            for(int i=0;i<n;i++){
+                Arrays.fill(dps[i],-Long.MAX_VALUE/2);
+                Arrays.fill(dpe[i],-Long.MAX_VALUE/2);
+            }
+            dps[0][0]=array[0][0];
+            dpe[n-1][m-1]=array[n-1][m-1];
+            for(int i=0;i<n;i++){
+                for(int j=0;j<m;j++){
+                    if(i>0)
+                        dps[i][j]=Math.max(dps[i][j],array[i][j]+dps[i-1][j]);
+                    if(j>0)
+                        dps[i][j]=Math.max(dps[i][j],array[i][j]+dps[i][j-1]);
+                }
+            }
+            for(int i=n-1;i>=0;i--){
+                for(int j=m-1;j>=0;j--){
+                    if(i<n-1)
+                        dpe[i][j]=Math.max(dpe[i][j],array[i][j]+dpe[i+1][j]);
+                    if(j<m-1)
+                        dpe[i][j]=Math.max(dpe[i][j],array[i][j]+dpe[i][j+1]);
+                }
+            }
+            long[][]maxleft=new long[n][m];
+            long[][]maxright=new long[n][m];
+            for(int i=0;i<n;i++){
+                for(int j=0;j<m;j++){
+                    maxleft[i][j]=dps[i][j]+dpe[i][j]-array[i][j];
+                    maxright[i][j]=dps[i][j]+dpe[i][j]-array[i][j];
+                }
+            }
+            for(int i=0;i<n;i++){
+                for(int j=m-1;j>=0;j--){
+                    if(i>0)
+                        maxleft[i][j]=Math.max(maxleft[i][j],maxleft[i-1][j]);
+                    if(j<m-1)
+                        maxleft[i][j]=Math.max(maxleft[i][j],maxleft[i][j+1]);
+                }
+            }
+            for(int i=n-1;i>=0;i--){
+                for(int j=0;j<m;j++){
+                    if(i<n-1)
+                        maxright[i][j]=Math.max(maxright[i][j],maxright[i+1][j]);
+                    if(j>0)
+                        maxright[i][j]=Math.max(maxright[i][j],maxright[i][j-1]);
+                }
+            }
+            int x=n-1;
+            int y=m-1;
+            long ans=Math.min(dps[x][y],dps[x][y]-2*array[x][y]);
+            for(int i=0;i<n+m-2;i++){
+                if(x>0&&dps[x-1][y]+array[x][y]==dps[x][y])
+                    x--;
+                else
+                    y--;
+                long best=dps[n-1][m-1]-2*array[x][y];
+                if(x>0&&y<m-1)
+                    best=Math.max(best,maxleft[x-1][y+1]);
+                if(x<n-1&&y>0)
+                    best=Math.max(best,maxright[x+1][y-1]);
+                ans=Math.min(ans,best);
+            }
+            System.out.println(ans);
+    		}
+  	}
+}
