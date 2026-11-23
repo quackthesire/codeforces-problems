@@ -1,0 +1,71 @@
+import java.util.*;
+public class Main{
+    static int bs(int n,int[]array){
+        int l=0;
+        int r=array.length;
+        while(l<r){
+            int m=(l+r)/2;
+            if(array[m]<=n)
+                l=m+1;
+            else
+                r=m;
+        }
+        return l;
+    }
+	public static void main(String[]args){
+	    Scanner scan=new Scanner(System.in);
+	    int n=scan.nextInt();
+	    int[]temp=new int[n];
+	    int[]temp2=new int[n];
+	    int[]size=new int[n];
+	    int[]size2=new int[n];
+	    int[]index=new int[n];
+	    int[]index2=new int[n];
+	    for(int i=0;i<n;i++){
+	        temp[i]=scan.nextInt()-1;
+	        size[temp[i]]++;
+	    }
+	    for(int i=0;i<n;i++){
+	        temp2[i]=scan.nextInt()-1;
+	        size2[temp2[i]]++;
+	    }
+	    int[][]array=new int[n][];
+	    int[][]array2=new int[n][];
+	    for(int i=0;i<n;i++){
+	        array[i]=new int[size[i]];
+	        array2[i]=new int[size2[i]];
+	    }
+	    for(int i=0;i<n;i++){
+	        array[temp[i]][index[temp[i]]]=i;
+	        index[temp[i]]++;
+	        array2[temp2[i]][index2[temp2[i]]]=i;
+	        index2[temp2[i]]++;
+	    }
+	    long ans=0;
+	    for(int i=0;i<n;i++){
+	        int[]mina=new int[array[i].length];
+	        int[]minb=new int[array2[i].length];
+	        long[]pre=new long[array2[i].length+1];
+	        for(int j=0;j<array[i].length;j++){
+	            mina[j]=Math.min(array[i][j]+1,n-array[i][j]);
+	        }
+	        for(int j=0;j<array2[i].length;j++){
+	            minb[j]=Math.min(array2[i][j]+1,n-array2[i][j]);
+	        }
+	        Arrays.sort(mina);
+	        Arrays.sort(minb);
+	        for(int j=0;j<array2[i].length;j++){
+	            pre[j+1]=minb[j]+pre[j];
+	        }
+	        for(int j:mina){
+	            ans+=(long)(array2[i].length-bs(j,minb))*j+pre[bs(j,minb)];
+	        }
+	    }
+	    for(int i=0;i<n;i++){
+	        if(temp[i]==temp2[i]){
+	            ans+=(long)i*(i+1)/2+(long)(n-i-1)*(n-i)/2;
+	        }
+	    }
+	    System.out.print(ans);
+	}
+}
