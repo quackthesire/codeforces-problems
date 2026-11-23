@@ -1,0 +1,84 @@
+import java.util.*;
+public class Main{
+    static void dfs(int u,int p,int[]depth,int[][]ancestor,ArrayList<Integer>[]adj){
+        ancestor[u][0]=p;
+        for(int i=1;i<17;i++){
+            if(ancestor[u][i-1]!=-1)
+                ancestor[u][i]=ancestor[ancestor[u][i-1]][i-1];
+            else
+                ancestor[u][i]=-1;
+        }
+        for(int v:adj[u]){
+            if(v!=p){
+                depth[v]=depth[u]+1;
+                dfs(v,u,depth,ancestor,adj);
+            }
+        }
+    }
+    static int lca(int u,int v,int[]depth,int[][]ancestor){
+        if(depth[u]<depth[v]){
+            int temp=u;
+            u=v;
+            v=temp;
+        }
+        for(int i=16;i>=0;i--){
+            if(ancestor[u][i]!=-1&&depth[ancestor[u][i]]>=depth[v])
+                u=ancestor[u][i];
+        }
+        if(u==v)
+            return u;
+        for(int i=16;i>=0;i--){
+            if(ancestor[u][i]!=-1&&ancestor[u][i]!=ancestor[v][i]){
+                u=ancestor[u][i];
+                v=ancestor[v][i];
+            }
+        }
+        return ancestor[u][0];
+    }
+	public static void main(String[]args){
+	    Scanner scan=new Scanner(System.in);
+	    int n=scan.nextInt();
+	    ArrayList<Integer>[]adj=new ArrayList[n];
+	    for(int i=0;i<n;i++){
+	        adj[i]=new ArrayList<>();
+	    }
+	    for(int i=0;i<n-1;i++){
+	        int u=scan.nextInt()-1;
+	        int v=scan.nextInt()-1;
+	        adj[u].add(v);
+	        adj[v].add(u);
+	    }
+	    int temp=scan.nextInt();
+	    ArrayList<Integer>[]color=new ArrayList[temp];
+	    for(int i=0;i<temp;i++){
+	        color[i]=new ArrayList<>();
+	        int c=scan.nextInt();
+	        for(int j=0;j<c;j++){
+	            color[i].add(scan.nextInt()-1);
+	        }
+	    }
+	    int[][]depth=new int[n][n];
+	    int[][][]ancestor=new int[n][n][17];
+	    for(int i=0;i<n;i++){
+            dfs(i,-1,depth[i],ancestor[i],adj);
+	    }
+	    int q=scan.nextInt();
+	    for(int i=0;i<q;i++){
+	        int r=scan.nextInt()-1;
+	        int s=scan.nextInt();
+	        int best=Integer.MAX_VALUE;
+	        HashSet<Integer>nodes=new HashSet<>();
+	        for(int j=0;j<s;j++){
+	            for(int k:color[scan.nextInt()-1]){
+	                nodes.add(k);
+	            }
+	        }
+	        for(int j:nodes){
+	            for(int k:nodes){
+                    best=Math.min(best,depth[r][lca(j,k,depth[r],ancestor[r])]);
+	            }
+	        }
+	        System.out.println(best);
+	    }
+	}
+}
