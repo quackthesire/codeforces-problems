@@ -1,0 +1,76 @@
+import java.util.*;
+public class Main{
+    static int n;
+    static ArrayList<Integer>[]children;
+    static int[]tin;
+    static int[]tout;
+    static int time=0;
+    static class Node{
+        int w;
+        int i;
+        public Node(int w,int i){
+            this.w=w;
+            this.i=i;
+        }
+    }
+    static class BIT{
+        int n;
+        int[]tree;
+        public BIT(int n){
+            this.n=n;
+            tree=new int[n+1];
+        }
+        public void update(int i,int x){
+            for(i=i+1;i<=n;i+=(i&-i)){
+                tree[i]+=x;
+            }
+        }
+        public int query(int i){
+            int sum=0;
+            for(i=i+1;i>0;i-=(i&-i)){
+                sum+=tree[i];
+            }
+            return sum;
+        }
+        public int query(int l,int r){
+            if(r<l)
+                return 0;
+            if(l==0)
+                return query(r);
+            return query(r)-query(l-1);
+        }
+    }
+    static void dfs(int u){
+        tin[u]=time++;
+        for(int v:children[u]){
+            dfs(v);
+        }
+        tout[u]=time-1;
+    }
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int n=scan.nextInt();
+        Node[]array=new Node[n];
+        children=new ArrayList[n];
+        for(int i=0;i<n;i++){
+            array[i]=new Node(scan.nextInt(),i);
+            children[i]=new ArrayList<>();
+        }
+        for(int i=0;i<n-1;i++){
+            children[scan.nextInt()-1].add(i+1);
+        }
+        tin=new int[n];
+        tout=new int[n];
+        dfs(0);
+        Arrays.sort(array,(a,b)->Integer.compare(b.w,a.w));
+        BIT tree=new BIT(n);
+        int[]ans=new int[n];
+        for(Node u:array){
+            ans[u.i]=tree.query(tin[u.i],tout[u.i]);
+            tree.update(tin[u.i],1);
+        }
+        for(int i=0;i<n;i++){
+            System.out.println(ans[i]);
+        }
+    }
+}
