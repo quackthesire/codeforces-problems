@@ -1,0 +1,26 @@
+import java.util.*;
+public class Main{
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int n=scan.nextInt();
+        BitSet[]array=new BitSet[n];
+        for(int i=0;i<n;i++){
+            array[i]=new BitSet(n);
+            String s=scan.next();
+            for(int j=0;j<n;j++){
+                if(s.charAt(j)=='1')
+                    array[i].set(j);
+            }
+        }
+        long count=0;
+        for(int i=0;i<n;i++){
+            for(int j=i+1;j<n;j++){
+                BitSet temp=(BitSet)array[i].clone();
+                temp.and(array[j]);
+                int val=temp.cardinality();
+                count+=(long)val*(val-1)/2;
+            }
+        }
+        System.out.println(count);
+    }
+}
