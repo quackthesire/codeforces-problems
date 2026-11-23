@@ -1,0 +1,157 @@
+import java.util.*;
+public class Main{
+    static class Segtree{
+        int n;
+        long[]tree;
+        long[]lazy;
+        public Segtree(int n){
+            this.n=n;
+            tree=new long[4*n];
+            lazy=new long[4*n];
+        }
+        public Segtree(long[]array){
+            this.n=array.length;
+            tree=new long[4*n];
+            lazy=new long[4*n];
+            build(array,1,0,n-1);
+        }
+        public void build(long[]array,int node,int l,int r){
+            if(l==r){
+                tree[node]=array[l];
+                return;
+            }
+            int m=(l+r)/2;
+            build(array,node*2,l,m);
+            build(array,node*2+1,m+1,r);
+            tree[node]=Math.max(tree[node*2],tree[node*2+1]);
+        }
+        public void push(int node){
+            if(lazy[node]==0)
+                return;
+            tree[node*2]+=lazy[node];
+            tree[node*2+1]+=lazy[node];
+            lazy[node*2]+=lazy[node];
+            lazy[node*2+1]+=lazy[node];
+            lazy[node]=0;
+        }
+        public long query(int l,int r){
+            return query(1,0,n-1,l,r);
+        }
+        public long query(int node,int l,int r,int ll,int rr){
+            if(ll>r||rr<l)
+                return Long.MIN_VALUE;
+            if(ll<=l&&r<=rr)
+                return tree[node];
+            push(node);
+            int m=(l+r)/2;
+            long left=query(node*2,l,m,ll,rr);
+            long right=query(node*2+1,m+1,r,ll,rr);
+            return Math.max(left,right);
+        }
+        public void update(int l,int r,long val){
+            update(1,0,n-1,l,r,val);
+        }
+        public void update(int node,int l,int r,int ll,int rr,long val){
+            if(ll>r||rr<l)
+                return;
+            if(ll<=l&&r<=rr){
+                tree[node]+=val;
+                lazy[node]+=val;
+                return;
+            }
+            push(node);
+            int m=(l+r)/2;
+            update(node*2,l,m,ll,rr,val);
+            update(node*2+1,m+1,r,ll,rr,val);
+            tree[node]=Math.max(tree[node*2],tree[node*2+1]);
+        }
+    }
+    static int[]array;
+    static int[]tin;
+    static int[]tout;
+    static int[]last;
+    static int[]prev;
+    static int[]euler;
+    static long[]vals;
+    static ArrayList<Integer>[]child;
+    static ArrayList<Integer>[]same;
+    static int timer;
+    static int index;
+    static void dfs(int u){
+        tin[u]=timer;
+        euler[timer]=u;
+        prev[u]=last[array[u]];
+        if(prev[u]!=-1)
+            same[prev[u]].add(u);
+        else
+            index++;
+        last[array[u]]=u;
+        vals[timer]=index;
+        timer++;
+        for(int v:child[u]){
+            dfs(v);
+        }
+        tout[u]=timer-1;
+        last[array[u]]=prev[u];
+        if(prev[u]==-1)
+            index--;
+    }
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int t=scan.nextInt();
+        for(int temp=0;temp<t;temp++){
+            int n=scan.nextInt();
+            timer=0;
+            index=0;
+            array=new int[n];
+            tin=new int[n];
+            tout=new int[n];
+            last=new int[n];
+            prev=new int[n];
+            euler=new int[n];
+            vals=new long[n];
+            child=new ArrayList[n];
+            same=new ArrayList[n];
+            Arrays.fill(last,-1);
+            for(int i=0;i<n;i++){
+                child[i]=new ArrayList<>();
+                same[i]=new ArrayList<>();
+            }
+            for(int i=1;i<n;i++){
+                child[scan.nextInt()-1].add(i);
+            }
+            for(int i=0;i<n;i++){
+                array[i]=scan.nextInt()-1;
+            }
+            dfs(0);
+            int cur=0;
+            long ans=1;
+            Segtree segtree=new Segtree(vals);
+            while(true){
+                long best1=1;
+                long best2=1;
+                int node=-1;
+                for(int u:child[cur]){
+                    long val=segtree.query(tin[u],tout[u]);
+                    if(val>best1){
+                        best2=best1;
+                        best1=val;
+                        node=u;
+                    }
+                    else if(val>best2)
+                        best2=val;
+                }
+                ans=Math.max(ans,best1*best2);
+                if(node==-1)
+                    break;
+                segtree.update(tin[node],tout[node],-1);
+                for(int u:same[cur]){
+                    if(tin[node]<=tin[u]&&tin[u]<=tout[node])
+                        segtree.update(tin[u],tout[u],1);
+                }
+                cur=node;
+            }
+            System.out.println(ans);
+        }
+    }
+}
