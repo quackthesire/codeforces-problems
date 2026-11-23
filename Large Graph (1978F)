@@ -1,0 +1,79 @@
+#include <bits/stdc++.h>
+using namespace std;
+using ll=long long;
+struct DSU{
+    int comp;
+    vector<int>parent;
+    vector<int>size;
+    DSU(int n){
+        comp=n;
+        parent.resize(n);
+        iota(parent.begin(),parent.end(),0);
+        size.resize(n,1);
+    }
+    int find(int u){
+        if(u==parent[u])
+            return u;
+        return parent[u]=find(parent[u]);
+    }
+    void merge(int u,int v){
+        u=find(u);
+        v=find(v);
+        if(u==v)
+            return;
+        if(size[u]<size[v])
+            swap(u,v);
+        comp--;
+        parent[v]=u;
+        size[u]+=size[v];
+    }
+};
+int main(){
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+    int t;
+    cin>>t;
+    vector<int>spf(1000001);
+    for(int i=1;i<=1000000;i++){
+        spf[i]=i;
+    }
+    for(int i=2;i*i<=1000000;i++){
+        if(spf[i]!=i)
+            continue;
+        for(int j=i*i;j<=1000000;j+=i){
+            if(spf[j]==j)
+                spf[j]=i;
+        }
+    }
+    while(t--){
+        int n;
+        int k;
+        cin>>n>>k;
+        vector<int>temp(n);
+        for(int i=0;i<n;i++){
+            cin>>temp[i];
+        }
+        ll extra=0;
+        unordered_map<int,vector<int>>vals;
+        for(int i=1-n;i<=n-1;i++){
+            int cur=temp[(n-(i%n))%n];
+            if(cur==1)
+                extra+=n-abs(i)-1;
+            while(cur>1){
+                int spfcur=spf[cur];
+                vals[spfcur].push_back(i+n-1);
+                while(cur>1&&cur%spfcur==0){
+                    cur/=spfcur;
+                }
+            }
+        }
+        DSU dsu(2*n-1);
+        for(auto&[prime,index]:vals){
+            for(int i=0;i<index.size()-1;i++){
+                if(index[i+1]-index[i]<=k)
+                    dsu.merge(index[i],index[i+1]);
+            }
+        }
+        cout<<dsu.comp+extra<<"\n";
+    }
+}
