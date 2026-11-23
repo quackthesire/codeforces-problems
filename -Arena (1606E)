@@ -1,0 +1,49 @@
+import java.util.*;
+public class Main{
+    static int MOD=998244353;
+    static long[]fact=new long[501];
+    static long solve(int i,int j,int i2,int j2){
+        long ans=choose(i,i-i2);
+        ans=(ans*pow(j2-j,i-i2))%MOD;
+        return ans;
+    }
+    static long choose(int n,int k){
+        return ((fact[n]*modinv(fact[k]))%MOD*modinv(fact[n-k]))%MOD;
+    }
+    static long modinv(long base){
+        return pow(base,MOD-2);
+    }
+    static long pow(long base,long exp){
+        long res=1;
+        while(exp>0){
+            if(exp%2==1)
+                res=(res*base)%MOD;
+            base=(base*base)%MOD;
+            exp/=2;
+        }
+        return res;
+    }
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int n=scan.nextInt();
+        int x=scan.nextInt();
+        fact[0]=1;
+        for(int i=1;i<=500;i++){
+            fact[i]=(fact[i-1]*i)%MOD;
+        }
+        long[][]dp=new long[n+1][x+1];
+        dp[n][0]=1;
+        for(int i=n;i>=2;i--){
+            for(int j=0;j<=x;j++){
+                for(int k=i;k>=0;k--){
+                    dp[k][Math.min(x,i+j-1)]=(dp[k][Math.min(x,i+j-1)]+(solve(i,j,k,Math.min(x,i+j-1))*dp[i][j])%MOD)%MOD;
+                }
+            }
+        }
+        long ans=0;
+        for(int i=0;i<=x;i++){
+            ans=(ans+dp[0][i])%MOD;
+        }
+        System.out.println(ans);
+    }
+}
