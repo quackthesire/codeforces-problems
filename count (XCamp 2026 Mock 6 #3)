@@ -1,0 +1,60 @@
+#include <bits/stdc++.h>
+using namespace std;
+using ll=long long;
+const ll MOD=998244353;
+vector<ll>fact;
+vector<ll>inv;
+ll modpow(ll base,ll exp){
+    ll res=1;
+    while(exp>0){
+        if(exp%2==1)
+            res=res*base%MOD;
+        base=base*base%MOD;
+        exp/=2;
+    }
+    return res;
+}
+ll modinv(ll val){
+    return modpow(val,MOD-2);
+}
+ll choose(int n,int k){
+    if(k<0||k>n)
+        return 0;
+    return fact[n]*inv[k]%MOD*inv[n-k]%MOD;
+}
+int main(){
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+    int n;
+    int k;
+    int x;
+    cin>>n>>k>>x;
+    fact.resize(n+k);
+    inv.resize(n+k);
+    fact[0]=1;
+    for(int i=1;i<n+k;i++){
+        fact[i]=i*fact[i-1]%MOD;
+    }
+    inv[n+k-1]=modinv(fact[n+k-1]);
+    for(int i=n+k-2;i>=0;i--){
+        inv[i]=(i+1)*inv[i+1]%MOD;
+    }
+    ll ans=0;
+    for(int i=1;i<n;i++){
+        if(i!=n-1){
+            int cur=min(x-2,n-i-1);
+            ll mult=fact[n-i-2]*fact[i-1]%MOD;
+            ll val1=(n-i-1)*(choose(n-2,i)-choose(n-cur-2,i)+MOD)%MOD;
+            ll val2=i*(choose(n-2,i+1)-choose(n-cur-2,i+1)+MOD)%MOD;
+            ans=(ans+mult*(val1-val2)%MOD*choose(i+k,k+1)%MOD)%MOD;
+        }
+        if(i<=n-x+1){
+            ll extra=(x-1)*fact[n-x]%MOD*fact[n-i-1]%MOD*inv[n-x-i+1]%MOD;
+            ans=(ans+extra*choose(i+k-1,k)%MOD)%MOD;
+        }
+    }
+    ans=(ans+fact[n-2]*choose(n+k-1,k+1)%MOD)%MOD;
+    if(x==1)
+        ans=fact[n-1]*choose(n+k-1,k)%MOD;
+    cout<<ans;
+}
