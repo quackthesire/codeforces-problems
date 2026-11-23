@@ -1,0 +1,47 @@
+import java.util.*;
+public class Main{
+    static int offset=100000;
+    static class Node{
+        int a;
+        int b;
+        public Node(int a,int b){
+            this.a=a;
+            this.b=b;
+        }
+    }
+	public static void main(String[]args){
+		Scanner scan=new Scanner(System.in);
+		int n=scan.nextInt();
+		int m=scan.nextInt();
+		Node[]array=new Node[n];
+		for(int i=0;i<n;i++){
+		    array[i]=new Node(scan.nextInt(),scan.nextInt());
+		}
+		boolean[][]dp=new boolean[n+1][200002];
+		dp[0][offset]=true;
+		for(int i=0;i<n;i++){
+		    for(int j=0;j<200002;j++){
+		        if(dp[i][j]){
+		            if(j+array[i].a>=0&&j+array[i].a<200002)
+		                dp[i+1][j+array[i].a]=true;
+		            if(j+array[i].b>=0&&j+array[i].b<200002)
+		                dp[i+1][j+array[i].b]=true;
+		        }
+		    }
+		}
+		int minb=0;
+		int maxb=0;
+		for(int i=0;i<m;i++){
+		    int a=scan.nextInt();
+		    int b=scan.nextInt();
+		    minb+=Math.min(a,b);
+		    maxb+=Math.max(a,b);
+		}
+		int best=Integer.MAX_VALUE;
+		for(int i=0;i<200002;i++){
+		    if(dp[n][i])
+		        best=Math.min(best,Math.max(Math.abs(i+minb-offset),Math.abs(i+maxb-offset)));
+		}
+		System.out.println(best);
+	}
+}
