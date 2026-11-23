@@ -1,0 +1,35 @@
+import java.util.*;
+public class Main{
+	public static void main(String[]args){
+		Scanner scan=new Scanner(System.in);
+		int n=scan.nextInt();
+		int p=scan.nextInt();
+		int k=scan.nextInt();
+		int[]array=new int[n];
+		for(int i=0;i<n;i++){
+		    array[i]=scan.nextInt();
+		}
+		long[]mod=new long[n];
+		for(int i=0;i<n;i++){
+		    long temp=array[i];
+		    temp=(temp*temp)%p;
+		    temp=(temp*temp)%p;
+		    long temp2=array[i];
+		    temp2=(k*temp2)%p;
+		    mod[i]=(temp-temp2+p)%p;
+		}
+		Arrays.sort(mod);
+		long count=1;
+		long ans=0;
+		for(int i=1;i<n;i++){
+		    if(mod[i]==mod[i-1])
+		        count++;
+		    else{
+                ans+=count*(count-1)/2;
+                count=1;
+		    }
+		}
+		ans+=count*(count-1)/2;
+		System.out.println(ans);
+	}
+}
