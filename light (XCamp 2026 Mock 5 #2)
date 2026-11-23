@@ -1,0 +1,308 @@
+#include <bits/stdc++.h>
+using namespace std;
+using ll=long long;
+struct Segtree{
+    int n;
+    vector<ll>tree;
+    vector<ll>mintree;
+    vector<ll>activemin;
+    vector<ll>lazy;
+    vector<ll>lazyadd;
+    vector<int>active;
+    vector<int>lazyactive;
+    vector<int>mincount;
+    vector<int>minall;
+    Segtree(vector<ll>array){
+        n=array.size();
+        tree.assign(n*4,0);
+        mintree.assign(n*4,0);
+        activemin.assign(n*4,LLONG_MAX);
+        lazy.assign(n*4,-1);
+        lazyadd.assign(n*4,0);
+        active.assign(n*4,0);
+        lazyactive.assign(n*4,-1);
+        mincount.assign(n*4,0);
+        minall.assign(n*4,0);
+        build(1,0,n-1,array);
+    }
+    void build(int node,int l,int r,const vector<ll>&array){
+        if(l==r){
+            tree[node]=array[l];
+            mintree[node]=array[l];
+            activemin[node]=array[l];
+            active[node]=1;
+            mincount[node]=1;
+            minall[node]=1;
+            return;
+        }
+        int m=(l+r)/2;
+        build(node*2,l,m,array);
+        build(node*2+1,m+1,r,array);
+        tree[node]=tree[node*2]+tree[node*2+1];
+        mintree[node]=min(mintree[node*2],mintree[node*2+1]);
+        if(mintree[node*2]==mintree[node])
+            minall[node]+=minall[node*2];
+        if(mintree[node*2+1]==mintree[node])
+            minall[node]+=minall[node*2+1];
+        active[node]=active[node*2]+active[node*2+1];
+        activemin[node]=min(activemin[node*2],activemin[node*2+1]);
+        if(activemin[node*2]==activemin[node])
+            mincount[node]+=mincount[node*2];
+        if(activemin[node*2+1]==activemin[node])
+            mincount[node]+=mincount[node*2+1];
+    }
+    ll query(int l,int r){
+        if(l>r)
+            return 0;
+        return query(1,0,n-1,l,r);
+    }
+    ll query(int node,int l,int r,int ql,int qr){
+        if(qr<l||r<ql)
+            return 0;
+        if(ql<=l&&r<=qr)
+            return tree[node];
+        push(node,l,r);
+        int m=(l+r)/2;
+        ll left=query(node*2,l,m,ql,qr);
+        ll right=query(node*2+1,m+1,r,ql,qr);
+        return left+right;
+    }
+    ll minquery(int l,int r){
+        if(l>r)
+            return LLONG_MAX;
+        return minquery(1,0,n-1,l,r);
+    }
+    ll minquery(int node,int l,int r,int ql,int qr){
+        if(qr<l||r<ql)
+            return LLONG_MAX;
+        if(ql<=l&&r<=qr)
+            return activemin[node];
+        push(node,l,r);
+        int m=(l+r)/2;
+        ll left=minquery(node*2,l,m,ql,qr);
+        ll right=minquery(node*2+1,m+1,r,ql,qr);
+        return min(left,right);
+    }
+    void set(int l,int r,ll val){
+        if(l>r)
+            return;
+        set(1,0,n-1,l,r,val);
+    }
+    void set(int node,int l,int r,int ql,int qr,ll val){
+        if(qr<l||r<ql)
+            return;
+        if(ql<=l&&r<=qr){
+            tree[node]=val*(r-l+1);
+            mintree[node]=val;
+            minall[node]=r-l+1;
+            activemin[node]=active[node]>0?val:LLONG_MAX;
+            mincount[node]=active[node];
+            lazy[node]=val;
+            lazyadd[node]=0;
+            return;
+        }
+        push(node,l,r);
+        int m=(l+r)/2;
+        set(node*2,l,m,ql,qr,val);
+        set(node*2+1,m+1,r,ql,qr,val);
+        tree[node]=tree[node*2]+tree[node*2+1];
+        mintree[node]=min(mintree[node*2],mintree[node*2+1]);
+        minall[node]=0;
+        if(mintree[node*2]==mintree[node])
+            minall[node]+=minall[node*2];
+        if(mintree[node*2+1]==mintree[node])
+            minall[node]+=minall[node*2+1];
+        active[node]=active[node*2]+active[node*2+1];
+        activemin[node]=min(activemin[node*2],activemin[node*2+1]);
+        mincount[node]=0;
+        if(activemin[node*2]==activemin[node])
+            mincount[node]+=mincount[node*2];
+        if(activemin[node*2+1]==activemin[node])
+            mincount[node]+=mincount[node*2+1];
+    }
+    void update(int l,int r,ll val){
+        if(l>r)
+            return;
+        update(1,0,n-1,l,r,val);
+    }
+    void update(int node,int l,int r,int ql,int qr,ll val){
+        if(qr<l||r<ql)
+            return;
+        if(ql<=l&&r<=qr){
+            tree[node]+=val*(r-l+1);
+            mintree[node]+=val;
+            if(active[node]>0)
+                activemin[node]+=val;
+            if(lazy[node]!=-1)
+                lazy[node]+=val;
+            else
+                lazyadd[node]+=val;
+            return;
+        }
+        push(node,l,r);
+        int m=(l+r)/2;
+        update(node*2,l,m,ql,qr,val);
+        update(node*2+1,m+1,r,ql,qr,val);
+        tree[node]=tree[node*2]+tree[node*2+1];
+        mintree[node]=min(mintree[node*2],mintree[node*2+1]);
+        minall[node]=0;
+        if(mintree[node*2]==mintree[node])
+            minall[node]+=minall[node*2];
+        if(mintree[node*2+1]==mintree[node])
+            minall[node]+=minall[node*2+1];
+        active[node]=active[node*2]+active[node*2+1];
+        activemin[node]=min(activemin[node*2],activemin[node*2+1]);
+        mincount[node]=0;
+        if(activemin[node*2]==activemin[node])
+            mincount[node]+=mincount[node*2];
+        if(activemin[node*2+1]==activemin[node])
+            mincount[node]+=mincount[node*2+1];
+    }
+    void inactivate(int l,int r,ll val){
+        if(l>r)
+            return;
+        inactivate(1,0,n-1,l,r,val);
+    }
+    void inactivate(int node,int l,int r,int ql,int qr,ll val){
+        if(qr<l||r<ql||active[node]==0||activemin[node]>val)
+            return;
+        if(ql<=l&&r<=qr&&activemin[node]==val&&mincount[node]==active[node]){
+            active[node]=0;
+            activemin[node]=LLONG_MAX;
+            mincount[node]=0;
+            lazyactive[node]=0;
+            return;
+        }
+        if(l==r){
+            active[node]=0;
+            activemin[node]=LLONG_MAX;
+            mincount[node]=0;
+            lazyactive[node]=0;
+            return;
+        }
+        push(node,l,r);
+        int m=(l+r)/2;
+        inactivate(node*2,l,m,ql,qr,val);
+        inactivate(node*2+1,m+1,r,ql,qr,val);
+        active[node]=active[node*2]+active[node*2+1];
+        activemin[node]=min(activemin[node*2],activemin[node*2+1]);
+        mincount[node]=0;
+        if(activemin[node*2]==activemin[node])
+            mincount[node]+=mincount[node*2];
+        if(activemin[node*2+1]==activemin[node])
+            mincount[node]+=mincount[node*2+1];
+        lazyactive[node]=-1;
+    }
+    void activate(){
+        active[1]=n;
+        activemin[1]=mintree[1];
+        mincount[1]=minall[1];
+        lazyactive[1]=1;
+    }
+    void push(int node,int l,int r){
+        if(l==r||(lazy[node]==-1&&lazyadd[node]==0&&lazyactive[node]==-1))
+            return;
+        int m=(l+r)/2;
+        if(lazy[node]!=-1){
+            tree[node*2]=lazy[node]*(m-l+1);
+            mintree[node*2]=lazy[node];
+            minall[node*2]=m-l+1;
+            activemin[node*2]=active[node*2]>0?lazy[node]:LLONG_MAX;
+            mincount[node*2]=active[node*2];
+            lazy[node*2]=lazy[node];
+            lazyadd[node*2]=0;
+            tree[node*2+1]=lazy[node]*(r-m);
+            mintree[node*2+1]=lazy[node];
+            minall[node*2+1]=r-m;
+            activemin[node*2+1]=active[node*2+1]>0?lazy[node]:LLONG_MAX;
+            mincount[node*2+1]=active[node*2+1];
+            lazy[node*2+1]=lazy[node];
+            lazyadd[node*2+1]=0;
+        }
+        if(lazyadd[node]!=0){
+            tree[node*2]+=lazyadd[node]*(m-l+1);
+            mintree[node*2]+=lazyadd[node];
+            if(active[node*2]>0)
+                activemin[node*2]+=lazyadd[node];
+            if(lazy[node*2]!=-1)
+                lazy[node*2]+=lazyadd[node];
+            else
+                lazyadd[node*2]+=lazyadd[node];
+            tree[node*2+1]+=lazyadd[node]*(r-m);
+            mintree[node*2+1]+=lazyadd[node];
+            if(active[node*2+1]>0)
+                activemin[node*2+1]+=lazyadd[node];
+            if(lazy[node*2+1]!=-1)
+                lazy[node*2+1]+=lazyadd[node];
+            else
+                lazyadd[node*2+1]+=lazyadd[node];
+        }
+        if(lazyactive[node]!=-1){
+            if(lazyactive[node]==0){
+                active[node*2]=0;
+                activemin[node*2]=LLONG_MAX;
+                mincount[node*2]=0;
+                lazyactive[node*2]=0;
+                active[node*2+1]=0;
+                activemin[node*2+1]=LLONG_MAX;
+                mincount[node*2+1]=0;
+                lazyactive[node*2+1]=0;
+            }
+            else{
+                active[node*2]=m-l+1;
+                activemin[node*2]=mintree[node*2];
+                mincount[node*2]=minall[node*2];
+                lazyactive[node*2]=1;
+                active[node*2+1]=r-m;
+                activemin[node*2+1]=mintree[node*2+1];
+                mincount[node*2+1]=minall[node*2+1];
+                lazyactive[node*2+1]=1;
+            }
+        }
+        lazy[node]=-1;
+        lazyadd[node]=0;
+        lazyactive[node]=-1;
+    }
+};
+int main(){
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+    int n;
+    int m;
+    cin>>n>>m;
+    vector<ll>array(n);
+    for(int i=0;i<n;i++){
+        cin>>array[i];
+    }
+    Segtree segtree(array);
+    for(int i=0;i<m;i++){
+        int type;
+        int l;
+        int r;
+        cin>>type>>l>>r;
+        l--;
+        r--;
+        if(type==1){
+            ll val;
+            cin>>val;
+            segtree.set(l,r,val);
+        }
+        if(type==2){
+            ll prev=segtree.minquery(l,r);
+            if(prev==0){
+                segtree.inactivate(l,r,prev);
+                ll cur=segtree.minquery(l,r);
+                while(cur-prev==1){
+                    segtree.inactivate(l,r,cur);
+                    prev=cur;
+                    cur=segtree.minquery(l,r);
+                }
+                segtree.update(l,r,prev+1);
+            }
+            segtree.activate();
+        }
+        if(type==3){
+            cout<<segtree.query(l,r)<<"\n";
+        }
+    }
+}
