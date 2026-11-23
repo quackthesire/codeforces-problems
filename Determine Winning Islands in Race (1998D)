@@ -1,0 +1,64 @@
+import java.util.*;
+public class Main{
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int t=scan.nextInt();
+        for(int temp=0;temp<t;temp++){
+            int n=scan.nextInt();
+            int m=scan.nextInt();
+            ArrayList<Integer>[]adj=new ArrayList[n];
+            ArrayList<Integer>[]edges=new ArrayList[n];
+            ArrayList<Integer>[]remove=new ArrayList[n];
+            for(int i=0;i<n;i++){
+                adj[i]=new ArrayList<>();
+                edges[i]=new ArrayList<>();
+                remove[i]=new ArrayList<>();
+                if(i==n-1)
+                    continue;
+                adj[i].add(i+1);
+            }
+            for(int i=0;i<m;i++){
+                int u=scan.nextInt()-1;
+                int v=scan.nextInt()-1;
+                adj[u].add(v);
+                edges[u].add(v);
+            }
+            int[]dist=new int[n];
+            Arrays.fill(dist,Integer.MAX_VALUE/2);
+            dist[0]=0;
+            for(int i=0;i<n;i++){
+                for(int j:adj[i]){
+                    dist[j]=Math.min(dist[j],dist[i]+1);
+                }
+            }
+            for(int i=0;i<n;i++){
+                for(int j:edges[i]){
+                    remove[j].add(j-dist[i]-1);
+                }
+            }
+            TreeMap<Integer,Integer>map=new TreeMap<>();
+            int[]ans=new int[n];
+            for(int i=0;i<n-1;i++){
+                for(int j:remove[i]){
+                    if(map.get(j)==1)
+                        map.remove(j);
+                    else
+                        map.put(j,map.get(j)-1);
+                }
+                if(i!=0){
+                    for(int j:edges[i-1]){
+                        if(j<=i)
+                            continue;
+                        map.put(j-dist[i-1]-1,map.getOrDefault(j-dist[i-1]-1,0)+1);
+                    }
+                }
+                if(map.isEmpty()||map.lastKey()<=i)
+                    ans[i]=1;
+            }
+            for(int i=0;i<n-1;i++){
+                System.out.print(ans[i]);
+            }
+            System.out.println();
+        }
+    }
+}
