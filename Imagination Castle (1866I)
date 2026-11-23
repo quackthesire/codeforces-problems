@@ -1,0 +1,42 @@
+import java.util.*;
+public class Main{
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int n=scan.nextInt();
+        int m=scan.nextInt();
+        int k=scan.nextInt();
+        int[] x=new int[n];
+        int[] y=new int[m];
+        Arrays.fill(x,-1);
+        Arrays.fill(y,-1);
+        for(int i=0;i<k;i++){
+            int a=scan.nextInt()-1;
+            int b=scan.nextInt()-1;
+            x[a]=Math.max(x[a],b);
+            y[b]=Math.max(y[b],a);
+        }
+        int r=n-1;
+        int c=m-1;
+        while(r>=0&&c>=0){
+            boolean first=x[r]>=c;
+            boolean second=y[c]>=r;
+            if(first&&second){
+                r--;
+                c--;
+            }
+            else if(first)
+                r--;
+            else if(second)
+                c--;
+            else{
+                if(r==0&&c==0){
+                    System.out.print("Bhinneka");
+                    return;
+                }
+                r--;
+                c--;
+            }
+        }
+        System.out.print("Chaneka");
+    }
+}
