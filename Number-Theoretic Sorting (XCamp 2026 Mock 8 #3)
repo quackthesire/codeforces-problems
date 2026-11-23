@@ -1,0 +1,47 @@
+#include <bits/stdc++.h>
+using namespace std;
+using ll=long long;
+int main(){
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+    int t;
+    cin>>t;
+    while(t--){
+        int n;
+        int m;
+        cin>>n>>m;
+        vector<int>array(n);
+        for(int i=0;i<n;i++){
+            cin>>array[i];
+        }
+        unordered_set<int>primes;
+        for(int i=2;i<=sqrt(m);i++){
+            if(m%i!=0)
+                continue;
+            primes.insert(i);
+            while(m%i==0){
+                m/=i;
+            }
+        }
+        if(m!=1)
+            primes.insert(m);
+        vector<int>ans(n,1);
+        for(int prime:primes){
+            vector<int>cur(n);
+            for(int i=0;i<n;i++){
+                while(array[i]%prime==0){
+                    cur[i]++;
+                    array[i]/=prime;
+                }
+            }
+            sort(cur.begin(),cur.end());
+            for(int i=0;i<n;i++){
+                ans[i]*=(int)pow(prime,cur[i]);
+            }
+        }
+        for(int i=0;i<n;i++){
+            cout<<ans[i]<<" ";
+        }
+        cout<<"\n";
+    }
+}
