@@ -1,0 +1,106 @@
+import java.util.*;
+
+public class Main{
+    static class Node implements Comparable<Node>{
+        int c;
+        int l;
+        int r;
+        public Node(int c,int l,int r){
+            this.c=c;
+            this.l=l;
+            this.r=r;
+        }
+        public int compareTo(Node other){
+            if(this.l==other.l)
+                return this.r-other.r;
+            return this.l-other.l;
+        }
+    }
+    static class DSU{
+        int[]parent;
+        int[]size;
+        public DSU(int n){
+            parent=new int[n];
+            size=new int[n];
+            for(int i=0;i<n;i++){
+                parent[i]=i;
+                size[i]=1;
+            }
+        }
+        public int find(int u){
+            if(parent[u]==u)
+                return u;
+            parent[u]=find(parent[u]);
+            return parent[u];
+        }
+        public boolean unite(int u,int v){
+            u=find(u);
+            v=find(v);
+            if(u==v)
+                return false;
+            if(size[u]<size[v]){
+                int temp=u;
+                u=v;
+                v=temp;
+            }
+            parent[v]=u;
+            size[u]+=size[v];
+            return true;
+        }
+    }
+    public static void main(String[] args){
+        Scanner scan=new Scanner(System.in);
+        int t=scan.nextInt();
+        for(int temp=0;temp<t;temp++){
+            int n=scan.nextInt();
+            Node[]segs=new Node[n];
+            for(int i=0;i<n;i++){
+                segs[i]=new Node(scan.nextInt(),scan.nextInt(),scan.nextInt());
+            }
+            Arrays.sort(segs);
+            int ans=n;
+            DSU dsu=new DSU(n);
+            HashMap<Integer,int[]>map=new HashMap<>();
+            HashSet<Integer>blue=new HashSet<>();
+            HashSet<Integer>red=new HashSet<>();
+            for(int i=0;i<n;i++){
+                int maxb=(segs[i].c==1?segs[i].r:-1);
+                int maxr=(segs[i].c==0?segs[i].r:-1);
+                HashSet<Integer>set=(segs[i].c==0?blue:red);
+                Iterator<Integer>it=set.iterator();
+                while(it.hasNext()){
+                    int cur=it.next();
+                    int parent=dsu.find(cur);
+                    if(cur!=parent){
+                        it.remove();
+                        continue;
+                    }
+                    if(map.get(parent)==null){
+                        it.remove();
+                        continue;
+                    }
+                    int[]pos=map.get(parent);
+                    if((segs[i].c==0?pos[0]:pos[1])<segs[i].l){
+                        it.remove();
+                        if((segs[i].c==0?pos[1]:pos[0])<segs[i].l)
+                            map.remove(parent);
+                        continue;
+                    }
+                    it.remove();
+                    maxb=Math.max(maxb,pos[0]);
+                    maxr=Math.max(maxr,pos[1]);
+                    map.remove(parent);
+                    if(dsu.unite(i,parent))
+                        ans--;
+                }
+                int root=dsu.find(i);
+                map.put(root,new int[]{maxb,maxr});
+                if(maxb>=segs[i].l)
+                    blue.add(root);
+                if(maxr>=segs[i].l)
+                    red.add(root);
+            }
+            System.out.println(ans);
+        }
+    }
+}
