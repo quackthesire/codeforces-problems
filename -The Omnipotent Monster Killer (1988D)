@@ -1,0 +1,51 @@
+import java.util.*;
+public class Main{
+    static long[] dfs(int u,int p,long[]array,ArrayList<Integer>[]adj){
+        long[]ans=new long[20];
+        ArrayList<long[]>list=new ArrayList<>();
+        for(int v:adj[u]){
+            if(v==p)
+                continue;
+            list.add(dfs(v,u,array,adj));
+        }
+        for(int i=1;i<20;i++){
+            long sum=0;
+            for(long[] vals:list){
+                long min=Long.MAX_VALUE;
+                for(int j=1;j<20;j++){
+                    if(i==j)
+                        continue;
+                    min=Math.min(min,vals[j]);
+                }
+                sum+=min;
+            }
+            ans[i]=array[u]*i+sum;
+        }
+        return ans;
+    }
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int t=scan.nextInt();
+        for(int temp=0;temp<t;temp++){
+            int n=scan.nextInt();
+            long[]array=new long[n];
+            ArrayList<Integer>[]adj=new ArrayList[n];
+            for(int i=0;i<n;i++){
+                array[i]=scan.nextLong();
+                adj[i]=new ArrayList<>();
+            }
+            for(int i=0;i<n-1;i++){
+                int u=scan.nextInt()-1;
+                int v=scan.nextInt()-1;
+                adj[u].add(v);
+                adj[v].add(u);
+            }
+            long min=Long.MAX_VALUE;
+            long[]ans=dfs(0,-1,array,adj);
+            for(int i=1;i<20;i++){
+                min=Math.min(min,ans[i]);
+            }
+            System.out.println(min);
+        }
+    }
+}
