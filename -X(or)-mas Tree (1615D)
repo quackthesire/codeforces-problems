@@ -1,0 +1,74 @@
+import java.util.*;
+public class Main{
+    static boolean work;
+    static class Edge{
+        int v;
+        long w;
+        public Edge(int v,long w){
+            this.v=v;
+            this.w=w;
+        }
+    }
+    static void dfs(int u,int[]array,ArrayList<Edge>[]adj,int cur){
+        if(array[u]==1-cur)
+            work=false;
+        if(array[u]!=-1)
+            return;
+        array[u]=cur;
+        for(Edge edge:adj[u]){
+            dfs(edge.v,array,adj,cur^(int)edge.w);
+        }
+    }
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int t=scan.nextInt();
+        for(int temp=0;temp<t;temp++){
+            int n=scan.nextInt();
+            int m=scan.nextInt();
+            int[]array=new int[n];
+            Arrays.fill(array,-1);
+            ArrayList<Edge>[]adj=new ArrayList[n];
+            ArrayList<Edge>[]edges=new ArrayList[n];
+            for(int i=0;i<n;i++){
+                adj[i]=new ArrayList<>();
+                edges[i]=new ArrayList<>();
+            }
+            for(int i=0;i<n-1;i++){
+                int u=scan.nextInt()-1;
+                int v=scan.nextInt()-1;
+                long w=scan.nextLong();
+                edges[Math.min(u,v)].add(new Edge(Math.max(u,v),w));
+                if(w!=-1){
+                    adj[u].add(new Edge(v,Long.bitCount(w)%2));
+                    adj[v].add(new Edge(u,Long.bitCount(w)%2));
+                }
+            }
+            for(int i=0;i<m;i++){
+                int u=scan.nextInt()-1;
+                int v=scan.nextInt()-1;
+                long w=scan.nextLong();
+                adj[u].add(new Edge(v,w));
+                adj[v].add(new Edge(u,w));
+            }
+            work=true;
+            for(int i=0;i<n;i++){
+                if(array[i]!=-1)
+                    continue;
+                dfs(i,array,adj,0);
+            }
+            if(!work){
+                System.out.println("NO");
+                continue;
+            }
+            System.out.println("YES");
+            for(int i=0;i<n;i++){
+                for(Edge edge:edges[i]){
+                    if(edge.w!=-1)
+                        System.out.println((i+1)+" "+(edge.v+1)+" "+edge.w);
+                    else
+                        System.out.println((i+1)+" "+(edge.v+1)+" "+(array[i]^array[edge.v]));
+                }
+            }
+        }
+    }
+}
