@@ -1,0 +1,55 @@
+import java.util.*;
+public class Main{
+    static int MOD=1000000007;
+    static long[]fact=new long[500005];
+    static long solve(int l,int r,long[]array){
+        if(l>r||(l==r&&array[l]==1))
+            return 1;
+        if(l==r)
+            return 0;
+        int index=-1;
+        for(int i=0;i<=(r-l)/2;i++){
+            if(array[l+i]==(long)(i+1)*(r-l-i+1)){
+                index=l+i;
+                break;
+            }
+            if(array[r-i]==(long)(i+1)*(r-l-i+1)){
+                index=r-i;
+                break;
+            }
+        }
+        if(index==-1)
+            return 0;
+        return ((solve(l,index-1,array)*solve(index+1,r,array))%MOD*choose(r-l,index-l))%MOD;
+    }
+    static long modinv(long base){
+        long res=1;
+        long exp=MOD-2;
+        while(exp>0){
+            if(exp%2==1)
+                res=(res*base)%MOD;
+            base=(base*base)%MOD;
+            exp/=2;
+        }
+        return res;
+    }
+    static long choose(int n,int k){
+        return ((fact[n]*modinv(fact[k]))%MOD*modinv(fact[n-k]))%MOD;
+    }
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        fact[0]=1;
+        for(int i=1;i<fact.length;i++){
+            fact[i]=(fact[i-1]*i)%MOD;
+        }
+        int t=scan.nextInt();
+        for(int temp=0;temp<t;temp++){
+            int n=scan.nextInt();
+            long[]array=new long[n];
+            for(int i=0;i<n;i++){
+                array[i]=scan.nextLong();
+            }
+            System.out.println(solve(0,n-1,array));
+        }
+    }
+}
