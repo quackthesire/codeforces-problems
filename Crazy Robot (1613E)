@@ -1,0 +1,72 @@
+import java.util.*;
+public class Main{
+    static class Node{
+        int x;
+        int y;
+        public Node(int x,int y){
+            this.x=x;
+            this.y=y;
+        }
+    }
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int t=scan.nextInt();
+        for(int temp=0;temp<t;temp++){
+            int n=scan.nextInt();
+            int m=scan.nextInt();
+            Node start=new Node(0,0);
+            char[][]array=new char[n][m];
+            for(int i=0;i<n;i++){
+                String s=scan.next();
+                for(int j=0;j<m;j++){
+                    array[i][j]=s.charAt(j);
+                    if(array[i][j]=='L'){
+                        start=new Node(i,j);
+                        array[i][j]='+';
+                    }
+                }
+            }
+            Queue<Node>q=new LinkedList<>();
+            if(start.x>0&&array[start.x-1][start.y]=='.')
+               q.add(new Node(start.x-1,start.y));
+            if(start.x<n-1&&array[start.x+1][start.y]=='.')
+                q.add(new Node(start.x+1,start.y));
+            if(start.y>0&&array[start.x][start.y-1]=='.')
+                q.add(new Node(start.x,start.y-1));
+            if(start.y<m-1&&array[start.x][start.y+1]=='.')
+                q.add(new Node(start.x,start.y+1));
+            while(!q.isEmpty()){
+                Node node=q.poll();
+                int count=0;
+                if(node.x==0||array[node.x-1][node.y]!='.')
+                    count++;
+                if(node.x==n-1||array[node.x+1][node.y]!='.')
+                    count++;
+                if(node.y==0||array[node.x][node.y-1]!='.')
+                    count++;
+                if(node.y==m-1||array[node.x][node.y+1]!='.')
+                    count++;
+                if(count>=3){
+                    array[node.x][node.y]='+';
+                    if(node.x!=0&&array[node.x-1][node.y]=='.')
+                        q.add(new Node(node.x-1,node.y));
+                    if(node.x!=n-1&&array[node.x+1][node.y]=='.')
+                        q.add(new Node(node.x+1,node.y));
+                    if(node.y!=0&&array[node.x][node.y-1]=='.')
+                        q.add(new Node(node.x,node.y-1));
+                    if(node.y!=m-1&&array[node.x][node.y+1]=='.')
+                        q.add(new Node(node.x,node.y+1));
+                }
+            }
+            for(int i=0;i<n;i++){
+                for(int j=0;j<m;j++){
+                    if(i==start.x&&j==start.y)
+                        System.out.print('L');
+                    else
+                        System.out.print(array[i][j]);
+                }
+                System.out.println();
+            }
+        }
+    }
+}
