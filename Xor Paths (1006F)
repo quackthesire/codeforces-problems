@@ -1,0 +1,57 @@
+import java.util.*;
+public class Main{
+    static void dfs(int i,int j,long xor,boolean dir,int len,long[][]array,HashMap<Long,Long>[][]map){
+        if(i+j==len){
+            map[i][j].merge(xor,(long)1,Long::sum);
+            return;
+        }
+        if(i<array.length-1&&dir){
+            dfs(i+1,j,xor^array[i+1][j],dir,len,array,map);
+        }
+        if(j<array[0].length-1&&dir){
+            dfs(i,j+1,xor^array[i][j+1],dir,len,array,map);
+        }
+        if(i>0&&!dir){
+            dfs(i-1,j,xor^array[i-1][j],dir,len,array,map);
+        }
+        if(j>0&&!dir){
+            dfs(i,j-1,xor^array[i][j-1],dir,len,array,map);
+        }
+    }
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int n=scan.nextInt();
+        int m=scan.nextInt();
+        long k=scan.nextLong();
+        long[][]array=new long[n][m];
+        HashMap<Long,Long>[][]map=new HashMap[n][m];
+        HashMap<Long,Long>[][]map2=new HashMap[n][m];
+        int len=(n+m)/2-1;
+        for(int i=0;i<n;i++){
+            for(int j=0;j<m;j++){
+                array[i][j]=scan.nextLong();
+                map[i][j]=new HashMap<>();
+                map2[i][j]=new HashMap<>();
+            }
+        }
+        dfs(0,0,array[0][0],true,len,array,map);
+        dfs(n-1,m-1,array[n-1][m-1],false,len,array,map2);
+        long ans=0;
+        for(int i=0;i<n;i++){
+            if(len-i<0||len-i>m-1){
+                continue;
+            }
+            HashMap<Long,Long>temp=map[i][len-i];
+            HashMap<Long,Long>temp2=map2[i][len-i];
+            if(!temp.isEmpty()&&!temp2.isEmpty()){
+                for(Map.Entry<Long,Long>j:temp.entrySet()){
+                    Long count=temp2.get(j.getKey()^k^array[i][len-i]);
+                    if(count!=null){
+                        ans+=j.getValue()*count;
+                    }
+                }
+            }
+        }
+        System.out.println(ans);
+    }
+}
