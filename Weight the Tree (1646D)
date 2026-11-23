@@ -1,0 +1,83 @@
+import java.util.*;
+public class Main{
+    static class Node{
+        int val;
+        int size;
+        public Node(int val,int size){
+            this.val=val;
+            this.size=size;
+        }
+        public void add(Node other){
+            this.val+=other.val;
+            this.size+=other.size;
+        }
+        public boolean better(Node other){
+            if(this.val==other.val)
+                return this.size<other.size;
+            return this.val>other.val;
+        }
+    }
+    static void dfs(int u,int p,Node[][]dp,ArrayList<Integer>[]adj){
+        Node count1=new Node(1,adj[u].size());
+        Node count2=new Node(0,0);
+        for(int v:adj[u]){
+            if(v==p)
+                continue;
+            dfs(v,u,dp,adj);
+            count1.add(dp[v][1]);
+            count2.add(dp[v][0].better(dp[v][1])?dp[v][0]:dp[v][1]);
+        }
+        dp[u][0]=count1;
+        dp[u][1]=count2;
+    }
+    static void solve(int u,int p,Node[][]dp,ArrayList<Integer>[]adj,boolean[]taken,boolean visited){
+        if(visited){
+            taken[u]=true;
+            for(int v:adj[u]){
+                if(v==p)
+                    continue;
+                solve(v,u,dp,adj,taken,false);
+            }
+        }
+        else{
+            for(int v:adj[u]){
+                if(v==p)
+                    continue;
+                solve(v,u,dp,adj,taken,dp[v][0].better(dp[v][1]));
+            }
+        }
+    }
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int n=scan.nextInt();
+        if(n==2){
+            System.out.println("2 2");
+            System.out.println("1 1");
+            System.exit(0);
+        }
+        ArrayList<Integer>[]adj=new ArrayList[n];
+        for(int i=0;i<n;i++){
+            adj[i]=new ArrayList<>();
+        }
+        for(int i=0;i<n-1;i++){
+            int u=scan.nextInt()-1;
+            int v=scan.nextInt()-1;
+            adj[u].add(v);
+            adj[v].add(u);
+        }
+        int sum=0;
+        int[]ans=new int[n];
+        Node[][]dp=new Node[n][2];
+        boolean[]taken=new boolean[n];
+        dfs(0,-1,dp,adj);
+        solve(0,-1,dp,adj,taken,dp[0][0].better(dp[0][1]));
+        for(int i=0;i<n;i++){
+            ans[i]=taken[i]?adj[i].size():1;
+            sum+=ans[i];
+        }
+        System.out.println(Math.max(dp[0][0].val,dp[0][1].val)+" "+sum);
+        for(int i=0;i<n;i++){
+            System.out.print(ans[i]+" ");
+        }
+    }
+}
