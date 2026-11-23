@@ -1,0 +1,193 @@
+#include <bits/stdc++.h>
+using namespace std;
+using ll=long long;
+struct Node{
+    int count;
+    int l;
+    int r;
+    ll sum;
+    Node(){
+        count=0;
+        l=0;
+        r=0;
+        sum=0;
+    }
+};
+struct Range{
+    int index;
+    int l;
+    int r;
+    Range(int index,int l,int r):index(index),l(l),r(r){}
+};
+struct Segtree{
+    int n;
+    vector<Node>tree;
+    vector<int>root;
+    vector<ll>vals;
+    Segtree(vector<int>&array,vector<ll>&vals):vals(vals){
+        n=vals.size();
+        tree.push_back(Node());
+        root.resize(array.size()+1);
+        for(int i=0;i<array.size();i++){
+            root[i+1]=update(root[i],0,n-1,array[i],vals[array[i]]);
+        }
+    }
+    int update(int prev,int l,int r,int i,ll val){
+        int cur=tree.size();
+        tree.push_back(tree[prev]);
+        tree[cur].count++;
+        tree[cur].sum+=val;
+        if(l==r)
+            return cur;
+        int m=(l+r)/2;
+        if(i<=m){
+            int next=update(tree[prev].l,l,m,i,val);
+            tree[cur].l=next;
+        }
+        else{
+            int next=update(tree[prev].r,m+1,r,i,val);
+            tree[cur].r=next;
+        }
+        return cur;
+    }
+    ll query(int i,int k){
+        return query(root[i],0,n-1,k);
+    }
+    ll query(int node,int l,int r,int k){
+        if(k==0)
+            return 0;
+        if(k>=tree[node].count)
+            return tree[node].sum;
+        if(l==r)
+            return vals[l]*k;
+        int m=(l+r)/2;
+        if(k<=tree[tree[node].r].count)
+            return query(tree[node].r,m+1,r,k);
+        else
+            return tree[tree[node].r].sum+query(tree[node].l,l,m,k-tree[tree[node].r].count);
+    }
+};
+struct Lazy{
+    int n;
+    vector<ll>tree;
+    vector<ll>lazy;
+    Lazy(int n):n(n){
+        tree.resize(4*n);
+        lazy.resize(4*n,-1);
+    }
+    void update(int l,int r,int val){
+        update(1,0,n-1,l,r,val);
+    }
+    void update(int node,int l,int r,int ql,int qr,int val){
+        if(qr<l||r<ql)
+            return;
+        if(ql<=l&&r<=qr){
+            tree[node]=val;
+            lazy[node]=val;
+            return;
+        }
+        push(node);
+        int m=(l+r)/2;
+        update(node*2,l,m,ql,qr,val);
+        update(node*2+1,m+1,r,ql,qr,val);
+    }
+    int query(int i){
+        return query(1,0,n-1,i);
+    }
+    int query(int node,int l,int r,int i){
+        if(l==r)
+            return tree[node];
+        push(node);
+        int m=(l+r)/2;
+        if(i<=m)
+            return query(node*2,l,m,i);
+        return query(node*2+1,m+1,r,i);
+    }
+    void push(int node){
+        if(lazy[node]==-1)
+            return;
+        tree[node*2]=lazy[node];
+        tree[node*2+1]=lazy[node];
+        lazy[node*2]=lazy[node];
+        lazy[node*2+1]=lazy[node];
+        lazy[node]=-1;
+    }
+};
+int bs(int prev,int cur,int l,int r,vector<ll>&array,Segtree& segtree){
+    int ans=r+1;
+    while(l<=r){
+        int m=(l+r)/2;
+        if(cur+array[cur]+segtree.query(cur,m)>=prev+array[prev]+segtree.query(prev,m)){
+            ans=m;
+            r=m-1;
+        }
+        else
+            l=m+1;
+    }
+    return ans;
+}
+int main(){
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+    int n;
+    int q;
+    cin>>n>>q;
+    vector<ll>array(n);
+    set<ll>temp;
+    for(int i=0;i<n;i++){
+        cin>>array[i];
+        temp.insert(array[i]);
+    }
+    vector<ll>vals(temp.begin(),temp.end());
+    unordered_map<ll,int>index;
+    for(int i=0;i<vals.size();i++){
+        index[vals[i]]=i;
+    }
+    vector<int>comp(n);
+    for(int i=0;i<n;i++){
+        comp[i]=index[array[i]];
+    }
+    Segtree segtree(comp,vals);
+    vector<ll>ans(q);
+    vector<vector<pair<int,int>>>query(n);
+    for(int i=0;i<q;i++){
+        int x;
+        int k;
+        cin>>x>>k;
+        query[x-1].push_back(make_pair(k,i));
+    }
+    stack<Range>s;
+    Lazy lazy(n);
+    for(int i=0;i<n;i++){
+        bool done=false;
+        while(!done){
+            while(!s.empty()&&array[s.top().index]<=array[i]){
+                s.pop();
+            }
+            if(s.empty()){
+                s.push(Range(i,0,i));
+                lazy.update(0,i,i);
+                done=true;
+            }
+            else{
+                int left=bs(s.top().index,i,s.top().l,s.top().r,array,segtree);
+                if(left==s.top().l){
+                    s.pop();
+                }
+                else{
+                    s.top().r=left-1;
+                    done=true;
+                }
+                s.push(Range(i,left,i));
+                lazy.update(left,i,i);
+            }
+        }
+        for(int j=0;j<query[i].size();j++){
+            int pos=lazy.query(query[i][j].first-1);
+            ans[query[i][j].second]=pos+array[pos]+segtree.query(pos,query[i][j].first-1)+1;
+        }
+    }
+    for(int i=0;i<q;i++){
+        cout<<ans[i]<<"\n";
+    }
+}
