@@ -1,0 +1,73 @@
+import java.util.*;
+public class Main{
+    static class Edge implements Comparable<Edge>{
+        int u;
+        int v;
+        long w;
+        public Edge(int u,int v,long w){
+            this.u=u;
+            this.v=v;
+            this.w=w;
+        }
+        public int compareTo(Edge other){
+            return Long.compare(this.w, other.w);
+        }
+    }
+    static class DSU{
+        int[]parent;
+        int[]size;
+        long[]min;
+        public DSU(int n){
+            parent=new int[n];
+            size=new int[n];
+            min=new long[n];
+            for(int i=0;i<n;i++){
+                parent[i]=i;
+                size[i]=1;
+                min[i]=Long.MAX_VALUE;
+            }
+        }
+        public int find(int u){
+            if(parent[u]!=u)
+                parent[u]=find(parent[u]);
+            return parent[u];
+        }
+        public void union(int u,int v,long w){
+            u=find(u);
+            v=find(v);
+            if(u==v)
+                return;
+            if(size[u]<size[v]){
+                parent[u]=v;
+                size[v]+=size[u];
+                min[v]=Math.min(Math.min(min[u],min[v]),w);
+            }
+            else{
+                parent[v]=u;
+                size[u]+=size[v];
+                min[u]=Math.min(Math.min(min[u],min[v]),w);
+            }
+        }
+    }
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int t=scan.nextInt();
+        for(int temp=0;temp<t;temp++){
+            int n=scan.nextInt();
+            int m=scan.nextInt();
+            Edge[]adj=new Edge[m];
+            for(int i=0;i<m;i++){
+                adj[i]=new Edge(scan.nextInt()-1,scan.nextInt()-1,scan.nextInt());
+            }
+            Arrays.sort(adj);
+            long ans=Long.MAX_VALUE;
+            DSU dsu=new DSU(n);
+            for(Edge e:adj){
+                dsu.union(e.u,e.v,e.w);
+                if(dsu.find(0)==dsu.find(n-1))
+                    ans=Math.min(ans,e.w+dsu.min[dsu.find(0)]);
+            }
+            System.out.println(ans);
+        }
+    }
+}
