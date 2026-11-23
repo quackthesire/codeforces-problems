@@ -1,0 +1,62 @@
+import java.util.*;
+public class Main{
+  static int MOD=1000000007;
+  static long pow(long base,int exp){
+      long val=1;
+      for(int i=0;i<exp;i++){
+          val=(val*base)%MOD;
+      }
+      return val;
+  }
+  static int remove(int i,int j){
+      return ((i>>(j+1))<<j)|(i&((1<<j)-1));
+  }
+	public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int t=scan.nextInt();
+        for(int temp=0;temp<t;temp++){
+            int n=scan.nextInt();
+            int m=scan.nextInt();
+            int k=scan.nextInt();
+            int[]array=new int[k];
+            for(int i=0;i<k;i++){
+                array[i]=scan.nextInt()-1;
+            }
+            Arrays.sort(array);
+            int[][]dp=new int[n+1][1<<n];
+            dp[1][0]=0;
+            dp[1][1]=1;
+            for(int i=2;i<=n;i++){
+                for(int j=0;j<(1<<i);j++){
+                    if((n-i)%2==0){
+                        int best=0;
+                        for(int l=0;l<k;l++){
+                            if(array[l]<i)
+                                best=Math.max(best,dp[i-1][remove(j,array[l])]);
+                        }
+                        dp[i][j]=best;
+                    }
+                    else{
+                        int best=1;
+                        for(int l=0;l<k;l++){
+                            if(array[l]<i)
+                                best=Math.min(best,dp[i-1][remove(j,array[l])]);
+                        }
+                        dp[i][j]=best;
+                    }
+                }
+            }
+            int[]count=new int[n+1];
+            for(int i=0;i<(1<<n);i++){
+                count[Integer.bitCount(i)]+=dp[n][i];
+            }
+            long ans=0;
+            for(int i=1;i<=m;i++){
+                for(int j=1;j<=n;j++){
+                    ans=(ans+((pow(i-1,n-j)*pow(m-i+1,j))%MOD*(count[j]%MOD))%MOD)%MOD;
+                }
+            }
+            System.out.println(ans%MOD);
+        }
+    }
+}
