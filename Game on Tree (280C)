@@ -1,0 +1,30 @@
+import java.util.*;
+public class Main{
+    static double sum=0;
+    static boolean[]visited;
+    static void solve(LinkedList<Integer>[]adj,int u,int depth){
+        if(visited[u])
+            return;
+        visited[u]=true;
+        sum+=1.0/depth;
+        for(int v:adj[u])
+            solve(adj,v,depth+1);
+    }
+	public static void main(String[]args){
+	    Scanner scan=new Scanner(System.in);
+	    int n=scan.nextInt();
+	    LinkedList<Integer>[]adj=new LinkedList[n];
+	    visited=new boolean[n];
+	    for(int i=0;i<n;i++){
+	        adj[i]=new LinkedList<Integer>();
+	    }
+	    for(int i=0;i<n-1;i++){
+	        int a=scan.nextInt()-1;
+	        int b=scan.nextInt()-1;
+	        adj[a].add(b);
+	        adj[b].add(a);
+	    }
+	    solve(adj,0,1);
+	    System.out.println(sum);
+	}
+}
