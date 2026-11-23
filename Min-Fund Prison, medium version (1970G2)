@@ -1,0 +1,117 @@
+import java.util.*;
+public class Main{
+    static class Edge{
+        int v;
+        int w;
+        public Edge(int v,int w){
+            this.v=v;
+            this.w=w;
+        }
+    }
+    static class Bridge{
+        int index;
+        int count;
+        public Bridge(int index,int count){
+            this.index=index;
+            this.count=count;
+        }
+    }
+    static void dfs(int u,int p,int index,ArrayList<Edge>[]adj,int[]tin,int[]low,int[]sub,int[]comp,boolean[]visited,ArrayList<Bridge>bridges,int[]time){
+        visited[u]=true;
+        tin[u]=time[0];
+        low[u]=time[0];
+        time[0]++;
+        comp[u]=index;
+        sub[u]=1;
+        for(Edge e:adj[u]){
+            if(e.w==p)
+                continue;
+            if(visited[e.v])
+                low[u]=Math.min(low[u],tin[e.v]);
+            else{
+                dfs(e.v,e.w,index,adj,tin,low,sub,comp,visited,bridges,time);
+                sub[u]+=sub[e.v];
+                low[u]=Math.min(low[u],low[e.v]);
+                if(low[e.v]>tin[u])
+                    bridges.add(new Bridge(index,sub[e.v]));
+            }
+        }
+    }
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int t=scan.nextInt();
+        for(int temp=0;temp<t;temp++){
+            int n=scan.nextInt();
+            int m=scan.nextInt();
+            long c=scan.nextLong();
+            ArrayList<Edge>[]adj=new ArrayList[n];
+            for(int i=0;i<n;i++)
+                adj[i]=new ArrayList<>();
+            for(int i=0;i<m;i++){
+                int u=scan.nextInt()-1;
+                int v=scan.nextInt()-1;
+                adj[u].add(new Edge(v,i));
+                adj[v].add(new Edge(u,i));
+            }
+            int count=0;
+            int[]tin=new int[n];
+            int[]low=new int[n];
+            int[]sub=new int[n];
+            int[]comp=new int[n];
+            int[]time=new int[]{0};
+            boolean[]visited=new boolean[n];
+            ArrayList<Integer>sizes=new ArrayList<>();
+            ArrayList<Bridge>bridges=new ArrayList<>();
+            for(int i=0;i<n;i++){
+                if(visited[i])
+                    continue;
+                dfs(i,-1,count,adj,tin,low,sub,comp,visited,bridges,time);
+                int size=0;
+                for(int j=0;j<n;j++){
+                    if(comp[j]==count)
+                        size++;
+                }
+                sizes.add(size);
+                count++;
+            }
+            long ans=Long.MAX_VALUE;
+            boolean[]dp=new boolean[n+1];
+            dp[0]=true;
+            for(int i:sizes){
+                for(int j=n-i;j>=0;j--){
+                    if(dp[j])
+                        dp[i+j]=true;
+                }
+            }
+            for(int i=1;i<n;i++){
+                if(!dp[i])
+                    continue;
+                ans=Math.min(ans,(long)i*i+(n-i)*(n-i)+(long)(count-1)*c);
+            }
+            for(Bridge i:bridges){
+                dp=new boolean[n+1];
+                dp[0]=true;
+                for(int j=0;j<count;j++){
+                    if(j==i.index)
+                        continue;
+                    int size=sizes.get(j);
+                    for(int k=n-size;k>=0;k--){
+                        if(dp[k])
+                            dp[k+size]=true;
+                    }
+                }
+                for(int j=0;j<=n;j++){
+                    if(!dp[j])
+                        continue;
+                    int val=j+i.count;
+                    if(val>0&&val<n)
+                        ans=Math.min(ans,(long)val*val+(n-val)*(n-val)+(long)(count-1)*c);
+                    val=j+sizes.get(i.index)-i.count;
+                    if(val>0&&val<n)
+                        ans=Math.min(ans,(long)val*val+(n-val)*(n-val)+(long)(count-1)*c);
+                }
+            }
+            System.out.println(ans==Long.MAX_VALUE?-1:ans);
+        }
+    }
+}
