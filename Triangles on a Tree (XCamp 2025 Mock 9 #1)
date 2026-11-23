@@ -1,0 +1,92 @@
+import java.util.*;
+public class Main{
+    static int[]depth;
+    static int[][]parent;
+    static ArrayList<Integer>[]adj;
+    static void dfs(int u,int p,int len){
+        parent[u][0]=p;
+        for(int i=1;i<17;i++){
+            parent[u][i]=parent[parent[u][i-1]][i-1];
+        }
+        depth[u]=len;
+        for(int v:adj[u]){
+            if(v!=p)
+                dfs(v,u,len+1);
+        }
+    }
+    static int lca(int u,int v){
+        if(depth[u]<depth[v]){
+            int temp=u;
+            u=v;
+            v=temp;
+        }
+        for(int i=16;i>=0;i--){
+            if(depth[u]-(1<<i)>=depth[v])
+                u=parent[u][i];
+        }
+        if(u==v)
+            return u;
+        for(int i=16;i>=0;i--){
+            if(parent[u][i]!=parent[v][i]){
+                u=parent[u][i];
+                v=parent[v][i];
+            }
+        }
+        return parent[u][0];
+    }
+	public static void main(String[]args){
+	    Scanner scan=new Scanner(System.in);
+	    int n=scan.nextInt();//at least 47=works
+	    int q=scan.nextInt();
+	    long[]array=new long[n];
+	    adj=new ArrayList[n];
+	    for(int i=0;i<n;i++){
+	        array[i]=scan.nextLong();
+	        adj[i]=new ArrayList<>();
+	    }
+	    for(int i=0;i<n-1;i++){
+	        int u=scan.nextInt()-1;
+	        int v=scan.nextInt()-1;
+	        adj[u].add(v);
+	        adj[v].add(u);
+	    }
+	    depth=new int[n];
+	    parent=new int[n][17];
+	    dfs(0,0,0);
+	    for(int i=0;i<q;i++){
+	        int t=scan.nextInt();
+	        if(t==1)
+	            array[scan.nextInt()-1]=scan.nextLong();
+	        else{
+	            int u=scan.nextInt()-1;
+	            int v=scan.nextInt()-1;
+	            int lca=lca(u,v);
+	            if(depth[u]+depth[v]-2*depth[lca]>=46)
+	                System.out.println("Y");
+	            else{
+	                ArrayList<Long>weights=new ArrayList<>();
+	                while(u!=lca){
+	                    weights.add(array[u]);
+	                    u=parent[u][0];
+	                }
+	                while(v!=lca){
+	                    weights.add(array[v]);
+	                    v=parent[v][0];
+	                }
+	                weights.add(array[lca]);
+	                Collections.sort(weights);
+	                boolean work=false;
+	                for(int j=0;j<weights.size()-2;j++){
+	                    if(weights.get(j)+weights.get(j+1)>weights.get(j+2)){
+	                        System.out.println("Y");
+	                        work=true;
+	                        break;
+	                    }
+	                }
+	                if(!work)
+	                    System.out.println("N");
+	            }
+	        }
+	    }
+	}
+}
