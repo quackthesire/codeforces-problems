@@ -1,0 +1,90 @@
+import java.util.*;
+public class Main{
+    static long MOD=998244353;
+    static long[]fact;
+    static long[]inv;
+    static class Node{
+        int r;
+        int b;
+        boolean end;
+        public Node(int r,int b,boolean end){
+            this.r=r;
+            this.b=b;
+            this.end=end;
+        }
+    }
+    static long modpow(long a,long b){
+        long ans=1;
+        while(b>0){
+            if((b&1)==1) ans=ans*a%MOD;
+            a=a*a%MOD;
+            b>>=1;
+        }
+        return ans;
+    }
+    static long choose(int n,int k){
+        if(k<0||k>n)
+            return 0;
+        return fact[n]*inv[k]%MOD*inv[n-k]%MOD;
+    }
+    static long solve(Node a,Node b){
+        if(a.r<b.r||a.b<b.b)
+            return 0;
+        return choose(a.r+a.b-b.r-b.b,a.r-b.r);
+    }
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int t=scan.nextInt();
+        for(int temp=0;temp<t;temp++){
+            int n=scan.nextInt();
+            int m=scan.nextInt();
+            int q=scan.nextInt();
+            long p=scan.nextLong();
+            Node[]array=new Node[q];
+            boolean last=false;
+            for(int i=0;i<q;i++){
+                array[i]=new Node(scan.nextInt(),scan.nextInt(),true);
+                if(array[i].r==0&&array[i].b==0)
+                    last=true;
+            }
+            if(p==1){
+                System.out.println(n*2+m);
+                continue;
+            }
+            fact=new long[n+m+1];
+            inv=new long[n+m+1];
+            fact[0]=1;
+            for(int i=1;i<=n+m;i++){
+                fact[i]=fact[i-1]*i%MOD;
+            }
+            inv[n+m]=modpow(fact[n+m],MOD-2);
+            for(int i=n+m;i>=1;i--){
+                inv[i-1]=inv[i]*i%MOD;
+            }
+            ArrayList<Node>list=new ArrayList<>();
+            list.add(new Node(n,m,false));
+            for(int i=0;i<q;i++){
+                if(array[i].r==n&&array[i].b==m)
+                    continue;
+                list.add(array[i]);
+            }
+            if(!last)
+                list.add(new Node(0,0,false));
+            Collections.sort(list,(a,b)->Integer.compare(b.r+b.b,a.r+a.b));
+            long tot=0;
+            long[]dp=new long[list.size()];
+            for(int i=1;i<list.size();i++){
+                Node cur=list.get(i);
+                if(!cur.end)
+                    continue;
+                long sum=solve(list.get(0),cur)*((n-cur.r)*2+(m-cur.b))%MOD;
+                for(int j=1;j<i;j++){
+                    sum=(sum+dp[j]*solve(list.get(j),cur))%MOD;
+                }
+                dp[i]=(p-1+MOD)%MOD*sum%MOD;
+                tot=(tot+dp[i]*solve(cur,new Node(0,0,false)))%MOD;
+            }
+            System.out.println((n*2+m+(tot*fact[n]%MOD*fact[m]%MOD*inv[n+m]%MOD))%MOD);
+        }
+    }
+}
