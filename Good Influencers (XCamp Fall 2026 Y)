@@ -1,0 +1,75 @@
+#include <bits/stdc++.h>
+using namespace std;
+using ll=long long;
+struct Node{
+    ll a;
+    ll b;
+    ll c;
+    Node(ll a,ll b,ll c):a(a),b(b),c(c){}
+};
+struct Val{
+    int u;
+    Node node;
+    Val(int u,Node node):u(u),node(node){}
+};
+Node solve(int u,int p,vector<vector<int>>&adj,vector<bool>&work,vector<int>&cost){
+    ll a;
+    ll b;
+    ll c;
+    vector<Val>child;
+    for(int v:adj[u]){
+        if(v==p)
+            continue;
+        child.push_back(Val(v,solve(v,u,adj,work,cost)));
+    }
+    ll all=0;//node isnt activated
+    ll none=0;//node can be activated
+    ll min1=INT_MAX;
+    ll min2=INT_MAX;
+    for(Val val:child){
+        ll best=min(val.node.a,val.node.b);
+        all+=val.node.b;
+        none+=best;
+        if(val.node.c<INT_MAX&&best<INT_MAX)
+            min1=min(min1,val.node.c-best);
+        if(val.node.c<INT_MAX&&val.node.a<INT_MAX)
+            min2=min(min2,val.node.c-val.node.b);
+    }
+    a=min(all,none+cost[u]);
+    if(work[u]){
+        c=none+cost[u];
+        b=min(c,all);
+    }
+    else{
+        c=none+cost[u]+min1;
+        b=min(c,all+min2);
+    }
+    return Node(a,b,c);
+}
+int main(){
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+    int n;
+    cin>>n;
+    vector<vector<int>>adj(n);
+    for(int i=0;i<n-1;i++){
+        int u;
+        int v;
+        cin>>u>>v;
+        u--;
+        v--;
+        adj[u].push_back(v);
+        adj[v].push_back(u);
+    }
+    string s;
+    cin>>s;
+    vector<bool>work(n);
+    for(int i=0;i<n;i++){
+        work[i]=(s[i]=='Y');
+    }
+    vector<int>cost(n);
+    for(int i=0;i<n;i++){
+        cin>>cost[i];
+    }
+    cout<<solve(0,-1,adj,work,cost).b<<"\n";
+}
