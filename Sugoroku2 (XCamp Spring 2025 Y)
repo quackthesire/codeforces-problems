@@ -1,0 +1,33 @@
+import java.util.*;
+public class Main{
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int n=scan.nextInt();
+        int m=scan.nextInt();
+        int k=scan.nextInt();
+        double[][]dp=new double[n][2];
+        double pre=0;
+        double pre2=0;
+        for(int i=0;i<k;i++){
+            dp[scan.nextInt()][1]=1;
+        }
+        for(int i=n-1;i>=1;i--){
+            if(dp[i][1]!=1){
+                dp[i][0]=pre/m+1;
+                dp[i][1]=pre2/m;
+            }
+            pre+=dp[i][0];
+            pre2+=dp[i][1];
+            if(i+m<n){
+                pre-=dp[i+m][0];
+                pre2-=dp[i+m][1];
+            }
+        }
+        if(Math.abs(1-pre2/m)<1e-12){
+            System.out.println("-1");
+        }
+        else{
+            System.out.println((pre/m+1)/(1-pre2/m));
+        }
+    }
+}
