@@ -1,0 +1,70 @@
+import java.util.*;
+public class Main{
+    static class Pair{
+        int u;
+        int v;
+        public Pair(int u,int v){
+            this.u=u;
+            this.v=v;
+        }
+    }
+    static void dfs(int u,int p,int sub,ArrayList<Integer>[]adj,int[]array,ArrayList<Pair>[]dist,int source,int cur){
+        array[u]=sub;
+        dist[cur].add(new Pair(source,u));
+        for(int v:adj[u]){
+            if(v==p)
+                continue;
+            dfs(v,u,sub==-1?v:sub,adj,array,dist,source,cur+1);
+        }
+    }
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int t=scan.nextInt();
+        for(int temp=0;temp<t;temp++){
+            int n=scan.nextInt();
+            String s=scan.next();
+            char[]array=s.toCharArray();
+            ArrayList<Integer>[]adj=new ArrayList[n];
+            for(int i=0;i<n;i++){
+                adj[i]=new ArrayList<>();
+            }
+            for(int i=0;i<n-1;i++){
+                int u=scan.nextInt()-1;
+                int v=scan.nextInt()-1;
+                adj[u].add(v);
+                adj[v].add(u);
+            }
+            int[][]next=new int[n][n];
+            ArrayList<Pair>[]dist=new ArrayList[n];
+            for(int i=0;i<n;i++){
+                dist[i]=new ArrayList<>();
+            }
+            for(int i=0;i<n;i++){
+                dfs(i,-1,-1,adj,next[i],dist,i,0);
+            }
+            int[][]dp=new int[n][n];
+            for(int i=0;i<n;i++){
+                dp[i][i]=1;
+            }
+            if(n!=1){
+                for(Pair pair:dist[1]){
+                    dp[pair.u][pair.v]=1+(array[pair.u]==array[pair.v]?1:0);
+                }
+                for(int i=2;i<n;i++){
+                    for(Pair pair:dist[i]){
+                        int nextu=next[pair.u][pair.v];
+                        int nextv=next[pair.v][pair.u];
+                        dp[pair.u][pair.v]=Math.max(Math.max(dp[pair.u][nextv],dp[nextu][pair.v]),dp[nextu][nextv]+2*(array[pair.u]==array[pair.v]?1:0));
+                    }
+                }
+            }
+            int ans=0;
+            for(int i=0;i<n;i++){
+                for(int j=0;j<n;j++){
+                    ans=Math.max(ans,dp[i][j]);
+                }
+            }
+            System.out.println(ans);
+        }
+    }
+}
