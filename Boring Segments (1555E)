@@ -1,0 +1,94 @@
+import java.util.*;
+public class Main{
+    static class Node implements Comparable<Node>{
+        int l;
+        int r;
+        long w;
+        public Node(int l,int r,long w){
+            this.l=l;
+            this.r=r;
+            this.w=w;
+        }
+        public int compareTo(Node other){
+            return Long.compare(this.w,other.w);
+        }
+    }
+    static class Segtree{
+        int n;
+        long[]tree;
+        long[]lazy;
+        public Segtree(int n){
+            this.n=n;
+            tree=new long[4*n];
+            lazy=new long[4*n];
+        }
+        public void push(int node,int l,int r){
+            if(lazy[node]==0)
+                return;
+            int m=(l+r)/2;
+            tree[node*2]+=lazy[node];
+            tree[node*2+1]+=lazy[node];
+            lazy[node*2]+=lazy[node];
+            lazy[node*2+1]+=lazy[node];
+            lazy[node]=0;
+        }
+        public long query(int l,int r){
+            return query(1,0,n-1,l,r);
+        }
+        public long query(int node,int l,int r,int ll,int rr){
+            if(ll>r||rr<l)
+                return Long.MAX_VALUE;
+            if(ll<=l&&r<=rr)
+                return tree[node];
+            push(node,l,r);
+            int m=(l+r)/2;
+            long left=query(node*2,l,m,ll,rr);
+            long right=query(node*2+1,m+1,r,ll,rr);
+            return Math.min(left,right);
+        }
+        public void update(int l,int r,long val){
+            update(1,0,n-1,l,r,val);
+        }
+        public void update(int node,int l,int r,int ll,int rr,long val){
+            if(ll>r||rr<l)
+                return;
+            if(ll<=l&&r<=rr){
+                tree[node]+=val;
+                lazy[node]+=val;
+                return;
+            }
+            push(node,l,r);
+            int m=(l+r)/2;
+            update(node*2,l,m,ll,rr,val);
+            update(node*2+1,m+1,r,ll,rr,val);
+            tree[node]=Math.min(tree[node*2],tree[node*2+1]);
+        }
+    }
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int n=scan.nextInt();
+        int m=scan.nextInt()-1;
+        Node[]array=new Node[n];
+        for(int i=0;i<n;i++){
+            array[i]=new Node(scan.nextInt()-1,scan.nextInt()-2,scan.nextLong());
+        }
+        Arrays.sort(array);
+        Segtree segtree=new Segtree(m);
+        int pos=0;
+        long best=Long.MAX_VALUE;
+        segtree.update(array[0].l,array[0].r,1);
+        for(int i=0;i<n;i++){
+            while(pos<n&&segtree.query(0,m)==0){
+                pos++;
+                if(pos>=n)
+                    break;
+                segtree.update(array[pos].l,array[pos].r,1);
+            }
+            if(pos>=n)
+                break;
+            best=Math.min(best,array[pos].w-array[i].w);
+            segtree.update(array[i].l,array[i].r,-1);
+        }
+        System.out.print(best);
+    }
+}
