@@ -1,0 +1,51 @@
+import java.util.*;
+public class Main {
+    static void leaf(int u,int[]array,LinkedList<Integer>[]adj){
+        for(int i:adj[u]){
+            leaf(i,array,adj);
+            array[u]+=array[i];
+        }
+        if(adj[u].size()==0){
+            array[u]=1;
+        }
+    }
+    static void dfs(int u,int d,int[]array,LinkedList<Integer>[]adj){
+        array[u]=d;
+        for(int i:adj[u]){
+            dfs(i,d+1,array,adj);
+        }
+    }
+    public static void main(String[] args){
+        Scanner scan=new Scanner(System.in);
+        int n=scan.nextInt();
+        int[]array=new int[n+1];
+        LinkedList<Integer>[]adj=new LinkedList[n+1];
+        for(int i=0;i<n+1;i++){
+            adj[i]=new LinkedList<>();
+        }
+        int count=0;
+        boolean[]visited=new boolean[n+1];
+        for(int i=1;i<n+1;i++){
+            array[i]=scan.nextInt();
+            adj[array[i]].add(i);
+            if(!visited[array[i]]){
+                visited[array[i]]=true;
+                count++;
+            }
+        }
+        int[]leaves=new int[n+1];
+        int[]depth=new int[n+1];
+        int[]loss=new int[n+1];
+        leaf(0,leaves,adj);
+        dfs(0,0,depth,adj);
+        for(int i=0;i<n-count+1;i++){
+            int u=scan.nextInt();
+            while(u!=0&&leaves[array[u]]-leaves[u]-loss[array[u]]==0){
+                loss[array[u]]+=leaves[u];
+                u=array[u];
+            }
+            loss[array[u]]+=leaves[u];
+            System.out.println(depth[u]);
+        }
+    }
+}
