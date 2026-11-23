@@ -1,0 +1,71 @@
+import java.util.*;
+public class Main{
+    static long MOD=998244353;
+    static class Node{
+        int l;
+        int r;
+        public Node(int l,int r){
+            this.l=l;
+            this.r=r;
+        }
+    }
+    static int solve(int l,int r,int[]array,ArrayList<Integer>[]adj){
+        boolean[]visited=new boolean[adj.length];
+        Queue<Integer>q=new LinkedList<>();
+        HashSet<Integer>work=new HashSet<>();
+        q.add(array[l]);
+        work.add(array[l]);
+        visited[array[l]]=true;
+        while(!q.isEmpty()){
+            int i=q.poll();
+            for(int j:adj[i]){
+                if(visited[j])
+                    continue;
+                q.add(j);
+                work.add(j);
+                visited[j]=true;
+            }
+        }
+        return 2*work.size();
+    }
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int t=scan.nextInt();
+        for(int temp=0;temp<t;temp++){
+            int n=scan.nextInt();
+            int[]array=new int[2*n];
+            Node[]segs=new Node[n];
+            for(int i=0;i<2*n;i++){
+                array[i]=scan.nextInt()-1;
+                if(segs[array[i]]==null)
+                    segs[array[i]]=new Node(i,0);
+                else
+                    segs[array[i]]=new Node(segs[array[i]].l,i);
+            }
+            ArrayList<Integer>[]adj=new ArrayList[n];
+            for(int i=0;i<n;i++){
+                adj[i]=new ArrayList<>();
+                for(int j=segs[i].l+1;j<segs[i].r;j++){
+                    if(segs[array[j]].l<segs[i].l==segs[array[j]].r<segs[i].r)
+                        adj[i].add(array[j]);
+                }
+            }
+            int prev=-1;
+            int min=0;
+            long ans=1;
+            HashSet<Integer>active=new HashSet<>();
+            for(int i=0;i<2*n;i++){
+                if(active.contains(array[i]))
+                    active.remove(array[i]);
+                else
+                    active.add(array[i]);
+                if(active.isEmpty()){
+                    ans=ans*solve(prev+1,i,array,adj)%MOD;
+                    min++;
+                    prev=i;
+                }
+            }
+            System.out.println(min+" "+ans);
+        }
+    }
+}
