@@ -1,0 +1,69 @@
+import java.util.*;
+public class Main{
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int n=scan.nextInt();
+        int m=scan.nextInt();
+        int w=scan.nextInt();
+        int h=scan.nextInt();
+        int[]ceil=new int[w+1];
+        int[]floor=new int[w+1];
+        Arrays.fill(ceil,Integer.MAX_VALUE);
+        Arrays.fill(floor,Integer.MIN_VALUE);
+        int prevx=scan.nextInt();
+        int prevy=scan.nextInt();
+        for(int i=1;i<n;i++){
+            int curx=scan.nextInt();
+            int cury=scan.nextInt();
+            int dx=curx-prevx;
+            if(dx==0)
+                ceil[curx]=Math.min(ceil[curx],Math.min(prevy,cury)-1);
+            else{
+                for(int x=prevx;x<=curx;x++){
+                    long num=(long)prevy*(curx-x)+(long)cury*(x-prevx);
+                    ceil[x]=Math.min(ceil[x],(int)Math.floorDiv(num+dx-1,dx)-1);
+                }
+            }
+            prevx=curx;
+            prevy=cury;
+        }
+        prevx=scan.nextInt();
+        prevy=scan.nextInt();
+        for(int i=1;i<m;i++){
+            int curx=scan.nextInt();
+            int cury=scan.nextInt();
+            int dx=curx-prevx;
+            if(dx==0)
+                floor[curx]=Math.max(floor[curx],Math.max(prevy,cury)+1);
+            else{
+                for(int x=prevx;x<=curx;x++){
+                    long num=(long)prevy*(curx-x)+(long)cury*(x-prevx);
+                    floor[x]=Math.max(floor[x],(int)Math.floorDiv(num,dx)+1);
+                }
+            }
+            prevx=curx;
+            prevy=cury;
+        }
+        int l=0;
+        int r=0;
+        if(l<floor[0]||r>ceil[0]){
+            System.out.print("impossible");
+            return;
+        }
+        for(int i=1;i<=w;i++){
+            l--;
+            r++;
+            l=Math.max(l,floor[i]);
+            r=Math.min(r,ceil[i]);
+            if((l&1)!=(i&1))
+                l++;
+            if((r&1)!=(i&1))
+                r--;
+            if(l>r){
+                System.out.print("impossible");
+                return;
+            }
+        }
+        System.out.print(l+" "+r);
+    }
+}
