@@ -1,0 +1,68 @@
+import java.util.*;
+public class Main{
+    static class Edge{
+        int v;
+        long w;
+        public Edge(int v,long w){
+            this.v=v;
+            this.w=w;
+        }
+    }
+  	public static void main(String[]args){
+  		Scanner scan=new Scanner(System.in);
+  		int n=scan.nextInt();
+  		int m=scan.nextInt();
+  		int q=scan.nextInt();
+  		long g=scan.nextLong();
+  		ArrayList<Edge>[]adj=new ArrayList[n];
+  		for(int i=0;i<n;i++){
+  		    adj[i]=new ArrayList<>();
+  		}
+  		for(int i=0;i<m;i++){
+  		    int u=scan.nextInt()-1;
+  		    int v=scan.nextInt()-1;
+  		    long w=scan.nextLong();
+  		    adj[u].add(new Edge(v,w));
+  		    adj[v].add(new Edge(u,w));
+  		}
+      long[][]dist=new long[n][n];
+      for(int i=0;i<n;i++){
+          Arrays.fill(dist[i],Long.MAX_VALUE/2);
+          dist[i][i]=0;
+      }
+      for(int i=0;i<n;i++){
+          for(Edge e:adj[i]){
+              dist[i][e.v]=Math.min(dist[i][e.v],e.w*g);
+          }
+      }
+      for(int k=0;k<n;k++){
+          for(int i=0;i<n;i++){
+              for(int j=0;j<n;j++){
+                  if(dist[i][k]<Long.MAX_VALUE/2&&dist[k][j]<Long.MAX_VALUE/2)
+                      dist[i][j]=Math.min(dist[i][j],dist[i][k]+dist[k][j]);
+              }
+          }
+      }
+  		long[]dp=new long[n];//at location i
+  		Arrays.fill(dp,Long.MIN_VALUE/2);
+  		dp[0]=0;
+  		for(int i=0;i<q;i++){
+  		    int u=scan.nextInt()-1;
+  		    int v=scan.nextInt()-1;
+  		    int w=scan.nextInt();
+  		    long[]temp=new long[n];
+  		    for(int j=0;j<n;j++){
+  		        temp[j]=dp[j];
+  		    }
+  		    for(int j=0;j<n;j++){
+  		        temp[v]=Math.max(temp[v],dp[j]+w-dist[j][u]-dist[u][v]);
+  		    }
+  		    dp=temp;
+  		}
+  		long best=0;
+  		for(int i=0;i<n;i++){
+  		    best=Math.max(best,dp[i]);
+  		}
+  		System.out.println(best);
+  	}
+}
