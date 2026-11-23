@@ -1,0 +1,119 @@
+import java.util.*;
+public class Main{
+    static class Query{
+        int l;
+        int r;
+        int index;
+        public Query(int l,int r,int index){
+            this.l=l;
+            this.r=r;
+            this.index=index;
+        }
+    }
+    static class Node{
+        int index;
+        long val;
+        public Node(int index,long val){
+            this.index=index;
+            this.val=val;
+        }
+    }
+    static class Segtree{
+        int n;
+        long[]pre;
+        long[]suff;
+        long[]sum;
+        long[]best;
+        public Segtree(int n){
+            this.n=n;
+            pre=new long[4*n];
+            suff=new long[4*n];
+            sum=new long[4*n];
+            best=new long[4*n];
+        }
+        public long[] query(int l,int r){
+            return query(1,0,n-1,l,r);
+        }
+        public long[] query(int node,int l,int r,int ll,int rr){
+            if(ll>r||rr<l)
+                return new long[]{Integer.MIN_VALUE,Integer.MIN_VALUE,0,Integer.MIN_VALUE};
+            if(ll<=l&&r<=rr)
+                return new long[]{pre[node],suff[node],sum[node],best[node]};
+            int m=(l+r)/2;
+            long[]left=query(node*2,l,m,ll,rr);
+            long[]right=query(node*2+1,m+1,r,ll,rr);
+            if(left[2]==Integer.MIN_VALUE)
+                return right;
+            if(right[2]==Integer.MIN_VALUE)
+                return left;
+            long[]res=new long[4];
+            res[0]=Math.max(left[0],left[2]+right[0]);
+            res[1]=Math.max(right[1],right[2]+left[1]);
+            res[2]=left[2]+right[2];
+            res[3]=Math.max(Math.max(left[3],right[3]),left[1]+right[0]);
+            return res;
+        }
+        public void update(int i,long val){
+            update(1,0,n-1,i,val);
+        }
+        public void update(int node,int l,int r,int i,long val){
+            if(l==r){
+                pre[node]+=val;
+                suff[node]+=val;
+                sum[node]+=val;
+                best[node]+=val;
+                return;
+            }
+            int m=(l+r)/2;
+            if(i<=m)
+                update(node*2,l,m,i,val);
+            else
+                update(node*2+1,m+1,r,i,val);
+            pre[node]=Math.max(pre[node*2],sum[node*2]+pre[node*2+1]);
+            suff[node]=Math.max(suff[node*2+1],sum[node*2+1]+suff[node*2]);
+            sum[node]=sum[node*2]+sum[node*2+1];
+            best[node]=Math.max(Math.max(best[node*2],best[node*2+1]),suff[node*2]+pre[node*2+1]);
+        }
+    }
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int n=scan.nextInt();
+        int m=scan.nextInt();
+        ArrayList<Node>[]array=new ArrayList[n];
+        for(int i=0;i<n;i++){
+            array[i]=new ArrayList<>();
+        }
+        for(int i=0;i<m;i++){
+            int l=scan.nextInt()-1;
+            int r=scan.nextInt();
+            long x=scan.nextLong();
+            array[l].add(new Node(i,x));
+            if(r!=n)
+                array[r].add(new Node(i,-x));
+        }
+        int q=scan.nextInt();
+        long[]ans=new long[q];
+        ArrayList<Query>[]queries=new ArrayList[n];
+        for(int i=0;i<n;i++){
+            queries[i]=new ArrayList<>();
+        }
+        for(int i=0;i<q;i++){
+            int pos=scan.nextInt()-1;
+            int l=scan.nextInt()-1;
+            int r=scan.nextInt()-1;
+            queries[pos].add(new Query(l,r,i));
+        }
+        Segtree segtree=new Segtree(m);
+        for(int i=0;i<n;i++){
+            for(Node j:array[i]){
+                segtree.update(j.index,j.val);
+            }
+            for(Query j:queries[i]){
+                ans[j.index]=segtree.query(j.l,j.r)[3];
+            }
+        }
+        for(int i=0;i<q;i++){
+            System.out.println(ans[i]);
+        }
+    }
+}
