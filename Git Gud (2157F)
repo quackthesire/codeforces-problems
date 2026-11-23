@@ -1,0 +1,28 @@
+import java.util.*;
+public class Main{
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int n=scan.nextInt();
+        int b=55;
+        ArrayList<int[]>ans=new ArrayList<>();
+        for(int i=1;i<b;i++){
+            for(int j=n-1;j>0;j--){
+                if(j%b==i)
+                    ans.add(new int[]{j,1});
+            }
+        }
+        for(int i=1;i<b;i++){
+            for(int j=n-1;j>0;j--){
+                if(j%b==0&&(j/b)%b==i)
+                    ans.add(new int[]{j,b});
+            }
+        }
+        for(int i=b*b;i<n;i+=b*b){
+            ans.add(new int[]{i,b*b});
+        }
+        System.out.println(ans.size());
+        for(int[]array:ans){
+            System.out.println(array[0]+" "+array[1]);
+        }
+    }
+}
