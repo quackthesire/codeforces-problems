@@ -1,0 +1,26 @@
+import java.util.*;
+public class Main{
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int t=scan.nextInt();
+        for(int temp=0;temp<t;temp++){
+            int n=scan.nextInt();
+            int ans=0;
+            TreeMap<Integer,Integer>map=new TreeMap<>();
+            for(int i=0;i<n;i++){
+                int l=scan.nextInt();
+                int r=scan.nextInt();
+                map.put(l,map.getOrDefault(l,0)+1);
+                Integer val=map.higherKey(r);
+                if(val==null)
+                    ans++;
+                else if(map.get(val)==1)
+                    map.remove(val);
+                else
+                    map.put(val,map.get(val)-1);
+                System.out.print(ans+" ");
+            }
+            System.out.println();
+        }
+    }
+}
