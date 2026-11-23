@@ -1,0 +1,126 @@
+import java.util.*;
+public class Main{
+    static long MOD=1000000007;
+    static long[]fact=new long[10000];
+    static long[]inv=new long[10000];
+    static long modpow(long base,long exp){
+        long res=1;
+        base=base%MOD;
+        while(exp>0){
+            if(exp%2==1)
+                res=(res*base)%MOD;
+            exp/=2;
+            base=(base*base)%MOD;
+        }
+        return res;
+    }
+    static long modinv(long val){
+        return modpow(val,MOD-2);
+    }
+    static long perm(long mult,int n,int k){
+        if(k>n)
+            return 0;
+        return fact[n]*inv[n-k]%MOD*mult%MOD;
+    }
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        fact[0]=1;
+        for(int i=1;i<10000;i++){
+            fact[i]=i*fact[i-1]%MOD;
+        }
+        inv[9999]=modinv(fact[9999]);
+        for(int i=9998;i>=0;i--){
+            inv[i]=(i+1)*inv[i+1]%MOD;
+        }
+        int t=scan.nextInt();
+        for(int temp=0;temp<t;temp++){
+            int n=scan.nextInt();
+            int[]pos=new int[n];
+            int[]array=new int[n];
+            Arrays.fill(pos,-1);
+            Arrays.fill(array,-1);
+            int min=n;
+            int tot=0;
+            for(int i=0;i<n;i++){
+                array[i]=scan.nextInt();
+                if(array[i]!=-1){
+                    pos[array[i]]=i;
+                    min=Math.min(min,array[i]);
+                }
+                else{
+                    tot++;
+                }
+            }
+            long ans=0;
+            long[]all=new long[n+1];
+            for(int i=0;i<n;i++){
+                int cur=0;
+                for(int j=i;j<n;j++){
+                    if(array[j]==-1)
+                        cur++;
+                    all[cur]++;
+                }
+            }
+            for(int i=0;i<min;i++){
+                for(int j=i+1;j<=tot;j++){
+                    ans=(ans+perm(all[j],j,i+1)*fact[tot-i-1])%MOD;
+                }
+            }
+            if(min==n){
+                System.out.println(ans);
+                continue;
+            }
+            int l=pos[min];
+            int r=pos[min];
+            ArrayList<Integer>llist=new ArrayList<>();
+            ArrayList<Integer>rlist=new ArrayList<>();
+            int cur=0;
+            for(int i=l;i>=0;i--){
+                if(array[i]==-1)
+                    cur++;
+                llist.add(cur);
+            }
+            cur=0;
+            for(int i=r;i<n;i++){
+                if(array[i]==-1)
+                    cur++;
+                rlist.add(cur);
+            }
+            Collections.reverse(llist);
+            Collections.reverse(rlist);
+            long[]count=new long[n+1];
+            for(int i:llist){
+                for(int j:rlist){
+                    count[i+j]++;
+                }
+            }
+            int num=min;
+            for(int i=min;i<n;i++){
+                if(pos[i]==-1){
+                    num++;
+                }
+                else{
+                    while(pos[i]<l){
+                        int val=llist.remove(llist.size()-1);
+                        for(int j:rlist){
+                            count[j+val]--;
+                        }
+                        l--;
+                    }
+                    while(pos[i]>r){
+                        int val=rlist.remove(rlist.size()-1);
+                        for(int j:llist){
+                            count[j+val]--;
+                        }
+                        r++;
+                    }
+                }
+                for(int j=num;j<=tot;j++){
+                    ans=(ans+perm(count[j],j,num)*fact[tot-num])%MOD;
+                }
+                //System.out.print(ans+" ");
+            }
+            System.out.println(ans);
+        }
+    }
+}
