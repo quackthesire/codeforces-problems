@@ -1,0 +1,93 @@
+import java.util.*;
+public class Main{
+    static class Edge{
+        int v;
+        int w;
+        public Edge(int v,int w){
+            this.v=v;
+            this.w=w;
+        }
+    }
+    static class Node implements Comparable<Node>{
+        int v;
+        long d;
+        public Node(int v,long d){
+            this.v=v;
+            this.d=d;
+        }
+        public int compareTo(Node other){
+            return Long.compare(this.d,other.d);
+        }
+    }
+    static int[]dx={0,1,1,0,0};
+    static int[]dy={0,0,1,1,0};
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int r=scan.nextInt();
+        int c=scan.nextInt();
+        int x=scan.nextInt();
+        int[][]array=new int[r][c];
+        ArrayList<Edge>[]adj=new ArrayList[r*c];
+        for(int i=0;i<r*c;i++){
+            adj[i]=new ArrayList<>();
+        }
+        for(int i=0;i<r;i++){
+            String s=scan.next();
+            for(int j=0;j<c;j++){
+                array[i][j]=s.charAt(j)-'0';
+            }
+        }
+        for(int i=0;i<r;i++){
+            for(int j=0;j<c;j++){
+                if(i>0)
+                    adj[i*c+j].add(new Edge((i-1)*c+j,(int)Math.pow(array[i][j]-array[i-1][j],x)));
+                if(i<r-1)
+                    adj[i*c+j].add(new Edge((i+1)*c+j,(int)Math.pow(array[i][j]-array[i+1][j],x)));
+                if(j>0)
+                    adj[i*c+j].add(new Edge(i*c+j-1,(int)Math.pow(array[i][j]-array[i][j-1],x)));
+                if(j<c-1)
+                    adj[i*c+j].add(new Edge(i*c+j+1,(int)Math.pow(array[i][j]-array[i][j+1],x)));
+            }
+        }
+        boolean work=true;
+        for(int i=0;i<r-1;i++){
+            for(int j=0;j<c-1;j++){
+                long val=0;
+                for(int k=1;k<=4;k++){
+                    val+=(int)Math.pow(array[i+dx[k]][j+dy[k]]-array[i+dx[k-1]][j+dy[k-1]],x);
+                }
+                if(val!=0){
+                    work=false;
+                    break;
+                }
+            }
+            if(!work)
+                break;
+        }
+        long[]pot=new long[r*c];
+        boolean[]visited=new boolean[r*c];
+        Queue<Integer>qq=new ArrayDeque<>();
+        qq.add(0);
+        visited[0]=true;
+        while(!qq.isEmpty()){
+            int u=qq.poll();
+            for(Edge e:adj[u]){
+                if(visited[e.v])
+                    continue;
+                visited[e.v]=true;
+                pot[e.v]=pot[u]+e.w;
+                qq.add(e.v);
+            }
+        }
+        int q=scan.nextInt();
+        for(int i=0;i<q;i++){
+            int s=(scan.nextInt()-1)*c+scan.nextInt()-1;
+            int e=(scan.nextInt()-1)*c+scan.nextInt()-1;
+            if(!work){
+                System.out.println("INVALID");
+                continue;
+            }
+            System.out.println(pot[e]-pot[s]);
+        }
+    }
+}
