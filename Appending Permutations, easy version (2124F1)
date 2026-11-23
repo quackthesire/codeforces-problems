@@ -1,0 +1,57 @@
+import java.util.*;
+public class Main{
+    static long MOD=998244353;
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int t=scan.nextInt();
+        for(int temp=0;temp<t;temp++){
+            int n=scan.nextInt();
+            int m=scan.nextInt();
+            int[][]req=new int[n+1][n+1];
+            long[][]dp=new long[n+1][n+1];
+            dp[0][0]=1;
+            for(int i=1;i<=m;i++){
+                req[scan.nextInt()][scan.nextInt()]=1;
+            }
+            for(int i=1;i<=n;i++){
+                for(int j=1;j<=i;j++){
+                    boolean work=true;
+                    for(int k=1;k<=j;k++){
+                        if(req[i-j+k][k]==1){
+                            work=false;
+                            break;
+                        }
+                    }
+                    if(!work)
+                        continue;
+                    for(int k=0;k<=n;k++){
+                        dp[i][j]=(dp[i][j]+dp[i-j][k])%MOD;
+                    }
+                }
+                for(int j=1;j<=i;j++){
+                    for(int k=1;k<j;k++){
+                        boolean work=true;
+                        for(int l=1;l<=j;l++){
+                            if(req[i-j+l][(l+k-1)%j+1]==1){
+                                work=false;
+                                break;
+                            }
+                        }
+                        if(!work)
+                            continue;
+                        for(int l=0;l<=n;l++){
+                            if(l==k)
+                                continue;
+                            dp[i][0]=(dp[i][0]+dp[i-j][l])%MOD;
+                        }
+                    }
+                }
+            }
+            long ans=0;
+            for(int i=0;i<=n;i++){
+                ans=(ans+dp[n][i])%MOD;
+            }
+            System.out.println(ans);
+        }
+    }
+}
