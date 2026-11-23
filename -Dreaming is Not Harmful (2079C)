@@ -1,0 +1,146 @@
+import java.util.*;
+public class Main{
+    static class Segtree{
+        int n;
+        long[]tree;
+        long[]lazy;
+        public Segtree(int n){
+            this.n=n;
+            tree=new long[4*n];
+            lazy=new long[4*n];
+        }
+        public void add(int l,int r,long val){
+            if(l>r)
+                return;
+            add(1,0,n-1,l,r,val);
+        }
+        public void add(int node,int l,int r,int ll,int rr,long val){
+            if(ll<=l&&r<=rr){
+                tree[node]+=val;
+                lazy[node]+=val;
+                return;
+            }
+            int m=(l+r)/2;
+            if(ll<=m)
+                add(node*2,l,m,ll,rr,val);
+            if(rr>m)
+                add(node*2+1,m+1,r,ll,rr,val);
+            tree[node]=Math.max(tree[node*2],tree[node*2+1])+lazy[node];
+        }
+    }
+    static int timer;
+    static int[]parent;
+    static int[]size;
+    static int[]heavy;
+    static int[]chain;
+    static int[]pos;
+    static void dfs(int u,int[]first,int[]next){
+        int best=-1;
+        int cur=first[u];
+        size[u]=1;
+        while(cur!=-1){
+            dfs(cur,first,next);
+            size[u]+=size[cur];
+            if(best==-1||size[cur]>size[best])
+                best=cur;
+            cur=next[cur];
+        }
+        heavy[u]=best;
+    }
+    static void build(int u,int index,int[]first,int[]next){
+        chain[u]=index;
+        pos[u]=timer++;
+        if(heavy[u]!=-1)
+            build(heavy[u],index,first,next);
+        int cur=first[u];
+        while(cur!=-1){
+            if(cur!=heavy[u])
+                build(cur,cur,first,next);
+            cur=next[cur];
+        }
+    }
+    static void path(int u,long val,Segtree segtree){
+        while(chain[u]!=chain[0]){
+            segtree.add(pos[chain[u]],pos[u],val);
+            u=parent[chain[u]];
+        }
+        segtree.add(pos[0],pos[u],val);
+    }
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int n=scan.nextInt();
+        int q=scan.nextInt();
+        parent=new int[n];
+        int[]first=new int[n];
+        int[]next=new int[n];
+        Arrays.fill(first,-1);
+        Arrays.fill(parent,-1);
+        for(int i=1;i<n;i++){
+            parent[i]=scan.nextInt()-1;
+            next[i]=first[parent[i]];
+            first[parent[i]]=i;
+        }
+        int[]vals=new int[n];
+        for(int i=0;i<n;i++){
+            vals[i]=scan.nextInt();
+        }
+        int[]query=new int[q];
+        boolean[]visited=new boolean[n];
+        Arrays.fill(visited,true);
+        for(int i=0;i<q;i++){
+            query[i]=scan.nextInt()-1;
+            visited[query[i]]=false;
+        }
+        timer=0;
+        size=new int[n];
+        heavy=new int[n];
+        chain=new int[n];
+        pos=new int[n];
+        Arrays.fill(heavy,-1);
+        dfs(0,first,next);
+        build(0,0,first,next);
+        PriorityQueue<Integer>pq=new PriorityQueue<>((a,b)->vals[b]-vals[a]);
+        int cur=first[0];
+        while(cur!=-1){
+            pq.add(cur);
+            cur=next[cur];
+        }
+        int count=1;
+        int[]order=new int[n];
+        int[]loc=new int[n];
+        order[0]=0;
+        loc[0]=0;
+        while(!pq.isEmpty()){
+            int u=pq.poll();
+            order[count]=u;
+            loc[u]=count;
+            count++;
+            cur=first[u];
+            while(cur!=-1){
+                pq.add(cur);
+                cur=next[cur];
+            }
+        }
+        long[]ans=new long[n];
+        Segtree segtree=new Segtree(n);
+        for(int i=0;i<n;i++){
+            if(!visited[order[i]]){
+                if(order[i]==0){
+                    ans[order[i]]=0;
+                }
+                else{
+                    path(order[i],-Long.MAX_VALUE/2,segtree);
+                    if(segtree.tree[1]<0)
+                        ans[order[i]]=i;
+                    else
+                        ans[order[i]]=i-segtree.tree[1];
+                    path(order[i],Long.MAX_VALUE/2,segtree);
+                }
+            }
+            path(order[i],1,segtree);
+        }
+        for(int i=0;i<q;i++){
+            System.out.print(ans[query[i]]+" ");
+        }
+    }
+}
