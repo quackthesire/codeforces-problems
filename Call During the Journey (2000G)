@@ -1,0 +1,66 @@
+import java.util.*;
+public class Main{
+    static class Node implements Comparable<Node>{
+        int v;
+        long b;
+        long w;
+        public Node(int v,long b,long w){
+            this.v=v;
+            this.b=b;
+            this.w=w;
+        }
+        public int compareTo(Node other){
+            return Long.compare(other.w,this.w);
+        }
+    }
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int t=scan.nextInt();
+        for(int temp=0;temp<t;temp++){
+            int n=scan.nextInt();
+            int m=scan.nextInt();
+            long t0=scan.nextLong();
+            long t1=scan.nextLong();
+            long t2=scan.nextLong();
+            ArrayList<Node>[]adj=new ArrayList[n];
+            for(int i=0;i<n;i++){
+                adj[i]=new ArrayList<>();
+            }
+            for(int i=0;i<m;i++){
+                int u=scan.nextInt()-1;
+                int v=scan.nextInt()-1;
+                long b=scan.nextLong();
+                long w=scan.nextLong();
+                adj[u].add(new Node(v,b,w));
+                adj[v].add(new Node(u,b,w));
+            }
+            long[]dist=new long[n];
+            Arrays.fill(dist,-1);
+            PriorityQueue<Node>pq=new PriorityQueue<>();
+            dist[n-1]=t0;
+            pq.add(new Node(n-1,0,t0));
+            while(!pq.isEmpty()){
+                Node cur=pq.poll();
+                if(cur.w!=dist[cur.v])
+                    continue;
+                for(Node edge:adj[cur.v]){
+                    if(cur.w-edge.b>=t2||cur.w<=t1){
+                        if(dist[edge.v]<cur.w-edge.b){
+                            dist[edge.v]=cur.w-edge.b;
+                            pq.add(new Node(edge.v,0,dist[edge.v]));
+                        }
+                    }
+                    if(cur.w>=t1&&dist[edge.v]<t1-edge.b){
+                        dist[edge.v]=t1-edge.b;
+                        pq.add(new Node(edge.v,0,dist[edge.v]));
+                    }
+                    if(dist[edge.v]<cur.w-edge.w){
+                        dist[edge.v]=cur.w-edge.w;
+                        pq.add(new Node(edge.v,0,dist[edge.v]));
+                    }
+                }
+            }
+            System.out.println(dist[0]);
+        }
+    }
+}
