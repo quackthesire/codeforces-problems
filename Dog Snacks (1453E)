@@ -1,0 +1,55 @@
+import java.util.*;
+public class Main{
+    static class Node implements Comparable<Node>{
+        int val;
+        int last;
+        public Node(int val,int last){
+            this.val=val;
+            this.last=last;
+        }
+        public int compareTo(Node other){
+            return this.last-other.last;
+        }
+    }
+    static Node dfs(int u,int p,ArrayList<Integer>[]adj){
+        int val=0;
+        int last=0;
+        ArrayList<Node>child=new ArrayList<>();
+        for(int v:adj[u]){
+            if(v==p)
+                continue;
+            child.add(dfs(v,u,adj));
+        }
+        if(child.isEmpty())
+            return new Node(0,0);
+        Collections.sort(child);
+        if(u==0)
+            Collections.reverse(child);
+        val=Math.max(val,child.get(0).val);
+        last=Math.max(last,child.get(0).last+1);
+        for(int i=1;i<child.size();i++){
+            val=Math.max(val,child.get(i).val);
+            val=Math.max(val,child.get(i).last+2);
+        }
+        return new Node(val,last);
+    }
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int t=scan.nextInt();
+        for(int temp=0;temp<t;temp++){
+            int n=scan.nextInt();
+            ArrayList<Integer>[]adj=new ArrayList[n];
+            for(int i=0;i<n;i++){
+                adj[i]=new ArrayList<>();
+            }
+            for(int i=0;i<n-1;i++){
+                int u=scan.nextInt()-1;
+                int v=scan.nextInt()-1;
+                adj[u].add(v);
+                adj[v].add(u);
+            }
+            Node ans=dfs(0,-1,adj);
+            System.out.println(Math.max(ans.val,ans.last));
+        }
+    }
+}
