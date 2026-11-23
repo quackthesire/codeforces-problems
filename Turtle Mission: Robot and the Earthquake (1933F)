@@ -1,0 +1,38 @@
+import java.util.*;
+public class Main{
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int t=scan.nextInt();
+        for(int temp=0;temp<t;temp++){
+            int n=scan.nextInt();
+            int m=scan.nextInt();
+            int[][]array=new int[n][m];
+            for(int i=0;i<n;i++){
+                for(int j=0;j<m;j++){
+                    array[i][j]=scan.nextInt();
+                }
+            }
+            long[][]dp=new long[n][m];
+            for(int i=0;i<n;i++){
+                Arrays.fill(dp[i],Long.MAX_VALUE/2);
+            }
+            dp[0][0]=0;
+            for(int j=0;j<m-1;j++){
+                for(int k=0;k<10;k++){
+                    for(int i=0;i<n;i++){
+                        if(array[(i+1)%n][j]!=1&&array[(i+2)%n][j]!=1)
+                            dp[(i+2)%n][j]=Math.min(dp[(i+2)%n][j],dp[i][j]+1);
+                        if(array[(i+1)%n][j+1]!=1)
+                            dp[(i+1)%n][j+1]=Math.min(dp[(i+1)%n][j+1],dp[i][j]+1);
+                    }
+                }
+            }
+            long best=Long.MAX_VALUE/2;
+            for(int i=0;i<n;i++){
+                int end=(n-1+(int)(dp[i][m-1]%n))%n;
+                best=Math.min(best,dp[i][m-1]+Math.min((end-i+n)%n,(i-end+n)%n));
+            }
+            System.out.println(best==Long.MAX_VALUE/2?-1:best);
+        }
+    }
+}
