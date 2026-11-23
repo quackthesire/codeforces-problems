@@ -1,0 +1,113 @@
+import java.util.*;
+public class Main{
+    static class Node implements Comparable<Node>{
+        long a;
+        int b;
+        int index;
+        public Node(long a,int b,int index){
+            this.a=a;
+            this.b=b;
+            this.index=index;
+        }
+        public int compareTo(Node other){
+            return this.b-other.b;
+        }
+    }
+    static ArrayList<Node>check(int x,long t,Node[]array){
+        long sum=0;
+        long[]pre=new long[array.length];
+        long[]suff=new long[array.length];
+        PriorityQueue<Node>pq=new PriorityQueue<>((u,v)->Long.compare(v.a,u.a));
+        for(int i=0;i<x-1;i++){
+            pq.add(array[i]);
+            sum+=array[i].a;
+        }
+        for(int i=x-1;i<array.length;i++){
+            pre[i]=sum+array[i].a;
+            if(!pq.isEmpty()&&pq.peek().a>array[i].a){
+                Node temp=pq.poll();
+                pq.add(array[i]);
+                sum-=(temp.a-array[i].a);
+            }
+        }
+        sum=0;
+        pq=new PriorityQueue<>((u,v)->Long.compare(v.a,u.a));
+        PriorityQueue<Node>pq2=new PriorityQueue<>((u,v)->Long.compare(v.a,u.a));
+        for(int i=array.length-1;i>=x-1;i--){
+            int need=Math.max(0,array[i].b-x);
+            while(pq.size()<need&&!pq2.isEmpty()){
+                Node temp=pq2.poll();
+                sum+=temp.a;
+                pq.add(temp);
+            }
+            while(pq.size()>need){
+                sum-=pq.poll().a;
+            }
+            if(pq.size()!=need)
+                suff[i]=Long.MAX_VALUE;
+            else
+                suff[i]=sum;
+            if(!pq.isEmpty()&&array[i].a<pq.peek().a){
+                Node temp=pq.poll();
+                pq.add(array[i]);
+                pq2.add(temp);
+                sum-=(temp.a-array[i].a);
+            }
+            else
+                pq2.add(array[i]);
+        }
+        for(int i=x-1;i<array.length;i++){
+            if(pre[i]!=Long.MAX_VALUE&&suff[i]!=Long.MAX_VALUE&&pre[i]+suff[i]<=t){
+                ArrayList<Node>ans=new ArrayList<>();
+                Node[]prenodes=Arrays.copyOfRange(array,0,i);
+                Node[]suffnodes=Arrays.copyOfRange(array,i+1,array.length);
+                Arrays.sort(prenodes,Comparator.comparingLong(u->u.a));
+                Arrays.sort(suffnodes,Comparator.comparingLong(u->u.a));
+                for(int j=0;j<Math.min(x-1,prenodes.length);j++){
+                    ans.add(prenodes[j]);
+                }
+                ans.add(array[i]);
+                for(int j=0;j<Math.min(Math.max(0,array[i].b-x),suffnodes.length);j++){
+                    ans.add(suffnodes[j]);
+                }
+                return ans;
+            }
+        }
+        return new ArrayList<>();
+    }
+	public static void main(String[]args){
+	    Scanner scan=new Scanner(System.in);
+	    int q=scan.nextInt();
+	    for(int temp=0;temp<q;temp++){
+	        int n=scan.nextInt();
+	        long t=scan.nextLong();
+	        Node[]array=new Node[n];
+	        for(int i=0;i<n;i++){
+	            array[i]=new Node(scan.nextLong(),scan.nextInt(),i);
+	        }
+	        Arrays.sort(array);
+	        int l=1;
+	        int r=n;
+	        int x=0;
+	        ArrayList<Node>ans=new ArrayList<>();
+	        while(l<=r){
+	            int m=(l+r)/2;
+	            ArrayList<Node>work=check(m,t,array);
+	            if(work.size()>0){
+	                l=m+1;
+	                x=m;
+	                ans=work;
+	            }
+	            else
+	                r=m-1;
+	        }
+	        System.out.println(x);
+	        System.out.println(ans.size());
+	        for(Node i:ans){
+	            System.out.print((i.index+1)+" ");
+	        }
+	        if(ans.size()>0)
+	            System.out.println();
+	    }
+	}
+}
