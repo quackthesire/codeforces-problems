@@ -1,0 +1,169 @@
+import java.util.*;
+public class Main{
+    static int[]vals;
+    static ArrayList<Integer>[]pos;
+    static class Node{
+        int val;
+        int count;
+        public Node(int val,int count){
+            this.val=val;
+            this.count=count;
+        }
+    }
+    static class Segtree{
+        int n;
+        Node[][]tree;
+        public Segtree(int[]array){
+            this.n=array.length;
+            tree=new Node[4*n][2];
+            build(array,1,0,n-1);
+        }
+        public void build(int[]array,int node,int l,int r){
+            if(l==r){
+                tree[node][0]=new Node(array[l],1);
+                return;
+            }
+            int m=(l+r)/2;
+            build(array,node*2,l,m);
+            build(array,node*2+1,m+1,r);
+            tree[node]=merge(tree[node*2],tree[node*2+1]);
+        }
+        public Node[] merge(Node[]left,Node[]right){
+            HashMap<Integer,Integer>map=new HashMap<>();
+            for(int i=0;i<2;i++){
+                if(left[i]!=null)
+                    map.put(left[i].val,map.getOrDefault(left[i].val,0)+left[i].count);
+                if(right[i]!=null)
+                    map.put(right[i].val,map.getOrDefault(right[i].val,0)+right[i].count);
+            }
+            while(map.size()>2){
+                int mn=Integer.MAX_VALUE;
+                for(int x:map.values())
+                    mn=Math.min(mn,x);
+                Iterator<Map.Entry<Integer,Integer>>it=map.entrySet().iterator();
+                while(it.hasNext()){
+                    Map.Entry<Integer,Integer>e=it.next();
+                    int x=e.getValue()-mn;
+                    if(x==0)
+                        it.remove();
+                    else
+                        e.setValue(x);
+                }
+            }
+            Node[]res=new Node[2];
+            int index=0;
+            for(Map.Entry<Integer,Integer>e:map.entrySet())
+                res[index++]=new Node(e.getKey(),e.getValue());
+            return res;
+        }
+        public Node[] query(int l,int r){
+            return query(1,0,n-1,l,r);
+        }
+        public Node[] query(int node,int l,int r,int ll,int rr){
+            if(ll>r||rr<l)
+                return new Node[2];
+            if(ll<=l&&r<=rr)
+                return tree[node];
+            int m=(l+r)/2;
+            Node[]left=query(node*2,l,m,ll,rr);
+            Node[]right=query(node*2+1,m+1,r,ll,rr);
+            if(left[0]==null)
+                return right;
+            if(right[0]==null)
+                return left;
+            return merge(left,right);
+        }
+    }
+    static int bsl(ArrayList<Integer>array,int val){
+        int l=0;
+        int r=array.size()-1;
+        while(l<=r){
+            int m=(l+r)/2;
+            if(array.get(m)>=val)
+                r=m-1;
+            else
+                l=m+1;
+        }
+        return l;
+    }
+    static int bsu(ArrayList<Integer>array,int val){
+        int l=0;
+        int r=array.size()-1;
+        while(l<=r){
+            int m=(l+r)/2;
+            if(array.get(m)>val)
+                r=m-1;
+            else
+                l=m+1;
+        }
+        return l;
+    }
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int t=scan.nextInt();
+        for(int tempvar=0;tempvar<t;tempvar++){
+            int n=scan.nextInt();
+            int q=scan.nextInt();
+            int[]array=new int[n];
+            for(int i=0;i<n;i++){
+                array[i]=scan.nextInt();
+            }
+            int count=0;
+            int[]temp=array.clone();
+            Arrays.sort(temp);
+            for(int i=0;i<n;i++){
+                if(i==0||temp[i]!=temp[i-1]){
+                    temp[count]=temp[i];
+                    count++;
+                }
+            }
+            vals=Arrays.copyOf(temp,count);
+            HashMap<Integer,Integer>map=new HashMap<>();
+            for(int i=0;i<count;i++){
+                map.put(vals[i],i);
+            }
+            pos=new ArrayList[count];
+            for(int i=0;i<count;i++){
+                pos[i]=new ArrayList<>();
+            }
+            for(int i=0;i<n;i++){
+                array[i]=map.get(array[i]);
+                pos[array[i]].add(i);
+            }
+            Segtree segtree=new Segtree(array);
+            for(int i=0;i<q;i++){
+                int l=scan.nextInt()-1;
+                int r=scan.nextInt()-1;
+                int index=0;
+                int count0=0;
+                int count1=0;
+                int[]res=new int[2];
+                Node[]ans=segtree.query(l,r);
+                if(ans[0]!=null)
+                    count0=bsu(pos[ans[0].val],r)-bsl(pos[ans[0].val],l);
+                if(ans[1]!=null)
+                    count1=bsu(pos[ans[1].val],r)-bsl(pos[ans[1].val],l);
+                if(ans[0]!=null&&count0*3>r-l+1){
+                    res[index]=vals[ans[0].val];
+                    index++;
+                }
+                if(ans[1]!=null&&count1*3>r-l+1){
+                    res[index]=vals[ans[1].val];
+                    index++;
+                }
+                if(index==0)
+                    System.out.println(-1);
+                else if(index==1)
+                    System.out.println(res[0]);
+                else{
+                    if(res[0]>res[1]){
+                        int tempval=res[0];
+                        res[0]=res[1];
+                        res[1]=tempval;
+                    }
+                    System.out.println(res[0]+" "+res[1]);
+                }
+            }
+        }
+    }
+}
