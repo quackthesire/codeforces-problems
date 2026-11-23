@@ -1,0 +1,40 @@
+#include <bits/stdc++.h>
+using namespace std;
+using ll=long long;
+struct Node{
+    ll first;
+    ll second;
+    ll val;
+    Node(ll first,ll second,ll val):first(first),second(second),val(val){}
+};
+int main(){
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+    int n;
+    int m;
+    cin>>n>>m;
+    vector<ll>t(n+1);
+    vector<ll>d(n+1);
+    for(int i=1;i<=n;i++){
+        cin>>t[i]>>d[i];
+        d[i]+=t[i];
+    }
+    vector<vector<ll>>dp(m+1,vector<ll>(n+1,LLONG_MAX/2));
+    dp[0][0]=0;
+    for(int i=1;i<=m;i++){
+        stack<Node>s;
+        for(int j=1;j<=n;j++){
+            ll best=dp[i-1][j-1]-t[j-1];
+            while(!s.empty()&&s.top().second<=d[j]){
+                best=min(best,s.top().first);
+                s.pop();
+            }
+            ll val=best+d[j];
+            if(!s.empty())
+                val=min(val,s.top().val);
+            s.push(Node(best,d[j],val));
+            dp[i][j]=val;
+        }
+    }
+    cout<<dp[m][n]+t[n];
+}
