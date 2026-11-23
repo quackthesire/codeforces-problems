@@ -1,0 +1,37 @@
+import java.util.*;
+public class Main{
+    static long MOD=1000000007;
+    static long modinv(long base){
+        long exp=MOD-2;
+        long res=1;
+        while(exp>0){
+            if(exp%2==1)
+                res=res*base%MOD;
+            base=base*base%MOD;
+            exp/=2;
+        }
+        return res;
+    }
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int t=scan.nextInt();
+        for(int temp=0;temp<t;temp++){
+            int n=scan.nextInt();
+            int m=scan.nextInt();
+            long k=scan.nextLong();
+            long[][]dp=new long[n+1][n+1];
+            dp[1][1]=k;
+            for(int i=2;i<=n;i++){
+                for(int j=0;j<=i;j++){
+                    if(j==i)
+                        dp[i][j]=(k+dp[i-1][j-1])%MOD;
+                    else if(j==0)
+                        dp[i][j]=dp[i-1][j];
+                    else
+                        dp[i][j]=(dp[i-1][j]+dp[i-1][j-1]+MOD)*modinv(2)%MOD;
+                }
+            }
+            System.out.println(dp[n][m]);
+        }
+    }
+}
