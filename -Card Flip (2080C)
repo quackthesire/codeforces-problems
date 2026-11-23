@@ -1,0 +1,45 @@
+import java.util.*;
+public class Main{
+    static class Node implements Comparable<Node>{
+        int a;
+        int b;
+        public Node(int a,int b){
+            this.a=a;
+            this.b=b;
+        }
+        public int compareTo(Node other){
+            return other.a-this.a;
+        }
+    }
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int n=scan.nextInt();
+        int m=scan.nextInt();
+        int[]c=new int[m];
+        Node[]array=new Node[n];
+        for(int i=0;i<n;i++){
+            array[i]=new Node(scan.nextInt()-1,0);
+        }
+        for(int i=0;i<n;i++){
+            array[i]=new Node(array[i].a,scan.nextInt()-1);
+        }
+        for(int i=0;i<m;i++){
+            c[i]=scan.nextInt()-1;
+        }
+        Arrays.sort(c);
+        Arrays.sort(array);
+        int best=0;
+        for(int i=1;i<n;i++){
+            if(array[i].b<array[best].a)
+                best=i;
+        }
+        int count=n-best-1;
+        for(int i=0;i<m;i++){
+            if(c[i]<array[best].a)
+                count++;
+            else
+                break;
+        }
+        System.out.println(count%2==0?"First":"Second");
+    }
+}
