@@ -1,0 +1,92 @@
+#include <bits/stdc++.h>
+using namespace std;
+using ll=long long;
+struct Node{
+    ll v;
+    int a;
+    int b;
+    Node(ll v,int a,int b):v(v),a(a),b(b){}
+};
+ll solve(int l,int r,int ql,int qr,vector<Node>&array,const vector<ll>&cur,ll k,ll limit){
+    if(l>r)
+        return 0;
+    if(ql==qr)
+        return (ll)(r-l+1)*(array.size()-ql);
+    int qm=(ql+qr)/2;
+    if(l>qm)
+        return solve(l,r,qm+1,qr,array,cur,k,limit);
+    vector<ll>left(cur);
+    for(int i=qm+1;i<=min(qr,(int)array.size()-1);i++){
+        for(int j=k-array[i].a;j>=0;j--){
+            left[j+array[i].a]=max(left[j+array[i].a],left[j]+array[i].v);
+        }
+    }
+    vector<ll>dp(left);
+    for(int i=r+1;i<=qm;i++){
+        for(int j=k-array[i].b;j>=0;j--){
+            dp[j+array[i].b]=max(dp[j+array[i].b],dp[j]+array[i].v);
+        }
+    }
+    int templ=l;
+    int tempr=min(r,qm);
+    while(templ<=tempr){
+        int m=(templ+tempr)/2;
+        vector<ll>tempdp(dp);
+        for(int i=templ;i<m;i++){
+            for(int j=k-array[i].a;j>=0;j--){
+                tempdp[j+array[i].a]=max(tempdp[j+array[i].a],tempdp[j]+array[i].v);
+            }
+        }
+        for(int i=m;i<=tempr;i++){
+            for(int j=k-array[i].b;j>=0;j--){
+                tempdp[j+array[i].b]=max(tempdp[j+array[i].b],tempdp[j]+array[i].v);
+            }
+        }
+        ll sum=0;
+        for(int i=1;i<=k;i++){
+            sum+=tempdp[i];
+        }
+        if(sum<=limit){
+            for(int i=templ;i<=m;i++){
+                for(int j=k-array[i].a;j>=0;j--){
+                    dp[j+array[i].a]=max(dp[j+array[i].a],dp[j]+array[i].v);
+                }
+            }
+            templ=m+1;
+        }
+        else{
+            for(int i=m;i<=tempr;i++){
+                for(int j=k-array[i].b;j>=0;j--){
+                    dp[j+array[i].b]=max(dp[j+array[i].b],dp[j]+array[i].v);
+                }
+            }
+            tempr=m-1;
+        }
+    }
+    vector<ll>right(cur);
+    for(int i=l;i<templ;i++){
+        for(int j=k-array[i].a;j>=0;j--){
+            right[j+array[i].a]=max(right[j+array[i].a],right[j]+array[i].v);
+        }
+    }
+    return solve(l,templ-1,ql,qm,array,left,k,limit)+solve(templ,r,qm+1,qr,array,right,k,limit);
+}
+int main(){
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+    int n;
+    ll k;
+    ll e;
+    cin>>n>>k>>e;
+    e*=k;
+    vector<Node>array;
+    for(int i=0;i<n;i++){
+        ll v;
+        int a;
+        int b;
+        cin>>v>>a>>b;
+        array.push_back(Node(v,a,b));
+    }
+    vector<ll>dp(k+1);
+    cout<<solve(0,n-1,0,n,array,dp,k,e);
+}
