@@ -1,0 +1,55 @@
+import java.util.*;
+public class Main{
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int t=scan.nextInt();
+        for(int temp=0;temp<t;temp++){
+            int n=scan.nextInt();
+            int[]dist=new int[n*n+1];
+            int first=0;
+            int max=0;
+            ArrayList<Integer>cand=new ArrayList<>();
+            for(int i=2;i<=n*n;i++){
+                System.out.println("? 1 "+i);
+                System.out.flush();
+                int val=scan.nextInt();
+                if(val>max){
+                    first=i;
+                    max=val;
+                }
+            }
+            for(int i=1;i<=n*n;i++){
+                System.out.println("? "+first+" "+i);
+                System.out.flush();
+                dist[i]=scan.nextInt();
+                if(dist[i]==n-1)
+                    cand.add(i);
+            }
+            max=0;
+            int second=0;
+            for(int i=1;i<cand.size();i++){
+                System.out.println("? "+cand.get(0)+" "+cand.get(i));
+                System.out.flush();
+                int val=scan.nextInt();
+                if(val>max){
+                    second=cand.get(i);
+                    max=val;
+                }
+            }
+            int[][]ans=new int[n][n];
+            for(int i=1;i<=n*n;i++){
+                System.out.println("? "+second+" "+i);
+                System.out.flush();
+                int val=scan.nextInt();
+                ans[(n-1+dist[i]-val)/2][(dist[i]+val-n+1)/2]=i;
+            }
+            System.out.println("!");
+            for(int i=0;i<n;i++){
+                for(int j=0;j<n;j++){
+                    System.out.print(ans[i][j]+" ");
+                }
+                System.out.println();
+            }
+        }
+    }
+}
