@@ -1,0 +1,25 @@
+import java.util.*;
+public class Main{
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int n=scan.nextInt();
+        int l=1;
+        int r=n-1;
+        int cur=0;
+        while(l<r){
+            int m=(l+r+1)/2;
+            System.out.println("+ "+(n-m%n));
+            System.out.flush();
+            if(scan.nextInt()>cur){
+                cur++;
+                l=m;
+            }
+            else{
+                r=m-1;
+            }
+            l+=n-m%n;
+            r+=n-m%n;
+        }
+        System.out.println("! "+l);
+    }
+}
