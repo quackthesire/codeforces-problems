@@ -1,0 +1,56 @@
+import java.util.*;
+public class Main{
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        String[][]array=new String[3][3];
+        String[][]array2=new String[3][3];
+        boolean[][]array3=new boolean[3][3];
+        boolean x=false;
+        int count=0;
+        int count2=0;
+        String scann;
+        for(int i=0;i<3;i++){
+            scann=scan.next();
+            array[i][0]=scann.substring(0,1);
+            array[i][1]=scann.substring(1,2);
+            array[i][2]=scann.substring(2,3);
+        }
+        for(int j=0;j<3;j++){
+            scann=scan.next();
+            array2[j][0]=scann.substring(0,1);
+            array2[j][1]=scann.substring(1,2);
+            array2[j][2]=scann.substring(2,3);
+        }
+        for(int k=0;k<26;k++){
+            for(int l=0;l<3;l++){
+                for(int m=0;m<3;m++){
+                    char c=(char)(k+65);
+                    if(array[l][m].equals(c+"")){
+                        if(array2[l][m].equals(c+"")){
+                            count++;
+                            array3[l][m]=true;
+                        }
+                        else{
+                            for(int o=0;o<3;o++){
+                                for(int p=0;p<3;p++){
+                                    if(array2[l][m].equals(array[o][p])&&array3[o][p]==false){
+                                        count2++;
+                                        array3[o][p]=true;
+                                        x=true;
+                                        break;
+                                    }
+                                }
+                                if(x==true){
+                                    break;
+                                }
+                            }
+                        }
+                        x=false;
+                    }
+                }
+            }
+        }
+        System.out.println(count);
+        System.out.println(count2);
+    }
+}
