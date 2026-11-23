@@ -1,67 +1,14 @@
 import java.util.*;
-import java.io.*;
 public class Main{
-    static class FastScanner{
-        InputStream in;
-        byte[]buffer=new byte[1<<16];
-        int len=0;
-        int index=0;
-        FastScanner(InputStream in){
-            this.in=in;
-        }
-        int read() throws IOException{
-            if(index>=len){
-                len=in.read(buffer);
-                index=0;
-                if(len<=0)
-                    return -1;
-            }
-            return buffer[index++];
-        }
-        int nextInt() throws IOException{
-            int cur=read();
-            while(cur!=-1&&cur<=' '){
-                cur=read();
-            }
-            int mult=1;
-            if(cur=='-'){
-                mult=-1;
-                cur=read();
-            }
-            int val=0;
-            while(cur>' '){
-                val=val*10+(cur-'0');
-                cur=read();
-            }
-            return val*mult;
-        }
-        long nextLong() throws IOException{
-            long cur=read();
-            while(cur!=-1&&cur<=' '){
-                cur=read();
-            }
-            long mult=1;
-            if(cur=='-'){
-                mult=-1;
-                cur=read();
-            }
-            long val=0;
-            while(cur>' '){
-                val=val*10+(cur-'0');
-                cur=read();
-            }
-            return val*mult;
-        }
-    }
-    static int LOG=20;
-    static FastScanner scan=new FastScanner(System.in);
-    static int n;
+    static final int LOG=20;
+    static Scanner scan=new Scanner(System.in);
+    static int n=scan.nextInt();
     static int[]dist;
-    static boolean[]array;
+    static boolean[]array=new boolean[n];
     static LinkedList<Integer>cur;
-    static LinkedList<Integer>[]adj;
-    static int[]depth;
-    static int[][]parent;
+    static LinkedList<Integer>[]adj=new LinkedList[n];
+    static int[]depth=new int[n];
+    static int[][]parent=new int[n][LOG];
     static void dfs(int u,int p){
         parent[u][0]=p;
         for(int i=1;i<LOG;i++){
@@ -95,43 +42,32 @@ public class Main{
         return depth[u]+depth[v]-2*depth[lca(u,v)];
     }
     static void bfs(){
-        int[]q=new int[n];
-        int l=0;
-        int r=0;
+        Queue<Integer>q=new LinkedList<>();
         for(int i=0;i<n;i++){
             if(array[i]){
                 dist[i]=0;
-                q[r]=i;
-                r++;
+                q.add(i);
             }
         }
-        while(l<r){
-            int u=q[l];
-            l++;
+        while(!q.isEmpty()){
+            int u=q.poll();
             for(int v:adj[u]){
                 if(dist[v]>dist[u]+1){
                     dist[v]=dist[u]+1;
-                    q[r]=v;
-                    r++;
+                    q.add(v);
                 }
             }
         }
     }
     static void solve(int u,LinkedList<Integer>cur,int[]dist){
         int best=dist[u];
-        for(int v:cur){
+        for(int v:cur)
             best=Math.min(best,distance(u,v));
-        }
         System.out.println(best);
     }
-    public static void main(String[]args) throws IOException{
-        n=scan.nextInt();
+    public static void main(String[]args){
         int m=scan.nextInt();
         int size=(int)Math.sqrt(m);
-        array=new boolean[n];
-        adj=new LinkedList[n];
-        depth=new int[n];
-        parent=new int[n][LOG];
         array[0]=true;
         for(int i=0;i<n;i++){
             adj[i]=new LinkedList<>();
