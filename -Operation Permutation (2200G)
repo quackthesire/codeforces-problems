@@ -1,0 +1,66 @@
+import java.util.*;
+public class Main{
+    static int MOD=1000000007;
+    static long modinv(long base){
+        long res=1;
+        long exp=MOD-2;
+        while(exp>0){
+            if(exp%2==1)
+                res=(res*base)%MOD;
+            base=(base*base)%MOD;
+            exp/=2;
+        }
+        return res;
+    }
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int t=scan.nextInt();
+        long[]fact=new long[3001];
+        fact[0]=1;
+        for(int i=1;i<=3000;i++){
+            fact[i]=(i*fact[i-1])%MOD;
+        }
+        long[]invfact=new long[3001];
+        invfact[3000]=modinv(fact[3000]);
+        for(int i=3000;i>=1;i--){
+            invfact[i-1]=(i*invfact[i])%MOD;
+        }
+        for(int temp=0;temp<t;temp++){
+            int n=scan.nextInt();
+            long x=scan.nextInt();
+            long sum=0;
+            long mult=1;
+            int index=0;
+            long[]dp=new long[n+1];
+            dp[0]=1;
+            for(int i=0;i<n;i++){
+                String s=scan.next();
+                long val=Long.parseLong(s.substring(1));
+                if(s.charAt(0)=='+')
+                    sum=(sum+val)%MOD;
+                if(s.charAt(0)=='-')
+                    sum=(sum-val+MOD)%MOD;
+                if(s.charAt(0)=='x'){
+                    mult=(mult*val)%MOD;
+                    for(int j=index+1;j>=1;j--){
+                        dp[j]=(dp[j]+val*dp[j-1])%MOD;
+                    }
+                    index++;
+                }
+                if(s.charAt(0)=='/'){
+                    mult=(mult*modinv(val))%MOD;
+                    for(int j=index+1;j>=1;j--){
+                        dp[j]=(dp[j]+modinv(val)*dp[j-1])%MOD;
+                    }
+                    index++;
+                }
+            }
+            long multavg=0;
+            for(int i=0;i<=index;i++){
+                multavg=(multavg+dp[i]*(((fact[i]*fact[index-i])%MOD*invfact[index])%MOD))%MOD;
+            }
+            multavg=(multavg*modinv(index+1))%MOD;
+            System.out.println(((x*mult)%MOD+(sum*multavg)%MOD)%MOD);
+        }
+    }
+}
