@@ -1,0 +1,28 @@
+import java.util.*;
+public class Main{
+    static boolean solve(int yes,int no,double p){
+        return choose(yes,3)+choose(yes,2)*no+0.5*choose(no,2)*yes>=p*choose(yes+no,3);
+    }
+    static int choose(int n,int k){
+        if(k==2)
+            return n*(n-1)/2;
+        if(k==3)
+            return n*(n-1)*(n-2)/6;
+        return 0;
+    }
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int n=scan.nextInt();
+        double p=scan.nextDouble();
+        int l=0;
+        int r=n;
+        while(l<=r){
+            int m=(l+r)/2;
+            if(solve(m,n-m,p))
+                r=m-1;
+            else
+                l=m+1;
+        }
+        System.out.println(l);
+    }
+}
