@@ -1,0 +1,85 @@
+import java.util.*;
+public class Main{
+    static long gcd(long a,long b){
+        while(b!=0){
+            long temp=a%b;
+            a=b;
+            b=temp;
+        }
+        return a;
+    }
+    static long modinv(long val,long mod){
+        long x=1;
+        long y=0;
+        long cur=mod;
+        while(mod!=0){
+            long q=val/mod;
+            long temp=val%mod;
+            val=mod;
+            mod=temp;
+            temp=x-q*y;
+            x=y;
+            y=temp;
+        }
+        return (x%cur+cur)%cur;
+    }
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int t=scan.nextInt();
+        for(int temp=0;temp<t;temp++){
+            int n=scan.nextInt();
+            long k=scan.nextLong();
+            long r=scan.nextLong();
+            long inv=0;
+            long gcd=gcd(r,k);
+            if(k/gcd!=1)
+                inv=modinv(r/gcd,k/gcd);
+            long[]pref=new long[n];
+            long[]array=new long[n];
+            for(int i=0;i<n;i++){
+                array[i]=scan.nextLong();
+                pref[i]=array[i];
+                if(i!=0)
+                    pref[i]+=pref[i-1];
+            }
+            long[][]dp=new long[n][n];
+            long[][]work=new long[n][n];
+            for(int i=0;i<n;i++){
+                Arrays.fill(dp[i],Long.MAX_VALUE/2);
+            }
+            for(int len=0;len<n;len++){
+                for(int i=0;i<n-len;i++){
+                    if(len!=0)
+                        work[i][i+len]=work[i][i+len-1];
+                    for(int j=i+1;j<=i+len;j++){
+                        if(dp[j][i+len]==Long.MAX_VALUE/2)
+                            continue;
+                        work[i][i+len]=Math.max(work[i][i+len],work[i][j-1]+dp[j][i+len]);
+                    }
+                    long sum=pref[i+len]-(i==0?0:pref[i-1]);
+                    long val=(((sum-r)%k+k)%k);
+                    if(val%gcd==0){
+                        long j=0;
+                        if(k/gcd!=1)
+                            j=(val/gcd*inv)%(k/gcd);
+                        if(j<=work[i][i+len])
+                            dp[i][i+len]=j+1;
+                    }
+                    if(dp[i][i+len]!=Long.MAX_VALUE/2)
+                        work[i][i+len]=Math.max(work[i][i+len],dp[i][i+len]);
+                }
+            }
+            long[]ans=new long[n+1];
+            for(int i=1;i<=n;i++){
+                ans[i]=ans[i-1];
+                for(int j=0;j<=i-1;j++){
+                    if(dp[j][i-1]==Long.MAX_VALUE/2)
+                        continue;
+                    long sum=pref[i-1]-(j==0?0:pref[j-1]);
+                    ans[i]=Math.max(ans[i],ans[j]+(sum-dp[j][i-1]*r)/k);
+                }
+            }
+            System.out.println(ans[n]);
+        }
+    }
+}
