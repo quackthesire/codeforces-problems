@@ -1,0 +1,34 @@
+import java.util.*;
+public class Main{
+    static class Time implements Comparable<Time>{
+        int t;
+        boolean start;
+        public Time(int t,boolean start){
+            this.t=t;
+            this.start=start;
+        }
+        public int compareTo(Time other){
+            return this.t-other.t;
+        }
+    }
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int n=scan.nextInt();
+        Time[]array=new Time[2*n];
+        for(int i=0;i<n;i++){
+            array[2*i]=new Time(scan.nextInt(),true);
+            array[2*i+1]=new Time(scan.nextInt(),false);
+        }
+        Arrays.sort(array);
+        int tot=0;
+        int best=0;
+        for(int i=0;i<2*n;i++){
+            if(array[i].start)
+                tot++;
+            else
+                tot--;
+            best=Math.max(best,tot);
+        }
+        System.out.println(best);
+    }
+}
