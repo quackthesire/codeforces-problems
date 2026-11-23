@@ -1,0 +1,96 @@
+import java.util.*;
+public class solution{
+    static class Node implements Comparable<Node>{
+        int u;
+        int d;
+        public Node(int u,int d){
+            this.u=u;
+            this.d=d;
+        }
+        public int compareTo(Node other){
+            return this.d-other.d;
+        }
+    }
+    static class dsu{
+        int[]parent;
+        int[]size;
+        public dsu(int n){
+            parent=new int[n];
+            size=new int[n];
+            for(int i=0;i<n;i++){
+                parent[i]=i;
+                size[i]=1;
+            }
+        }
+        public int find(int u){
+            if(parent[u]!=u)
+                parent[u]=find(parent[u]);
+            return parent[u];
+        }
+        public void union(int u,int v){
+            u=find(u);
+            v=find(v);
+            if(u==v)
+                return;
+            if(size[u]<size[v]){
+                parent[u]=v;
+                size[v]+=size[u];
+            }
+            else{
+                parent[v]=u;
+                size[u]+=size[v];
+            }
+        }
+        public int size(int u){
+            return size[find(u)];
+        }
+    }
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int n=scan.nextInt();
+        int m=scan.nextInt();
+        ArrayList<Integer>[]adj=new ArrayList[n];
+        for(int i=0;i<n;i++){
+            adj[i]=new ArrayList<Integer>();
+        }
+        for(int i=0;i<m;i++){
+            int a=scan.nextInt()-1;
+            int b=scan.nextInt()-1;
+            adj[a].add(b);
+            adj[b].add(a);
+        }
+        boolean[]visited=new boolean[n];
+        int[]deg=new int[n];
+        PriorityQueue<Node>pq=new PriorityQueue<>();
+        for(int i=0;i<n;i++){
+            deg[i]=adj[i].size();
+            pq.add(new Node(i,deg[i]));
+        }
+        ArrayList<Node>order=new ArrayList<Node>();
+        while(!pq.isEmpty()){
+            Node node=pq.poll();
+            if(visited[node.u]||deg[node.u]!=node.d)
+                continue;
+            visited[node.u]=true;
+            order.add(node);
+            for(int v:adj[node.u]){
+                if(!visited[v])
+                    pq.add(new Node(v,--deg[v]));
+            }
+	    }
+	    Collections.reverse(order);
+	    Arrays.fill(visited,false);
+	    long best=0;
+	    dsu dsu=new dsu(n);
+	    for(int i=0;i<n;i++){
+	        Node node=order.get(i);
+	        visited[node.u]=true;
+	        for(int v:adj[node.u]){
+	            if(visited[v])
+	                dsu.union(node.u,v);
+	        }
+	        best=Math.max(best,(long)node.d*dsu.size(node.u));
+	    }
+	    System.out.println(best);
+	}
+}
