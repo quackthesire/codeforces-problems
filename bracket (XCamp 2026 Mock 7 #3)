@@ -1,0 +1,63 @@
+#include <bits/stdc++.h>
+using namespace std;
+using ll=long long;
+int main(){
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+    int t;
+    cin>>t;
+    while(t--){
+        int n;
+        string str;
+        cin>>n>>str;
+        vector<int>pre(n+1);
+        vector<ll>freq(2*n+1);
+        freq[n]++;
+        for(int i=1;i<=n;i++){
+            if(str[i-1]=='(')
+                pre[i]++;
+            else
+                pre[i]--;
+            pre[i]+=pre[i-1];
+            freq[pre[i]+n]++;
+        }
+        stack<int>s;
+        vector<int>next(n+1,n+1);
+        vector<int>nexteq(n+1,n+1);
+        for(int i=n;i>=0;i--){
+            while(!s.empty()&&pre[s.top()]>=pre[i]){
+                s.pop();
+            }
+            if(!s.empty())
+                next[i]=s.top();
+            s.push(i);
+        }
+        s={};
+        for(int i=n;i>=0;i--){
+            while(!s.empty()&&pre[s.top()]>pre[i]){
+                s.pop();
+            }
+            if(!s.empty())
+                nexteq[i]=s.top();
+            s.push(i);
+        }
+        ll ans=0;
+        vector<ll>count(n+1);
+        for(int i=n;i>=0;i--){
+            if(nexteq[i]==n+1)
+                count[i]=n-i;
+            else
+                count[i]=nexteq[i]-i-1+count[nexteq[i]];
+            if(next[i]!=n+1)
+                ans+=count[next[i]];
+        }
+        ll sum=0;
+        ll num=0;
+        for(int i=0;i<=2*n;i++){
+            ans+=freq[i]*(num*i-sum);
+            sum+=freq[i]*i;
+            num+=freq[i];
+        }
+        cout<<ans<<"\n";
+    }
+}
