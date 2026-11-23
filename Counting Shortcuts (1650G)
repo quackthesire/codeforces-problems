@@ -1,0 +1,92 @@
+import java.util.*;
+public class Main{
+    static long MOD=1000000007;
+    static class Node implements Comparable<Node>{
+        int u;
+        int dist;
+        public Node(int u,int dist){
+            this.u=u;
+            this.dist=dist;
+        }
+        public int compareTo(Node other){
+            return this.dist-other.dist;
+        }
+    }
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int t=scan.nextInt();
+        for(int temp=0;temp<t;temp++){
+            int n=scan.nextInt();
+            int m=scan.nextInt();
+            int s=scan.nextInt()-1;
+            int e=scan.nextInt()-1;
+            ArrayList<Integer>[]adj=new ArrayList[n];
+            for(int i=0;i<n;i++){
+                adj[i]=new ArrayList<>();
+            }
+            int[]edgeu=new int[m];
+            int[]edgev=new int[m];
+            for(int i=0;i<m;i++){
+                int u=scan.nextInt()-1;
+                int v=scan.nextInt()-1;
+                edgeu[i]=u;
+                edgev[i]=v;
+                adj[u].add(v);
+                adj[v].add(u);
+            }
+            int[]dist=new int[n];
+            Arrays.fill(dist,Integer.MAX_VALUE/4);
+            PriorityQueue<Node>pq=new PriorityQueue<>();
+            dist[s]=0;
+            pq.add(new Node(s,0));
+            while(!pq.isEmpty()){
+                Node node=pq.poll();
+                if(node.dist!=dist[node.u])
+                    continue;
+                for(int v:adj[node.u]){
+                    if(node.dist+1<dist[v]){
+                        dist[v]=node.dist+1;
+                        pq.add(new Node(v,dist[v]));
+                    }
+                }
+            }
+            Integer[]order=new Integer[n];
+            for(int i=0;i<n;i++){
+                order[i]=i;
+            }
+            Arrays.sort(order,(a,b)->(dist[a]-dist[b]));
+            long[]dp=new long[n];
+            dp[s]=1;
+            for(int u:order){
+                for(int v:adj[u]){
+                    if(dist[v]==dist[u]+1)
+                        dp[v]=(dp[v]+dp[u])%MOD;
+                }
+            }
+            long[]count=new long[n];
+            count[e]=1;
+            for(int i=n-1;i>=0;i--){
+                int u=order[i];
+                for(int v:adj[u]){
+                    if(dist[v]==dist[u]-1){
+                        count[v]=(count[v]+count[u])%MOD;
+                    }
+                }
+            }
+            long ans=dp[e];
+            for(int i=0;i<m;i++){
+                int u=edgeu[i];
+                int v=edgev[i];
+                if(dist[u]==dist[v]){
+                    if(dist[s]==dist[u])
+                        continue;
+                    if(dist[u]+count[u]*0==dist[u]){
+                        ans=(ans+dp[u]*count[v])%MOD;
+                        ans=(ans+dp[v]*count[u])%MOD;
+                    }
+                }
+            }
+            System.out.println(ans);
+        }
+    }
+}
