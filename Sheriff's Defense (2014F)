@@ -1,0 +1,42 @@
+import java.util.*;
+public class Main{
+    static long[]dp1;//strengthen i
+    static long[]dp2;//no strengthen i
+    static void solve(int u,int p,long[]array,ArrayList<Integer>[]adj,long c){
+        long count1=array[u];
+        long count2=0;
+        for(int v:adj[u]){
+            if(v==p)
+                continue;
+            solve(v,u,array,adj,c);
+            count1+=Math.max(dp1[v]-2*c,dp2[v]);
+            count2+=Math.max(dp1[v],dp2[v]);
+        }
+        dp1[u]=count1;
+        dp2[u]=count2;
+    }
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int t=scan.nextInt();
+        for(int temp=0;temp<t;temp++){
+            int n=scan.nextInt();
+            long c=scan.nextLong();
+            dp1=new long[n];
+            dp2=new long[n];
+            long[]array=new long[n];
+            ArrayList<Integer>[]adj=new ArrayList[n];
+            for(int i=0;i<n;i++){
+                array[i]=scan.nextLong();
+                adj[i]=new ArrayList<>();
+            }
+            for(int i=0;i<n-1;i++){
+                int u=scan.nextInt()-1;
+                int v=scan.nextInt()-1;
+                adj[u].add(v);
+                adj[v].add(u);
+            }
+            solve(0,-1,array,adj,c);
+            System.out.println(Math.max(dp1[0],dp2[0]));
+        }
+    }
+}
