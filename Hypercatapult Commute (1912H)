@@ -1,0 +1,107 @@
+#include <bits/stdc++.h>
+using namespace std;
+using ll=long long;
+void solve(int u,vector<bool>&visited,vector<vector<int>>&undir,vector<int>&cur){
+    if(visited[u])
+        return;
+    visited[u]=true;
+    cur.push_back(u);
+    for(int v:undir[u]){
+        solve(v,visited,undir,cur);
+    }
+}
+vector<int> find(vector<int>deg,vector<int>&comp,vector<vector<int>>&adj,int node){
+    queue<int>q;
+    vector<int>order;
+    if(node!=-1){
+        for(int i:adj[node]){
+            deg[i]--;
+        }
+    }
+    for(int i:comp){
+        if(deg[i]==0&&i!=node)
+            q.push(i);
+    }
+    while(!q.empty()){
+        int u=q.front();
+        q.pop();
+        order.push_back(u);
+        for(int v:adj[u]){
+            if(u==node)
+                continue;
+            deg[v]--;
+            if(deg[v]==0&&v!=node)
+                q.push(v);
+        }
+    }
+    return order;
+}
+int main(){
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+    int n;
+    int m;
+    cin>>n>>m;
+    vector<int>deg(n);
+    vector<vector<int>>adj(n,vector<int>());
+    vector<vector<int>>undir(n,vector<int>());
+    for(int i=0;i<m;i++){
+        int u;
+        int v;
+        cin>>u>>v;
+        u--;
+        v--;
+        adj[u].push_back(v);
+        undir[u].push_back(v);
+        undir[v].push_back(u);
+        deg[v]++;
+    }
+    vector<bool>visited(n);
+    vector<vector<int>>comps;
+    for(int i=0;i<n;i++){
+        if(visited[i])
+            continue;
+        vector<int>cur;
+        solve(i,visited,undir,cur);
+        comps.push_back(cur);
+    }
+    int tot=0;
+    bool work=true;
+    vector<pair<int,int>>moves;
+    for(vector<int>comp:comps){
+        vector<int>order=find(deg,comp,adj,-1);
+        if(order.size()==comp.size()){
+            tot+=order.size()-1;
+            for(int i=0;i<order.size()-1;i++){
+                moves.push_back(make_pair(order[i],order[i+1]));
+            }
+            continue;
+        }
+        bool cur=false;
+        for(int u:comp){
+            order=find(deg,comp,adj,u);
+            if(order.size()==comp.size()-1){
+                tot+=order.size()+1;
+                moves.push_back(make_pair(u,order[0]));
+                for(int i=0;i<order.size()-1;i++){
+                    moves.push_back(make_pair(order[i],order[i+1]));
+                }
+                moves.push_back(make_pair(order[order.size()-1],u));
+                cur=true;
+                break;
+            }
+        }
+        if(!cur){
+            work=false;
+            break;
+        }
+    }
+    if(!work){
+        cout<<"-1"<<"\n";
+        return 0;
+    }
+    cout<<tot<<"\n";
+    for(pair<int,int>move:moves){
+        cout<<(move.first+1)<<" "<<(move.second+1)<<"\n";
+    }
+}
