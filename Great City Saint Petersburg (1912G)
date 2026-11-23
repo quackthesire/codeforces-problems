@@ -1,0 +1,210 @@
+#include <bits/stdc++.h>
+using namespace std;
+using ll=long long;
+struct Segtree{
+    int n;
+    vector<ll>maxval;//max val
+    vector<ll>tree;//sum of pref max
+    vector<ll>prefmax;//pref max
+    vector<ll>lazymax;
+    vector<ll>lazy;
+    Segtree(vector<ll>&array){
+        n=array.size();
+        maxval.resize(4*n);
+        tree.resize(4*n);
+        prefmax.resize(4*n);
+        lazymax.resize(4*n);
+        lazy.resize(4*n);
+        vector<ll>pref(n);
+        for(int i=0;i<n;i++){
+            pref[i]=array[i];
+            if(i!=0)
+                pref[i]=max(pref[i],pref[i-1]);
+        }
+        build(1,0,n-1,array,pref);
+    }
+    void build(int node,int l,int r,vector<ll>&array,vector<ll>&pref){
+        if(l==r){
+            maxval[node]=array[l];
+            tree[node]=pref[l];
+            prefmax[node]=pref[l];
+            return;
+        }
+        int m=(l+r)/2;
+        build(node*2,l,m,array,pref);
+        build(node*2+1,m+1,r,array,pref);
+        maxval[node]=max(maxval[node*2],maxval[node*2+1]);
+        tree[node]=tree[node*2]+tree[node*2+1];
+        prefmax[node]=max(prefmax[node*2],prefmax[node*2+1]);
+    }
+    ll query(int l,int r){
+        if(l<0||r>n-1||l>r)
+            return 0;
+        return query(1,0,n-1,l,r);
+    }
+    ll query(int node,int l,int r,int ql,int qr){
+        if(r<ql||qr<l)
+            return 0;
+        if(ql<=l&&r<=qr)
+            return tree[node];
+        push(node,l,r);
+        int m=(l+r)/2;
+        ll left=query(node*2,l,m,ql,qr);
+        ll right=query(node*2+1,m+1,r,ql,qr);
+        return left+right;
+    }
+    ll querymax(int l,int r){
+        if(l<0||r>n-1||l>r)
+            return 0;
+        return querymax(1,0,n-1,l,r);
+    }
+    ll querymax(int node,int l,int r,int ql,int qr){
+        if(r<ql||qr<l)
+            return 0;
+        if(ql<=l&&r<=qr)
+            return maxval[node];
+        push(node,l,r);
+        int m=(l+r)/2;
+        ll left=querymax(node*2,l,m,ql,qr);
+        ll right=querymax(node*2+1,m+1,r,ql,qr);
+        return max(left,right);
+    }
+    int first(int l,int r,ll val){
+        if(l<0||r>n-1||l>r)
+            return -1;
+        return first(1,0,n-1,l,r,val);
+    }
+    int first(int node,int l,int r,int ql,int qr,ll val){
+        if(r<ql||qr<l||maxval[node]<val)
+            return -1;
+        if(l==r)
+            return l;
+        push(node,l,r);
+        int m=(l+r)/2;
+        int left=first(node*2,l,m,ql,qr,val);
+        if(left!=-1)
+            return left;
+        return first(node*2+1,m+1,r,ql,qr,val);
+    }
+    int firstpref(int l,int r,ll val){
+        if(l<0||r>n-1||l>r)
+            return -1;
+        return firstpref(1,0,n-1,l,r,val);
+    }
+    int firstpref(int node,int l,int r,int ql,int qr,ll val){
+        if(r<ql||qr<l||prefmax[node]<=val)
+            return -1;
+        if(l==r)
+            return l;
+        push(node,l,r);
+        int m=(l+r)/2;
+        int left=firstpref(node*2,l,m,ql,qr,val);
+        if(left!=-1)
+            return left;
+        return firstpref(node*2+1,m+1,r,ql,qr,val);
+    }
+    void update(int l,int r){
+        int left=first(l,r,query(l-1,l-1));
+        int right=firstpref(r+1,n-1,querymax(l,r));
+        updatemax(1,0,n-1,l,r);
+        if(left==-1)
+            return;
+        if(right==-1)
+            update(1,0,n-1,left,n-1);
+        else
+            update(1,0,n-1,left,right-1);
+    }
+    void updatemax(int node,int l,int r,int ql,int qr){
+        if(r<ql||qr<l)
+            return;
+        if(ql<=l&&r<=qr){
+            maxval[node]++;
+            lazymax[node]++;
+            return;
+        }
+        push(node,l,r);
+        int m=(l+r)/2;
+        updatemax(node*2,l,m,ql,qr);
+        updatemax(node*2+1,m+1,r,ql,qr);
+        maxval[node]=max(maxval[node*2],maxval[node*2+1]);
+    }
+    void update(int node,int l,int r,int ql,int qr){
+        if(r<ql||qr<l)
+            return;
+        if(ql<=l&&r<=qr){
+            tree[node]+=(r-l+1);
+            prefmax[node]++;
+            lazy[node]++;
+            return;
+        }
+        push(node,l,r);
+        int m=(l+r)/2;
+        update(node*2,l,m,ql,qr);
+        update(node*2+1,m+1,r,ql,qr);
+        tree[node]=tree[node*2]+tree[node*2+1];
+        prefmax[node]=max(prefmax[node*2],prefmax[node*2+1]);
+    }
+    void push(int node,int l,int r){
+        if(lazy[node]==0&&lazymax[node]==0)
+            return;
+        int m=(l+r)/2;
+        maxval[node*2]+=lazymax[node];
+        maxval[node*2+1]+=lazymax[node];
+        tree[node*2]+=(m-l+1)*lazy[node];
+        tree[node*2+1]+=(r-m)*lazy[node];
+        prefmax[node*2]+=lazy[node];
+        prefmax[node*2+1]+=lazy[node];
+        lazymax[node*2]+=lazymax[node];
+        lazymax[node*2+1]+=lazymax[node];
+        lazy[node*2]+=lazy[node];
+        lazy[node*2+1]+=lazy[node];
+        lazymax[node]=0;
+        lazy[node]=0;
+    }
+};
+int bs(Segtree& pre,Segtree& suff,int n){
+    int l=0;
+    int r=n-1;
+    int ans=n;
+    while(l<=r){
+        int m=(l+r)/2;
+        if(pre.query(m,m)>suff.query(n-m-1,n-m-1)){
+            ans=m;
+            r=m-1;
+        }
+        else
+            l=m+1;
+    }
+    return ans;
+}
+int main(){
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+    int n;
+    int q;
+    cin>>n>>q;
+    ll sum=0;
+    vector<ll>array(n);
+    vector<ll>rev(n);
+    for(int i=0;i<n;i++){
+        cin>>array[i];
+        rev[n-i-1]=array[i];
+        sum+=array[i];
+    }
+    Segtree pre(array);
+    Segtree suff(rev);
+    int val=bs(pre,suff,n);
+    cout<<pre.query(0,val-1)+suff.query(0,n-val-1)-sum<<"\n";
+    for(int i=0;i<q;i++){
+        int l;
+        int r;
+        cin>>l>>r;
+        l--;
+        r--;
+        pre.update(l,r);
+        suff.update(n-r-1,n-l-1);
+        sum+=(r-l+1);
+        val=bs(pre,suff,n);
+        cout<<pre.query(0,val-1)+suff.query(0,n-val-1)-sum<<"\n";
+    }
+}
