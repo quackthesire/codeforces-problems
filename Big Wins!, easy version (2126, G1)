@@ -1,0 +1,42 @@
+import java.util.*;
+public class Main{
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int t=scan.nextInt();
+        for(int temp=0;temp<t;temp++){
+            int n=scan.nextInt();
+            int[]array=new int[n];
+            for(int i=0;i<n;i++){
+                array[i]=scan.nextInt();
+            }
+            int best=0;
+            for(int i=1;i<=100;i++){
+                int[]vals=new int[n];
+                for(int j=0;j<n;j++){
+                    vals[j]=(array[j]<i?-1:1);
+                }
+                int[]pre=new int[n];
+                int[]premin=new int[n];
+                int[]suffmax=new int[n];
+                for(int j=0;j<n;j++){
+                    pre[j]=vals[j];
+                    if(j!=0)
+                        pre[j]+=pre[j-1];
+                    premin[j]=Math.min(0,pre[j]);
+                    if(j!=0)
+                        premin[j]=Math.min(premin[j],premin[j-1]);
+                }
+                for(int j=n-1;j>=0;j--){
+                    suffmax[j]=pre[j];
+                    if(j!=n-1)
+                        suffmax[j]=Math.max(suffmax[j],suffmax[j+1]);
+                }
+                for(int j=0;j<n;j++){
+                    if(suffmax[j]>=(j==0?0:premin[j-1]))
+                        best=Math.max(best,i-array[j]);
+                }
+            }
+            System.out.println(best);
+        }
+    }
+}
