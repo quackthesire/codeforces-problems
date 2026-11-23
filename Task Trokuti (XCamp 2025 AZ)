@@ -1,0 +1,67 @@
+import java.util.*;
+public class Main{
+    static class Triangle{
+        int a;
+        int b;
+        int c;
+        public Triangle(int a,int b,int c){
+            this.a=a;
+            this.b=b;
+            this.c=c;
+        }
+    }
+	public static void main(String[]args){
+	    Scanner scan=new Scanner(System.in);
+	    int t=scan.nextInt();
+	    for(int temp=0;temp<t;temp++){
+	        int n=scan.nextInt();
+	        int m=scan.nextInt();
+    	    boolean[][]adj=new boolean[6*n][6*n];
+    	    for(int i=0;i<m;i++){
+    	        int u=scan.nextInt()-1;
+    	        int v=scan.nextInt()-1;
+    	        adj[u][v]=true;
+    	        adj[v][u]=true;
+    	    }
+    	    ArrayList<Integer>index=new ArrayList<>();
+    	    for(int i=0;i<6*n;i++){
+    	        index.add(i);
+        	}
+        	while(true){
+        	    boolean[]visited=new boolean[6*n];
+        	    ArrayList<Triangle>ans=new ArrayList<>();
+        	    Collections.shuffle(index);
+        	    for(int i=0;i<6*n;i++){
+        	        int a=index.get(i);
+        	        if(visited[a])
+        	            continue;
+                    for(int j=i+1;j<6*n;j++){
+                        int b=index.get(j);
+                        if(visited[a]||visited[b]||!adj[a][b])
+                            continue;
+                        for(int k=0;k<6*n;k++){
+                            int c=index.get(k);
+                            if(visited[c]||!adj[a][c]||!adj[b][c])
+                                continue;
+                            ans.add(new Triangle(a+1,b+1,c+1));
+                            visited[a]=true;
+                            visited[b]=true;
+                            visited[c]=true;
+                            break;
+                        }
+                        if(ans.size()==n)
+                            break;
+                    }
+                    if(ans.size()==n)
+                        break;
+                }
+                if(ans.size()==n){
+                    for(Triangle tri:ans){
+                        System.out.println(tri.a+" "+tri.b+" "+tri.c);
+                    }
+                    break;
+                }
+	        }
+	    }
+	}
+}
