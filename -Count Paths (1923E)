@@ -1,0 +1,61 @@
+import java.util.*;
+public class Main{
+    static class Node implements Comparable<Node>{
+        long val;
+        TreeMap<Integer,Integer>exposed;
+        public Node(long val,int n){
+            this.val=val;
+            exposed=new TreeMap<>();
+        }
+        public int compareTo(Node other){
+            return other.exposed.size()-this.exposed.size();
+        }
+    }
+    static Node dfs(int u,int p,int[]array,ArrayList<Integer>[]adj){
+        ArrayList<Node>temp=new ArrayList<>();
+        for(int v:adj[u]){
+            if(v==p)
+                continue;
+            temp.add(dfs(v,u,array,adj));
+        }
+        Collections.sort(temp);
+        Node ans;
+        if(temp.isEmpty())
+            ans=new Node(0,array.length);
+        else
+            ans=temp.get(0);
+        for(int i=1;i<temp.size();i++){
+            Node node=temp.get(i);
+            ans.val+=node.val;
+            for(Map.Entry<Integer,Integer>e:node.exposed.entrySet()){
+                int prev=ans.exposed.getOrDefault(e.getKey(),0);
+                if(e.getKey()!=array[u])
+                    ans.val+=(long)e.getValue()*prev;
+                ans.exposed.put(e.getKey(),e.getValue()+prev);
+            }
+        }
+        ans.val+=ans.exposed.getOrDefault(array[u],0);
+        ans.exposed.put(array[u],1);
+        return ans;
+    }
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int t=scan.nextInt();
+        for(int temp=0;temp<t;temp++){
+            int n=scan.nextInt();
+            int[]array=new int[n];
+            ArrayList<Integer>[]adj=new ArrayList[n];
+            for(int i=0;i<n;i++){
+                array[i]=scan.nextInt()-1;
+                adj[i]=new ArrayList<>();
+            }
+            for(int i=0;i<n-1;i++){
+                int u=scan.nextInt()-1;
+                int v=scan.nextInt()-1;
+                adj[u].add(v);
+                adj[v].add(u);
+            }
+            System.out.println(dfs(0,-1,array,adj).val);
+        }
+    }
+}
