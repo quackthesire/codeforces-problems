@@ -1,0 +1,55 @@
+import java.util.*;
+public class Main{
+    static class Node{
+        int x;
+        int y;
+        public Node(int x,int y){
+            this.x=x;
+            this.y=y;
+        }
+    }
+	public static void main(String[]args){
+	    Scanner scan=new Scanner(System.in);
+	    int n=scan.nextInt();
+	    Node[]array=new Node[n];
+	    for(int i=0;i<n;i++){
+	        array[i]=new Node(scan.nextInt(),scan.nextInt());
+	    }
+	    int[][]minx=new int[n][n];
+	    int[][]miny=new int[n][n];
+	    for(int i=0;i<n;i++){
+	        Arrays.fill(minx[i],Integer.MAX_VALUE);
+	        Arrays.fill(miny[i],Integer.MAX_VALUE);
+	        for(int j=i;j<n;j++){
+	            if(i==j){
+	                minx[i][j]=array[j].x;
+	                miny[i][j]=array[j].y;
+	            }
+	            else{
+	                minx[i][j]=Math.min(minx[i][j-1],array[j].x);
+	                miny[i][j]=Math.min(miny[i][j-1],array[j].y);
+	            }
+	        }
+	    }
+	    long[][]dp=new long[n][n];
+	    for(int i=0;i<n;i++){
+	        Arrays.fill(dp[i],Long.MAX_VALUE/2);
+	        dp[i][i]=0;
+	    }
+	    for(int i=2;i<=n;i++){
+	        for(int j=0;(j+i-1)<n;j++){
+	            long best=Long.MAX_VALUE/2;
+	            for(int k=j;k<(j+i-1);k++){
+	                long xval=(long)minx[j][k]+(long)minx[k+1][j+i-1]-2L*(long)minx[j][j+i-1];
+	                long yval=(long)miny[j][k]+(long)miny[k+1][j+i-1]-2L*(long)miny[j][j+i-1];
+	                best=Math.min(best,dp[j][k]+dp[k+1][j+i-1]+xval+yval);
+	            }
+	            dp[j][j+i-1]=best;
+	        }
+	    }
+	    if(n>0)
+	        System.out.println((long)minx[0][n-1]+(long)miny[0][n-1]+dp[0][n-1]);
+	    else
+	        System.out.println("0");
+	}
+}
