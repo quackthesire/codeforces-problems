@@ -1,0 +1,116 @@
+import java.util.*;
+public class Main{
+    static class Node{
+        int pos;
+        long val;
+        public Node(int pos,long val){
+            this.pos=pos;
+            this.val=val;
+        }
+    }
+    static class Segtree{
+        int n;
+        long[]tree;
+        public Segtree(int n){
+            this.n=n;
+            tree=new long[4*n];
+        }
+        public long query(int l,int r){
+            if(l>r)
+                return 0;
+            return query(1,0,n-1,l,r);
+        }
+        public long query(int node,int l,int r,int ll,int rr){
+            if(ll>r||rr<l)
+                return 0;
+            if(ll<=l&&r<=rr)
+                return tree[node];
+            int m=(l+r)/2;
+            long left=query(node*2,l,m,ll,rr);
+            long right=query(node*2+1,m+1,r,ll,rr);
+            return left+right;
+        }
+        public void update(int i,long val){
+            update(1,0,n-1,i,val);
+        }
+        public void update(int node,int l,int r,int i,long val){
+            if(l==r){
+                tree[node]=val;
+                return;
+            }
+            int m=(l+r)/2;
+            if(i<=m)
+                update(node*2,l,m,i,val);
+            else
+                update(node*2+1,m+1,r,i,val);
+            tree[node]=tree[node*2]+tree[node*2+1];
+        }
+    }
+    static int n;
+    static TreeSet<Node>set=new TreeSet<>((a,b)->(a.pos-b.pos));
+    static long distl(int pos){
+        if(set.floor(new Node(pos,0))==null)
+            return (long)pos*(pos+1)/2;
+        int prev=set.floor(new Node(pos,0)).pos;
+        return (long)(pos-prev-1)*(pos-prev)/2;
+    }
+    static long distr(int pos){
+        if(set.higher(new Node(pos,0))==null)
+            return (long)(n-pos-1)*(n-pos)/2;
+        int next=set.higher(new Node(pos,0)).pos;
+        return (long)(next-pos-1)*(next-pos)/2;
+    }
+    static long rangedist(int prev,int pos){
+        if(pos<=prev)
+            return 0;
+        int next=set.higher(new Node(prev,0)).pos;
+        return (long)(next-prev-1)*(next-prev)/2-(long)(next-pos-1)*(next-pos)/2;
+    }
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        n=scan.nextInt();
+        int m=scan.nextInt();
+        int q=scan.nextInt();
+        Segtree segtree=new Segtree(n);
+        int[]temp=new int[m];
+        for(int i=0;i<m;i++){
+            temp[i]=scan.nextInt()-1;
+        }
+        for(int i=0;i<m;i++){
+            long val=scan.nextLong();
+            set.add(new Node(temp[i],val));
+        }
+        for(Node cur:set){
+            if(set.higher(cur)!=null)
+                segtree.update(cur.pos,cur.val*distr(cur.pos));
+        }
+        for(int i=0;i<q;i++){
+            if(scan.nextInt()==1){
+                int pos=scan.nextInt()-1;
+                long val=scan.nextLong();
+                Node left=set.floor(new Node(pos,0));
+                Node right=set.ceiling(new Node(pos,0));
+                segtree.update(left.pos,left.val*distl(pos));
+                segtree.update(pos,val*distr(pos));
+                set.add(new Node(pos,val));
+            }
+            else{
+                int l=scan.nextInt()-1;
+                int r=scan.nextInt()-1;
+                Node left=set.floor(new Node(l,0));
+                Node right=set.floor(new Node(r,0));
+                Node next=set.higher(left);
+                if(left.pos==right.pos)
+                    System.out.println(left.val*(rangedist(left.pos,r)-rangedist(left.pos,l-1)));
+                else{
+                    long ans=0;
+                    ans+=left.val*(rangedist(left.pos,next.pos-1)-rangedist(left.pos,l-1));
+                    ans+=segtree.query(next.pos,right.pos-1);
+                    if(right.pos<r)
+                        ans+=right.val*rangedist(right.pos,r);
+                    System.out.println(ans);
+                }
+            }
+        }
+    }
+}
