@@ -1,0 +1,80 @@
+import java.util.*;
+public class Main{
+    static class Node{
+        int i;
+        int j;
+        public Node(int i,int j){
+            this.i=i;
+            this.j=j;
+        }
+    }
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int t=scan.nextInt();
+        for(int temp=0;temp<t;temp++){
+            int n=scan.nextInt();
+            int m=scan.nextInt();
+            char[][]array=new char[n][m];
+            for(int i=0;i<n;i++){
+                array[i]=scan.next().toCharArray();
+            }
+            int[][]ans=new int[n][m];
+            for(int i=0;i<n;i++){
+                for(int j=0;j<m;j++){
+                    if(ans[i][j]!=0)
+                        continue;
+                    int curi=i;
+                    int curj=j;
+                    ArrayList<Node>list=new ArrayList<>();
+                    while(curi>=0&&curi<n&&curj>=0&&curj<m&&ans[curi][curj]==0){
+                        ans[curi][curj]=-1;
+                        list.add(new Node(curi,curj));
+                        if(array[curi][curj]=='U')
+                            curi--;
+                        else if(array[curi][curj]=='D')
+                            curi++;
+                        else if(array[curi][curj]=='L')
+                            curj--;
+                        else if(array[curi][curj]=='R')
+                            curj++;
+                    }
+                    int val=0;
+                    Node start=null;
+                    if(curi>=0&&curi<n&&curj>=0&&curj<m){
+                        if(ans[curi][curj]>0)
+                            val=ans[curi][curj];
+                        else
+                            start=new Node(curi,curj);
+                    }
+                    int cur=0;
+                    boolean work=(start!=null);
+                    ArrayList<Node>cycle=new ArrayList<>();
+                    for(int k=list.size()-1;k>=0;k--){
+                        val++;
+                        ans[list.get(k).i][list.get(k).j]=val;
+                        if(work){
+                            cur=val;
+                            cycle.add(list.get(k));
+                            if(list.get(k).i==start.i&&list.get(k).j==start.j)
+                                work=false;
+                        }
+                    }
+                    for(Node node:cycle){
+                        ans[node.i][node.j]=cur;
+                    }
+                }
+            }
+            int besti=0;
+            int bestj=0;
+            for(int i=0;i<n;i++){
+                for(int j=0;j<m;j++){
+                    if(ans[i][j]>ans[besti][bestj]){
+                        besti=i;
+                        bestj=j;
+                    }
+                }
+            }
+            System.out.println((besti+1)+" "+(bestj+1)+" "+ans[besti][bestj]);
+        }
+    }
+}
