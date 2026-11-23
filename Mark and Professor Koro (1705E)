@@ -1,0 +1,135 @@
+import java.util.*;
+public class Main{
+    static class Segtree{
+        int n;
+        int[]tree;
+        boolean[]lazy;
+        public Segtree(int n){
+            this.n=n;
+            tree=new int[4*n];
+            lazy=new boolean[4*n];
+        }
+        public void apply(int node,int l,int r){
+            tree[node]=(r-l+1)-tree[node];
+            lazy[node]^=true;
+        }
+        public void push(int node,int l,int r){
+            if(!lazy[node]||l==r)
+                return;
+            int m=(l+r)/2;
+            apply(node*2,l,m);
+            apply(node*2+1,m+1,r);
+            lazy[node]=false;
+        }
+        public int query(int i){
+            return query(1,0,n-1,i);
+        }
+        public int query(int node,int l,int r,int i){
+            if(l==r)
+                return tree[node];
+            push(node,l,r);
+            int m=(l+r)/2;
+            if(i<=m)
+                return query(node*2,l,m,i);
+            return query(node*2+1,m+1,r,i);
+        }
+        public void update(int i,int val){
+            update(1,0,n-1,i,val);
+        }
+        public void update(int node,int l,int r,int i,int val){
+            if(l==r){
+                tree[node]=val;
+                return;
+            }
+            push(node,l,r);
+            int m=(l+r)/2;
+            if(i<=m)
+                update(node*2,l,m,i,val);
+            else
+                update(node*2+1,m+1,r,i,val);
+            tree[node]=tree[node*2]+tree[node*2+1];
+        }
+        public void flip(int l,int r){
+            if(l>r)
+                return;
+            flip(1,0,n-1,l,r);
+        }
+        public void flip(int node,int l,int r,int ll,int rr){
+            if(ll<=l&&r<=rr){
+                apply(node,l,r);
+                return;
+            }
+            push(node,l,r);
+            int m=(l+r)/2;
+            if(ll<=m)
+                flip(node*2,l,m,ll,rr);
+            if(rr>m)
+                flip(node*2+1,m+1,r,ll,rr);
+            tree[node]=tree[node*2]+tree[node*2+1];
+        }
+        public int one(int node,int l,int r,int i){
+            if(r<i||tree[node]==0)
+                return -1;
+            if(l==r)
+                return l;
+            push(node,l,r);
+            int m=(l+r)/2;
+            int res=one(node*2,l,m,i);
+            if(res!=-1)
+                return res;
+            return one(node*2+1,m+1,r,i);
+        }
+        public int zero(int node,int l,int r,int i){
+            if(r<i||tree[node]==r-l+1)
+                return -1;
+            if(l==r)
+                return l;
+            push(node,l,r);
+            int m=(l+r)/2;
+            int res=zero(node*2,l,m,i);
+            if(res!=-1)
+                return res;
+            return zero(node*2+1,m+1,r,i);
+        }
+        public int max(int node,int l,int r){
+            if(l==r)
+                return l;
+            push(node,l,r);
+            int m=(l+r)/2;
+            if(tree[node*2+1]>0)
+                return max(node*2+1,m+1,r);
+            return max(node*2,l,m);
+        }
+        public void add(int i){
+            int pos=zero(1,0,n-1,i);
+            if(pos>i)
+                flip(i,pos-1);
+            update(pos,1);
+        }
+        public void subtract(int i){
+            int pos=one(1,0,n-1,i);
+            if(pos>i)
+                flip(i,pos-1);
+            update(pos,0);
+        }
+    }
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int n=scan.nextInt();
+        int q=scan.nextInt();
+        int[]array=new int[n];
+        Segtree segtree=new Segtree(300000);
+        for(int i=0;i<n;i++){
+            array[i]=scan.nextInt();
+            segtree.add(array[i]);
+        }
+        for(int i=0;i<q;i++){
+            int index=scan.nextInt()-1;
+            int val=scan.nextInt();
+            segtree.subtract(array[index]);
+            array[index]=val;
+            segtree.add(array[index]);
+            System.out.println(segtree.max(1,0,299999));
+        }
+    }
+}
