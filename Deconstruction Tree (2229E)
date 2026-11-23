@@ -1,0 +1,132 @@
+import java.util.*;
+public class Main{
+    static long MOD=998244353;
+    static void dfs(int u,int p,int sub,ArrayList<Integer>[]adj,int[]max,int[]par){
+        par[u]=sub;
+        for(int v:adj[u]){
+            if(v==p)
+                continue;
+            if(sub==-1)
+                dfs(v,u,v,adj,max,par);
+            else
+                dfs(v,u,sub,adj,max,par);
+            max[u]=Math.max(max[u],max[v]);
+            max[u]=Math.max(max[u],v);
+        }
+    }
+    static class Segtree{
+        int n;
+        long[]tree;
+        long[]lazy;
+        public Segtree(int n){
+            this.n=n;
+            tree=new long[4*n];
+            lazy=new long[4*n];
+        }
+        public void update(int l,int r,long val){
+            update(1,0,n-1,l,r,val%MOD);
+        }
+        public void update(int node,int l,int r,int ll,int rr,long val){
+            if(ll>r||rr<l)
+                return;
+            if(ll<=l&&r<=rr){
+                tree[node]=(tree[node]+val)%MOD;
+                lazy[node]=(lazy[node]+val)%MOD;
+                return;
+            }
+            push(node);
+            int m=(l+r)/2;
+            update(node*2,l,m,ll,rr,val);
+            update(node*2+1,m+1,r,ll,rr,val);
+        }
+        public long query(int i){
+            return query(1,0,n-1,i);
+        }
+        public long query(int node,int l,int r,int i){
+            if(l==r)
+                return tree[node];
+            push(node);
+            int m=(l+r)/2;
+            if(i<=m)
+                return query(node*2,l,m,i);
+            return query(node*2+1,m+1,r,i);
+        }
+        public void push(int node){
+            if(lazy[node]==0)
+                return;
+            long val=lazy[node];
+            tree[node*2]=(tree[node*2]+val)%MOD;
+            tree[node*2+1]=(tree[node*2+1]+val)%MOD;
+            lazy[node*2]=(lazy[node*2]+val)%MOD;
+            lazy[node*2+1]=(lazy[node*2+1]+val)%MOD;
+            lazy[node]=0;
+        }
+    }
+    static class Node implements Comparable<Node>{
+        int index;
+        int val;
+        public Node(int index,int val){
+            this.index=index;
+            this.val=val;
+        }
+        public int compareTo(Node other){
+            return other.val-this.val;
+        }
+    }
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int t=scan.nextInt();
+        for(int temp=0;temp<t;temp++){
+            int n=scan.nextInt();
+            ArrayList<Integer>[]adj=new ArrayList[n];
+            for(int i=0;i<n;i++){
+                adj[i]=new ArrayList<>();
+            }
+            for(int i=0;i<n-1;i++){
+                int u=scan.nextInt()-1;
+                int v=scan.nextInt()-1;
+                adj[u].add(v);
+                adj[v].add(u);
+            }
+            int maxleaf=-1;
+            for(int i=0;i<n;i++){
+                if(adj[i].size()==1)
+                    maxleaf=Math.max(maxleaf,i);
+            }
+            int[]max=new int[n];
+            Arrays.fill(max,-1);
+            int[]par=new int[n];
+            dfs(n-1,-1,-1,adj,max,par);
+            Segtree segtree=new Segtree(n);
+            ArrayList<Node>list=new ArrayList<>();
+            for(int i:adj[n-1]){
+                list.add(new Node(i,Math.max(i,max[i])));
+            }
+            Collections.sort(list);
+            segtree.update(n-1,n-1,1);
+            for(int i=0;i<n-1;i++){
+                if(list.size()==1){
+                    segtree.update(i,i,1);
+                    continue;
+                }
+                if(i>list.get(0).val||(par[i]==list.get(0).index&&i>list.get(1).val))
+                    segtree.update(i,i,1);
+            }
+            for(int i=n-2;i>=0;i--){
+                long val=segtree.query(i);
+                segtree.update(max[i]+1,i-1,val);
+            }
+            /*
+            for(int i=0;i<n;i++){
+                System.out.print(max[i]+" ");
+            }
+            System.out.println();
+            for(int i=0;i<n;i++){
+                System.out.print(segtree.query(i)+" ");
+            }
+            System.out.println();
+            */
+            System.out.println(segtree.query(maxleaf));
+        }
+    }
+}
