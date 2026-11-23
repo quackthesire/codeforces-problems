@@ -1,0 +1,71 @@
+#include <bits/stdc++.h>
+using namespace std;
+using ll=long long;
+const ll MOD=998244353;
+pair<ll,ll> solve(ll l,ll r,vector<ll>&prime){
+    ll nextl=upper_bound(prime.begin(),prime.end(),(prime[l]+prime[r])/2)-prime.begin()-1;
+    ll nextr=lower_bound(prime.begin(),prime.end(),(prime[l]+prime[r]+1)/2)-prime.begin();
+    //cout<<l<<" "<<r<<" "<<prime[l]<<" "<<prime[r]<<" "<<nextl<<" "<<nextr<<"\n";
+    if(l==nextl&&r==nextr)
+        return make_pair(prime[r]-prime[l],1);
+    pair<ll,ll> res=make_pair(LLONG_MAX/2,0);
+    if(l!=nextl){
+        pair<ll,ll>temp=solve(nextl,r,prime);
+        if(temp.first<res.first){
+            res.first=temp.first;
+            res.second=temp.second;
+        }
+        else if(temp.first==res.first)
+            res.second=(res.second+temp.second)%MOD;
+    }
+    if(r!=nextr){
+        pair<ll,ll>temp=solve(l,nextr,prime);
+        if(temp.first<res.first){
+            res.first=temp.first;
+            res.second=temp.second;
+        }
+        else if(temp.first==res.first)
+            res.second=(res.second+temp.second)%MOD;
+    }
+    //cout<<l<<" "<<r<<" "<<prime[l]<<" "<<prime[r]<<" "<<res.second<<"\n";
+    return res;
+}
+int main(){
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+    vector<bool>prime(10000000,true);
+    prime[0]=false;
+    prime[1]=false;
+    for(int i=2;i*i<10000000;i++){
+        if(!prime[i])
+            continue;
+        for(int j=i*i;j<10000000;j+=i){
+            prime[j]=false;
+        }
+    }
+    int t;
+    cin>>t;
+    while(t--){
+        ll l;
+        ll r;
+        cin>>l>>r;
+        l*=2;
+        r*=2;
+        vector<bool>work(r-l+1,true);
+        for(int i=2;(ll)i*i<=r;i++){
+            if(!prime[i])
+                continue;
+            for(ll j=max((ll)i*i,((l+i-1)/i)*i);j<=r;j+=i){
+                work[j-l]=false;
+            }
+        }
+        work[0]=true;
+        work[r-l]=true;
+        vector<ll>all;
+        for(int i=0;i<r-l+1;i++){
+            if(work[i])
+                all.push_back(i+l);
+        }
+        cout<<solve(0,all.size()-1,all).second<<"\n";
+    }
+}
