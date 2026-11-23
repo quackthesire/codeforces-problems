@@ -1,0 +1,93 @@
+import java.util.*;
+public class Main{
+    static class Node implements Comparable<Node>{
+        int pos;
+        int index;
+        boolean left;
+        public Node(int pos,int index,boolean left){
+            this.pos=pos;
+            this.index=index;
+            this.left=left;
+        }
+        public int compareTo(Node other){
+            if(this.pos==other.pos){
+                if(!this.left)
+                    return -1;
+                return 1;
+            }
+            return this.pos-other.pos;
+        }
+    }
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int t=scan.nextInt();
+        for(int temp=0;temp<t;temp++){
+            int n=scan.nextInt();
+            int m=scan.nextInt();
+            int[]val=new int[n];
+            for(int i=0;i<n;i++){
+                val[i]=scan.nextInt();
+            }
+            ArrayList<Node>even=new ArrayList<>();
+            ArrayList<Node>odd=new ArrayList<>();
+            for(int i=0;i<n;i++){
+                if(val[i]%2==0)
+                    even.add(new Node(val[i],i,scan.next().charAt(0)=='L'));
+                else
+                    odd.add(new Node(val[i],i,scan.next().charAt(0)=='L'));
+            }
+            Collections.sort(even);
+            Collections.sort(odd);
+            int[]ans=new int[n];
+            Arrays.fill(ans,-1);
+            Stack<Node>s=new Stack<>();
+            for(int i=0;i<odd.size();i++){
+                if(odd.get(i).left){
+                    if(s.isEmpty())
+                        s.push(new Node(-odd.get(i).pos,odd.get(i).index,false));
+                    else{
+                        Node node=s.pop();
+                        int dist=(odd.get(i).pos-node.pos)/2;
+                        ans[node.index]=dist;
+                        ans[odd.get(i).index]=dist;
+                    }
+                }
+                else
+                    s.push(new Node(odd.get(i).pos,odd.get(i).index,false));
+            }
+            while(s.size()>=2){
+                Node first=s.pop();
+                Node second=s.pop();
+                int dist=(2*m-first.pos-second.pos)/2;
+                ans[first.index]=dist;
+                ans[second.index]=dist;
+            }
+            s=new Stack<>();
+            for(int i=0;i<even.size();i++){
+                if(even.get(i).left){
+                    if(s.isEmpty())
+                        s.push(new Node(-even.get(i).pos,even.get(i).index,false));
+                    else{
+                        Node node=s.pop();
+                        int dist=(even.get(i).pos-node.pos)/2;
+                        ans[node.index]=dist;
+                        ans[even.get(i).index]=dist;
+                    }
+                }
+                else
+                    s.push(new Node(even.get(i).pos,even.get(i).index,false));
+            }
+            while(s.size()>=2){
+                Node first=s.pop();
+                Node second=s.pop();
+                int dist=(2*m-first.pos-second.pos)/2;
+                ans[first.index]=dist;
+                ans[second.index]=dist;
+            }
+            for(int i=0;i<n;i++){
+                System.out.print(ans[i]+" ");
+            }
+            System.out.println();
+        }
+    }
+}
