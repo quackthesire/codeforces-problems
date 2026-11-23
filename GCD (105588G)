@@ -1,24 +1,24 @@
 import java.util.*;
 public class Main{
-  static int best;
-  static class State{
-      long a;
-      long b;
-      int t;
-      public State(long a,long b,int t){
-          this.a=a;
-          this.b=b;
-          this.t=t;
-      }
-  }
-  static long gcd(long a,long b){
-      while(b!=0){
-          long temp=a%b;
-          a=b;
-          b=temp;
-      }
-      return a;
-  }
+	static int best;
+	static class State{
+	  long a;
+	  long b;
+	  int t;
+	  public State(long a,long b,int t){
+		  this.a=a;
+		  this.b=b;
+		  this.t=t;
+	  }
+	}
+	static long gcd(long a,long b){
+	  while(b!=0){
+		  long temp=a%b;
+		  a=b;
+		  b=temp;
+	  }
+	  return a;
+	}
 	public static void main(String[]args){
 		Scanner scan=new Scanner(System.in);
 		int t=scan.nextInt();
