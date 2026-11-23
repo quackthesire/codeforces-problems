@@ -1,0 +1,58 @@
+#include <bits/stdc++.h>
+using namespace std;
+using ll=long long;
+int solve(vector<ll>&array,ll maxval){
+    vector<int>res(array.size()+1);//res[i]=pre[i-1],suff[i]
+    ll sum=0;
+    priority_queue<ll>pre;
+    for(int i=0;i<array.size();i++){
+        sum+=array[i];
+        pre.push(array[i]);
+        while(sum>maxval){
+            sum-=pre.top();
+            pre.pop();
+        }
+        res[i+1]+=pre.size();
+    }
+    sum=0;
+    priority_queue<ll>suff;
+    for(int i=array.size()-1;i>=0;i--){
+        sum+=array[i];
+        suff.push(array[i]);
+        while(sum>maxval){
+            sum-=suff.top();
+            suff.pop();
+        }
+        res[i]+=suff.size();
+    }
+    int count=0;
+    for(int i=0;i<=array.size();i++){
+        count=max(count,res[i]);
+    }
+    return count;
+}
+int main(){
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+    int t;
+    cin>>t;
+    while(t--){
+        int n;
+        int k;
+        cin>>n>>k;
+        vector<ll>array(n);
+        for(int i=0;i<n;i++){
+            cin>>array[i];
+        }
+        ll l=0;
+        ll r=1000000000000000;
+        while(l<=r){
+            ll m=(l+r)/2;
+            if(solve(array,m)>=k)
+                r=m-1;
+            else
+                l=m+1;
+        }
+        cout<<l<<"\n";
+    }
+}
