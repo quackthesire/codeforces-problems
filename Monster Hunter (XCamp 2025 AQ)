@@ -1,0 +1,93 @@
+import java.util.*;
+public class Main{
+    static class Node implements Comparable<Node>{
+        long need;
+        long gain;
+        public Node(int a,int b){
+            this.need=a;
+            this.gain=b;
+        }
+        public int compareTo(Node other){
+            if(this.gain-this.need>0&&other.gain-other.need>0)
+                return Long.compare(this.need,other.need);
+            if(this.gain-this.need<=0&&other.gain-other.need<=0)
+                return Long.compare(other.gain,this.gain);
+            if(this.gain-this.need>0&&other.gain-other.need<=0)
+                return -1;
+            return 1;
+        }
+        public void merge(Node other){
+            if(this.gain>=other.need)
+                this.gain+=other.gain-other.need;
+            else{
+                this.need+=other.need-this.gain;
+                this.gain=other.gain;
+            }
+        }
+    }
+    static void dfs(int u,int p,ArrayList<Integer>[]adj,int[]parent,boolean[]visited){
+        if(visited[u])
+            return;
+        visited[u]=true;
+        parent[u]=p;
+        for(int v:adj[u]){
+            if(v==p)
+                continue;
+            dfs(v,u,adj,parent,visited);
+            if(pq[v].size()>pq[u].size()){
+                PriorityQueue<Node>temp=pq[u];
+                pq[u]=pq[v];
+                pq[v]=temp;
+            }
+            while(!pq[v].isEmpty()){
+                pq[u].add(pq[v].poll());
+            }
+        }
+        long need=array[u].need;
+        long gain=array[u].gain;
+        while(!pq[u].isEmpty()){
+            Node node=pq[u].peek();
+            if((need<=gain&&(gain<node.need||node.need>node.gain))||(need>gain&&node.need>node.gain&&gain>node.gain))
+                break;
+            array[u].merge(node);
+            pq[u].poll();
+            need=array[u].need;
+            gain=array[u].gain;
+        }
+        pq[u].add(array[u]);
+    }
+    static PriorityQueue<Node>[]pq;
+    static Node[]array;
+	public static void main(String[]args){
+	    Scanner scan=new Scanner(System.in);
+	    int t=scan.nextInt();
+	    for(int tempvar=0;tempvar<t;tempvar++){
+	        int n=scan.nextInt();
+	        array=new Node[n];
+	        pq=new PriorityQueue[n];
+	        ArrayList<Integer>[]adj=new ArrayList[n];
+	        array[0]=new Node(0,0);
+	        for(int i=0;i<n-1;i++){
+	            array[i+1]=new Node(scan.nextInt(),scan.nextInt());
+	        }
+	        for(int i=0;i<n;i++){
+	            adj[i]=new ArrayList<>();
+	            pq[i]=new PriorityQueue<>();
+	        }
+	        for(int i=0;i<n-1;i++){
+	            int u=scan.nextInt()-1;
+	            int v=scan.nextInt()-1;
+	            adj[u].add(v);
+	            adj[v].add(u);
+	        }
+	        int[]parent=new int[n];
+            boolean[]visited=new boolean[n];
+            dfs(0,-1,adj,parent,visited);
+            Node ans=new Node(0, 0);
+            while(!pq[0].isEmpty()){
+                ans.merge(pq[0].poll());
+            }
+            System.out.println(ans.need);
+	    }
+	}
+}
