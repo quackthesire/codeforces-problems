@@ -1,0 +1,87 @@
+import java.util.*;
+public class Main{
+    static class Node implements Comparable<Node>{
+        int v;
+        long w;
+        int index;
+        public Node(int v,long w,int index){
+            this.v=v;
+            this.w=w;
+            this.index=index;
+        }
+        public int compareTo(Node other){
+            return Long.compare(this.w,other.w);
+        }
+    }
+    static void dijkstra(int start,ArrayList<Node>[]adj,long[]dist,int[]parent){
+        PriorityQueue<Node>pq=new PriorityQueue<>();
+        pq.add(new Node(start,0,-1));
+        dist[start]=0;
+        while(!pq.isEmpty()){
+            Node u=pq.poll();
+            if(u.w!=dist[u.v])
+                continue;
+            for(Node v:adj[u.v]){
+                if(u.w+v.w<dist[v.v]){
+                    dist[v.v]=u.w+v.w;
+                    parent[v.v]=v.index;
+                    pq.add(new Node(v.v,dist[v.v],v.index));
+                }
+            }
+        }
+    }
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int n=scan.nextInt();
+        int m=scan.nextInt();
+        int[]u=new int[m];
+        int[]v=new int[m];
+        long[]w=new long[m];
+        ArrayList<Node>[]adj=new ArrayList[n];
+        for(int i=0;i<n;i++){
+            adj[i]=new ArrayList<>();
+        }
+        for(int i=0;i<m;i++){
+            u[i]=scan.nextInt()-1;
+            v[i]=scan.nextInt()-1;
+            w[i]=scan.nextLong();
+            adj[u[i]].add(new Node(v[i],w[i],i));
+            adj[v[i]].add(new Node(u[i],w[i],i));
+        }
+        long[]start=new long[n];
+        long[]end=new long[n];
+        Arrays.fill(start,Long.MAX_VALUE/2);
+        Arrays.fill(end,Long.MAX_VALUE/2);
+        int[]parent=new int[n];
+        Arrays.fill(parent,-1);
+        dijkstra(0,adj,start,parent);
+        dijkstra(n-1,adj,end,new int[n]);
+        if(start[n-1]>=Long.MAX_VALUE/4){
+            System.out.println(-1);
+            return;
+        }
+        int prev=n-1;
+        boolean[]visited=new boolean[m];
+        while(prev!=0){
+            int cur=parent[prev];
+            visited[cur]=true;
+            if(u[cur]==prev)
+                prev=v[cur];
+            else
+                prev=u[cur];
+        }
+        long best=Long.MAX_VALUE;
+        for(int i=0;i<m;i++){
+            if(visited[i])
+                continue;
+            if(start[u[i]]<Long.MAX_VALUE/4&&end[v[i]]<Long.MAX_VALUE/4)
+                best=Math.min(best,start[u[i]]+w[i]+end[v[i]]);
+            if(start[v[i]]<Long.MAX_VALUE/4&&end[u[i]]<Long.MAX_VALUE/4)
+                best=Math.min(best,start[v[i]]+w[i]+end[u[i]]);
+        }
+        if(best>=Long.MAX_VALUE/4)
+            System.out.println(-1);
+        else
+            System.out.println(start[n-1]+best);
+    }
+}
