@@ -1,60 +1,87 @@
 import java.util.*;
 public class Main{
-    static class Node implements Comparable<Node>{
-        int node;
-        long dist;
-        public Node(int node,long dist){
-            this.node=node;
-            this.dist=dist;
+    static int dfs(int u,boolean[]visited,ArrayList<Integer>[]adj){
+        if(visited[u])
+            return 0;
+        visited[u]=true;
+        int sum=1;
+        for(int v:adj[u]){
+            sum+=dfs(v,visited,adj);
         }
-        public int compareTo(Node other){
-            return Long.compare(this.dist,other.dist);
+        return sum;
+    }
+    static class Size{
+        int val;
+        int count;
+        public Size(int val,int count){
+            this.val=val;
+            this.count=count;
         }
     }
-    public static void main(String[]args){
-        Scanner scan=new Scanner(System.in);
-        int n=scan.nextInt();
-        int m=scan.nextInt();
-        long[][]adj=new long[n][n];
-        for(int i=0;i<n;i++){
-            Arrays.fill(adj[i],Long.MAX_VALUE/4);
-        }
-        for(int i=0;i<m;i++){
-            int u=scan.nextInt();
-            int v=scan.nextInt();
-            int w=scan.nextInt();
-            adj[u][v]=Math.min(adj[u][v],w);
-        }
-        long[][]dist=new long[n][n];
-        for(int i=0;i<n;i++){
-            boolean[]visited=new boolean[n];
-            Arrays.fill(dist[i],Long.MAX_VALUE/4);
-            for(int j=0;j<n;j++){
-                dist[i][j]=adj[i][j];
-            }
-            while(true){
-                int best=-1;
-                for(int j=0;j<n;j++){
-                    if(!visited[j]&&(best==-1||dist[i][j]<dist[i][best]))
-                        best=j;
+	public static void main(String[]args){
+		Scanner scan=new Scanner(System.in);
+		int n=scan.nextInt();
+		int m=scan.nextInt();
+		ArrayList<Integer>[]adj=new ArrayList[n];
+		for(int i=0;i<n;i++){
+		    adj[i]=new ArrayList<>();
+		}
+		for(int i=0;i<m;i++){
+		    int u=scan.nextInt()-1;
+		    int v=scan.nextInt()-1;
+		    adj[u].add(v);
+		    adj[v].add(u);
+		}
+		boolean[]visited=new boolean[n];
+		ArrayList<Integer>temp=new ArrayList<>();
+		for(int i=0;i<n;i++){
+		    if(!visited[i])
+		        temp.add(dfs(i,visited,adj));
+		}
+		Collections.sort(temp);
+		ArrayList<Size>sizes=new ArrayList<>();
+		int num=0;
+		int cur=-1;
+		for(int i=0;i<temp.size();i++){
+		    if(temp.get(i)==cur)
+		        num++;
+		    else{
+		        sizes.add(new Size(cur,num));
+		        cur=temp.get(i);
+		        num=1;
+		    }
+		}
+		sizes.add(new Size(cur,num));
+		int[]dp=new int[n+1];
+		Arrays.fill(dp,Integer.MAX_VALUE/2);
+		dp[0]=0;
+        for(Size i:sizes){
+            int val=i.val;
+            int count=i.count;
+            for(int j=1;count>0;j<<=1){
+                int cost=Math.min(j,count);
+                for(int k=n;k>=cost*val;k--){
+                    if(dp[k-cost*val]+cost<dp[k])
+                        dp[k]=dp[k-cost*val]+cost;
                 }
-                if(best==-1)
-                    break;
-                visited[best]=true;
-                dist[i][(best+1)%n]=Math.min(dist[i][(int)(best+1)%n],dist[i][best]+1);
-                for(int j=0;j<n;j++){
-                    dist[i][(int)(j+dist[i][best])%n]=Math.min(dist[i][(int)(j+dist[i][best])%n],dist[i][best]+adj[best][j]);
-                }
+                count-=cost;
             }
         }
-        for(int i=0;i<n;i++){
-            for(int j=0;j<n;j++){
-                if(i==j)
-                    System.out.print("0 ");
-                else
-                    System.out.print(dist[i][j]+" ");
+        int best=Integer.MAX_VALUE/2;
+        for(int i=0;i<=n;i++){
+            int[]digits=Integer.toString(i).chars().map(c->c-'0').toArray();
+            boolean work=true;
+            for(int j=0;j<digits.length;j++){
+                if(digits[j]!=4&&digits[j]!=7)
+                    work=false;
             }
-            System.out.println();
+            if(!work)
+                continue;
+            best=Math.min(best,dp[i]);
         }
-    }
+        if(best==Integer.MAX_VALUE/2)
+            System.out.print("-1");
+        else
+            System.out.print(best-1);
+	}
 }
