@@ -1,0 +1,51 @@
+import java.util.*;
+public class Main{
+    static void solve(int x,int y,long[][]array,boolean right){
+        if(right){
+            int sum=0;
+            for(int i=0;i<array.length;i++){
+                sum+=array[i][y];
+            }
+            array[x][y]=-sum;
+        }
+        else{
+            int sum=0;
+            for(int i=0;i<array[0].length;i++){
+                sum+=array[x][i];
+            }
+            array[x][y]=-sum;
+        }
+    }
+  	public static void main(String[]args){
+  	    Scanner scan=new Scanner(System.in);
+  	    int t=scan.nextInt();
+  	    for(int temp=0;temp<t;temp++){
+  	        int n=scan.nextInt();
+  	        int m=scan.nextInt();
+  	        String s=scan.next();
+  	        long[][]array=new long[n][m];
+  	        for(int i=0;i<n;i++){
+  	            for(int j=0;j<m;j++){
+  	                array[i][j]=scan.nextLong();
+  	            }
+  	        }
+  	        int x=0;
+  	        int y=0;
+  	        for(int i=0;i<s.length();i++){
+  	            boolean right=s.charAt(i)=='R'?true:false;
+  	            solve(x,y,array,right);
+  	            if(right)
+  	                y++;
+  	            else
+  	                x++;
+  	        }
+  	        solve(x,y,array,true);
+  	        for(int i=0;i<n;i++){
+  	            for(int j=0;j<m;j++){
+  	                System.out.print(array[i][j]+" ");
+  	            }
+  	            System.out.println();
+  	        }
+  	    }
+  	}
+}
