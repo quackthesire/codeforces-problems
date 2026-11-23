@@ -1,0 +1,127 @@
+
+#include <bits/stdc++.h>
+using namespace std;
+using ll=long long;
+struct Node{
+    int index;
+    ll x;
+    ll y;
+    Node(int index,ll x,ll y):index(index),x(x),y(y){}
+};
+struct Comp{
+    bool operator()(const Node&a,const Node&b)const{
+        if(a.x==b.x)
+            return a.y<b.y;
+        return a.x>b.x;
+    }
+};
+struct Segtree{
+    int n;
+    vector<ll>tree;
+    Segtree(vector<ll>&array){
+        n=array.size();
+        tree.resize(4*n);
+        build(1,0,n-1,array);
+    }
+    void build(int node,int l,int r,vector<ll>&array){
+        if(l==r){
+            tree[node]=array[l];
+            return;
+        }
+        int m=(l+r)/2;
+        build(node*2,l,m,array);
+        build(node*2+1,m+1,r,array);
+        tree[node]=min(tree[node*2],tree[node*2+1]);
+    }
+    int query(int pos,ll val){
+        if(pos>=n)
+            return -1;
+        return query(1,0,n-1,pos,val);
+    }
+    int query(int node,int l,int r,int pos,ll val){
+        if(r<pos||tree[node]>val)
+            return -1;
+        if(l==r)
+            return l;
+        int m=(l+r)/2;
+        int left=query(node*2,l,m,pos,val);
+        if(left!=-1)
+            return left;
+        return query(node*2+1,m+1,r,pos,val);
+    }
+};
+int main(){
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+    int t;
+    cin>>t;
+    while(t--){
+        ll n;
+        ll m;
+        int k;
+        cin>>n>>m>>k;
+        vector<Node>array;
+        for(int i=0;i<k;i++){
+            ll x;
+            ll y;
+            cin>>x>>y;
+            array.push_back(Node(i,x,y));
+        }
+        sort(array.begin(),array.end(),Comp());
+        vector<Node>rows;
+        vector<ll>next;
+        vector<int>index(k);
+        ll cur=-1;
+        int row=-1;
+        for(int i=0;i<k;i++){
+            if(array[i].x!=cur){
+                row++;
+                rows.push_back(Node(array[i].index,array[i].x,array[i].y));
+                if(i!=k-1&&array[i+1].x==array[i].x)
+                    next.push_back(array[i+1].y);
+                else
+                    next.push_back(m+1);
+                cur=array[i].x;
+            }
+            index[array[i].index]=row;
+        }
+        vector<ll>temp(rows.size());
+        for(int i=0;i<rows.size();i++){
+            temp[i]=rows[i].y;
+        }
+        Segtree segtree(temp);
+        vector<Node>vals;
+        vals.push_back(Node(-1,n,m+1));
+        ll best=m+1;
+        for(int i=0;i<rows.size();i++){
+            if(rows[i].y<best){
+                vals.push_back(Node(rows[i].index,rows[i].x,rows[i].y));
+                best=rows[i].y;
+            }
+        }
+        vals.push_back(Node(-1,0,1));
+        ll res=0;
+        for(int i=0;i<vals.size()-1;i++){
+            res+=(vals[i].y-1)*(vals[i].x-vals[i+1].x);
+        }
+        cout<<res<<"\n";
+        vector<ll>ans(k);
+        for(int i=1;i<vals.size()-1;i++){
+            ll cur=min(vals[i-1].y,next[index[vals[i].index]]);
+            ll max=rows[index[vals[i].index]].x;
+            int next=segtree.query(index[vals[i].index]+1,vals[i].y);
+            if(next==-1)
+                next=rows.size();
+            for(int j=index[vals[i].index]+1;j<next;j++){
+                ans[vals[i].index]+=(max-rows[j].x)*(cur-vals[i].y);
+                max=rows[j].x;
+                cur=min(cur,rows[j].y);
+            }
+            ans[vals[i].index]+=(max-(next<rows.size()?rows[next].x:0))*(cur-vals[i].y);
+        }
+        for(int i=0;i<k;i++){
+            cout<<ans[i]<<" ";
+        }
+        cout<<"\n";
+    }
+}
