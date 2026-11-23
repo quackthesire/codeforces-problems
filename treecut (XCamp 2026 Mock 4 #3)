@@ -1,0 +1,87 @@
+import java.util.*;
+public class Main{
+    static int root=0;
+    static void dfs(int u,int p,int[]size,ArrayList<Integer>[]adj){
+        size[u]=1;
+        for(int v:adj[u]){
+            if(v==p)
+                continue;
+            dfs(v,u,size,adj);
+            size[u]+=size[v];
+        }
+    }
+    static void solve(int u,int p,int[]size,ArrayList<Integer>[]adj,ArrayList<Integer>res){
+        int index=-1;
+        for(int v:adj[u]){
+            if(v==p)
+                continue;
+            if(size[v]%2==1)
+                index=v;
+        }
+        if(index!=-1)
+            solve(index,u,size,adj,res);
+        for(int v:adj[u]){
+            if(v==p||v==index)
+                continue;
+            solve(v,u,size,adj,res);
+        }
+        res.add(u);
+    }
+    static int centroid(int u,int p,int[]size,ArrayList<Integer>[]adj){
+        for(int v:adj[u]){
+            if(v==p||size[v]<=adj.length/2)
+                continue;
+            return centroid(v,u,size,adj);
+        }
+        return u;
+    }
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int n=scan.nextInt();
+        ArrayList<Integer>[]adj=new ArrayList[n];
+        for(int i=0;i<n;i++){
+            adj[i]=new ArrayList<>();
+        }
+        for(int i=0;i<n-1;i++){
+            int u=scan.nextInt()-1;
+            int v=scan.nextInt()-1;
+            adj[u].add(v);
+            adj[v].add(u);
+        }
+        int[]temp=new int[n];
+        dfs(0,-1,temp,adj);
+        int root=centroid(0,-1,temp,adj);
+        int[]size=new int[n];
+        dfs(root,-1,size,adj);
+        ArrayList<Integer>[]order=new ArrayList[adj[root].size()];
+        for(int i=0;i<adj[root].size();i++){
+            order[i]=new ArrayList<>();
+            solve(adj[root].get(i),root,size,adj,order[i]);
+            Collections.reverse(order[i]);
+        }
+        int cur=-1;
+        PriorityQueue<int[]>pq=new PriorityQueue<>((a,b)->Integer.compare(b[1],a[1]));
+        for(int i=0;i<order.length;i++){
+            if(order[i].size()%2==1)
+                cur=i;
+            pq.add(new int[]{i,order[i].size()});
+        }
+        for(int i=0;i<(n-1)/2;i++){
+            int next=-1;
+            while(!pq.isEmpty()){
+                int[]best=pq.poll();
+                if(best[1]!=order[best[0]].size()||order[best[0]].isEmpty()||best[0]==cur)
+                    continue;
+                next=best[0];
+                break;
+            }
+            System.out.println((order[cur].remove(order[cur].size()-1)+1)+" "+(order[next].remove(order[next].size()-1)+1));
+            if(!order[cur].isEmpty())
+                pq.add(new int[]{cur,order[cur].size()});
+            if(!order[next].isEmpty())
+                pq.add(new int[]{next,order[next].size()});
+            cur=next;
+        }
+        System.out.println((root+1)+" "+(order[cur].remove(order[cur].size()-1)+1));
+    }
+}
