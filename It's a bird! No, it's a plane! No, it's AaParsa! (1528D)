@@ -1,0 +1,60 @@
+import java.util.*;
+public class Main{
+    static class Node implements Comparable<Node>{
+        int node;
+        long dist;
+        public Node(int node,long dist){
+            this.node=node;
+            this.dist=dist;
+        }
+        public int compareTo(Node other){
+            return Long.compare(this.dist,other.dist);
+        }
+    }
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int n=scan.nextInt();
+        int m=scan.nextInt();
+        long[][]adj=new long[n][n];
+        for(int i=0;i<n;i++){
+            Arrays.fill(adj[i],Long.MAX_VALUE/4);
+        }
+        for(int i=0;i<m;i++){
+            int u=scan.nextInt();
+            int v=scan.nextInt();
+            int w=scan.nextInt();
+            adj[u][v]=Math.min(adj[u][v],w);
+        }
+        long[][]dist=new long[n][n];
+        for(int i=0;i<n;i++){
+            boolean[]visited=new boolean[n];
+            Arrays.fill(dist[i],Long.MAX_VALUE/4);
+            for(int j=0;j<n;j++){
+                dist[i][j]=adj[i][j];
+            }
+            while(true){
+                int best=-1;
+                for(int j=0;j<n;j++){
+                    if(!visited[j]&&(best==-1||dist[i][j]<dist[i][best]))
+                        best=j;
+                }
+                if(best==-1)
+                    break;
+                visited[best]=true;
+                dist[i][(best+1)%n]=Math.min(dist[i][(int)(best+1)%n],dist[i][best]+1);
+                for(int j=0;j<n;j++){
+                    dist[i][(int)(j+dist[i][best])%n]=Math.min(dist[i][(int)(j+dist[i][best])%n],dist[i][best]+adj[best][j]);
+                }
+            }
+        }
+        for(int i=0;i<n;i++){
+            for(int j=0;j<n;j++){
+                if(i==j)
+                    System.out.print("0 ");
+                else
+                    System.out.print(dist[i][j]+" ");
+            }
+            System.out.println();
+        }
+    }
+}
