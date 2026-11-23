@@ -1,0 +1,43 @@
+import java.util.*;
+public class Main{
+    static long MOD=1000000007;
+    static long[]fact=new long[10000000];
+    static long modinv(long base){
+        return modpow(base,MOD-2);
+    }
+    static long modpow(long base,long exp){
+        long res=1;
+        while(exp>0){
+            if(exp%2==1)
+                res=res*base%MOD;
+            base=base*base%MOD;
+            exp/=2;
+        }
+        return res;
+    }
+    static long choose(int n,int k){
+        return fact[n]*modinv(fact[k])%MOD*modinv(fact[n-k])%MOD;
+    }
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int t=scan.nextInt();
+        fact[0]=1;
+        for(int i=1;i<10000000;i++){
+            fact[i]=fact[i-1]*i%MOD;
+        }
+        for(int temp=0;temp<t;temp++){
+            int n=scan.nextInt();
+            int m=scan.nextInt();
+            long k=scan.nextLong();
+            long ans=0;
+            if(n==m){
+                System.out.println(k*n%MOD);
+                continue;
+            }
+            for(int i=1;i<=Math.min(n-1,m);i++){
+                ans=(ans+k*i%MOD*choose(n-i-1,m-i)%MOD*modinv(modpow(2,n-i))%MOD)%MOD;
+            }
+            System.out.println(ans);
+        }
+    }
+}
