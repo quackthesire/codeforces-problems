@@ -1,0 +1,66 @@
+import java.util.*;
+public class Main{
+    static long MOD=998244353;
+    static class Edge{
+        int u;
+        int v;
+        public Edge(int u,int v){
+            this.u=u;
+            this.v=v;
+        }
+    }
+    static void dfs(int u,int p,int cur,int[]depth,long[]deg,long[]size,ArrayList<Integer>[]adj){
+        depth[u]=cur;
+        deg[u]=adj[u].size();
+        size[u]=1;
+        for(int v:adj[u]){
+            if(v==p)
+                continue;
+            dfs(v,u,cur+1,depth,deg,size,adj);
+            deg[u]+=deg[v];
+            size[u]+=size[v];
+        }
+    }
+    static long modpow(long base,long exp){
+        long res=1;
+        while(exp>0){
+            if(exp%2==1)
+                res=res*base%MOD;
+            base=base*base%MOD;
+            exp/=2;
+        }
+        return res;
+    }
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int n=scan.nextInt();
+        Edge[]array=new Edge[n-1];
+        ArrayList<Integer>[]adj=new ArrayList[n];
+        for(int i=0;i<n;i++){
+            adj[i]=new ArrayList<>();
+        }
+        for(int i=0;i<n-1;i++){
+            int u=scan.nextInt()-1;
+            int v=scan.nextInt()-1;
+            array[i]=new Edge(u,v);
+            adj[u].add(v);
+            adj[v].add(u);
+        }
+        int[]depth=new int[n];
+        long[]deg=new long[n];
+        long[]size=new long[n];
+        dfs(0,-1,0,depth,deg,size,adj);
+        long sum=0;
+        for(int i=0;i<n-1;i++){
+            int u=array[i].u;
+            int v=array[i].v;
+            if(depth[u]<depth[v]){
+                int temp=u;
+                u=v;
+                v=temp;
+            }
+            sum=(sum+(deg[u]+size[u])*(deg[0]-deg[u]+size[0]-size[u])%MOD*(2*size[u]+2*(size[0]-size[u])-2))%MOD;
+        }
+        System.out.print(sum*modpow((deg[0]+size[0])*(deg[0]+size[0])%MOD,MOD-2)%MOD);
+    }
+}
