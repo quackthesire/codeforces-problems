@@ -1,0 +1,114 @@
+import java.util.*;
+public class Main{
+    static class Segtree{
+        int[]tree;
+        public Segtree(int n){
+            tree=new int[4*n+5];
+        }
+        public void update(int node,int l,int r,int index,boolean add){
+            if(l==r){
+                tree[node]=add?index:0;
+                return;
+            }
+            int m=(l+r)/2;
+            if(index<=m)
+                update(node*2,l,m,index,add);
+            else
+                update(node*2+1,m+1,r,index,add);
+            tree[node]=gcd(tree[node*2],tree[node*2+1]);
+        }
+        public int query(int node,int l,int r,int ll,int rr){
+            if(rr<l||r<ll)
+                return 0;
+            if(ll<=l&&r<=rr)
+                return tree[node];
+            int m=(l+r)/2;
+            return gcd(query(node*2,l,m,ll,rr),query(node*2+1,m+1,r,ll,rr));
+        }
+    }
+    static int gcd(int a,int b){
+        if(a<b){
+            int temp=a;
+            a=b;
+            b=temp;
+        }
+        if(a==0)
+            return b;
+        while(b!=0){
+            int temp=a%b;
+            a=b;
+            b=temp;
+        }
+        return a;
+    }
+    static int count(int num,int[]prime){
+        int ans=1;
+        int cur=-1;
+        int count=0;
+        while(num!=1){
+            if(cur==-1||prime[num]==cur){
+                count++;
+                if(cur==-1)
+                    cur=prime[num];
+            }
+            else{
+                ans*=(count+1);
+                count=1;
+                cur=prime[num];
+            }
+            num/=prime[num];
+        }
+        ans*=(count+1);
+        return ans;
+    }
+  	public static void main(String[]args){
+      	Scanner scan=new Scanner(System.in);
+      	int t=scan.nextInt();
+      	int max=200000;
+  	    int[]prime=new int[max];
+  	    for(int i=2;i<max;i++){
+              if(prime[i]!=0)
+                  continue;
+              for(int j=i;j<max;j+=i){
+                  if(prime[j]==0)
+                      prime[j]=i;
+              }
+          }
+      	for(int temp=0;temp<t;temp++){
+      	    int n=scan.nextInt();
+      	    int q=scan.nextInt();
+      	    int[]array=new int[n];
+      	    Segtree segtree=new Segtree(n);
+      	    for(int i=0;i<n;i++){
+      	        array[i]=scan.nextInt();
+      	    }
+      	    for(int i=0;i<n;i++){
+      	        if(i<n-1&&array[i]>array[i+1])
+      	            segtree.update(1,0,n-1,i+1,true);
+      	    }
+      	    int gcd=segtree.query(1,0,n-1,0,n-1);
+      	    if(gcd==0)
+      	        System.out.println(n);
+      	    else
+      	        System.out.println(count(gcd,prime));
+      	    for(int i=0;i<q;i++){
+      	        int index=scan.nextInt()-1;
+      	        int val=scan.nextInt();
+      	        if(index>0&&array[index-1]>array[index]&&array[index-1]<=val)
+      	            segtree.update(1,0,n-1,index,false);
+      	        if(index<n-1&&array[index]>array[index+1]&&val<=array[index+1])
+      	            segtree.update(1,0,n-1,index+1,false);
+      	        if(index>0&&array[index-1]<=array[index]&&array[index-1]>val)
+      	            segtree.update(1,0,n-1,index,true);
+      	        if(index<n-1&&array[index]<=array[index+1]&&val>array[index+1])
+      	            segtree.update(1,0,n-1,index+1,true);
+          	    gcd=segtree.query(1,0,n-1,0,n-1);
+          	    if(gcd==0)
+          	        System.out.println(n);
+          	    else
+          	        System.out.println(count(gcd,prime));
+          	    array[index]=val;
+      	    }
+      	}
+  	}
+}
