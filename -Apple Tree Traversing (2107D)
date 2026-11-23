@@ -1,0 +1,183 @@
+import java.util.*;
+public class Main{
+    static int index=0;
+    static int[]parent;
+    static int[]visited;
+    static ArrayList<ArrayList<Integer>>comp=new ArrayList<>();
+    static class Node implements Comparable<Node>{
+        int d;
+        int u;
+        int v;
+        public Node(int d,int u,int v){
+            this.d=d;
+            this.u=u;
+            this.v=v;
+        }
+        public int compareTo(Node other){
+            if(this.d==other.d)
+                return other.u-this.u;
+            return other.d-this.d;
+        }
+    }
+    static void solve(ArrayList<Integer>[]adj,ArrayList<Integer>cur,ArrayList<Node>ans,boolean[]work){
+        if(cur.size()==1){
+            ans.add(new Node(1,cur.get(0)+1,cur.get(0)+1));
+            work[cur.get(0)]=false;
+            return;
+        }
+        int best=cur.get(0);
+        index++;
+        visited[cur.get(0)]=index;
+        Queue<Integer>q=new LinkedList<>();
+        q.add(cur.get(0));
+        while(!q.isEmpty()){
+            best=q.poll();
+            for(int v:adj[best]){
+                if(visited[v]==index||!work[v])
+                    continue;
+                visited[v]=index;
+                q.add(v);
+            }
+        }
+        int other=best;
+        index++;
+        q.clear();
+        q.add(best);
+        visited[best]=index;
+        parent[best]=-1;
+        while(!q.isEmpty()){
+            other=q.poll();
+            for(int v:adj[other]){
+                if(visited[v]==index||!work[v])
+                    continue;
+                visited[v]=index;
+                parent[v]=other;
+                q.add(v);
+            }
+        }
+        ArrayList<Integer>path=new ArrayList<>();
+        int pos=other;
+        while(pos!=-1){
+            path.add(pos);
+            if(pos==best)
+                break;
+            pos=parent[pos];
+        }
+        int len=path.size()-1;
+        ArrayList<Node>leaf=new ArrayList<>();
+        if(len%2==0){
+            for(int v:adj[path.get(len/2)]){
+                if(!work[v])
+                    continue;
+                leaf.add(dfs(v,path.get(len/2),adj,cur,work,1));
+            }
+        }
+        else{
+            leaf.add(dfs(path.get(len/2),path.get(len/2+1),adj,cur,work,0));
+            leaf.add(dfs(path.get(len/2+1),path.get(len/2),adj,cur,work,0));
+        }
+        Collections.sort(leaf);
+        Node first=leaf.get(0);
+        Node second=leaf.get(1);
+        ans.add(new Node(path.size(),Math.max(first.u,second.u)+1,Math.min(first.u,second.u)+1));
+        index++;
+        q.clear();
+        q.add(first.u);
+        visited[first.u]=index;
+        parent[first.u]=-1;
+        while(!q.isEmpty()){
+            int u=q.poll();
+            if(u==second.u)
+                break;
+            for(int v:adj[u]){
+                if(!work[v]||visited[v]==index)
+                    continue;
+                visited[v]=index;
+                parent[v]=u;
+                q.add(v);
+            }
+        }
+        path.clear();
+        pos=second.u;
+        while(pos!=-1){
+            path.add(pos);
+            if(pos==first.u)
+                break;
+            pos=parent[pos];
+        }
+        for(int u:path){
+            work[u]=false;
+        }
+        index++;
+        for(int u:path){
+            for(int v:adj[u]){
+                if(!work[v]||visited[v]==index)
+                    continue;
+                ArrayList<Integer>next=new ArrayList<>();
+                build(v,-1,adj,next,work);
+                comp.add(next);
+            }
+        }
+    }
+    static Node dfs(int u,int p,ArrayList<Integer>[]adj,ArrayList<Integer>cur,boolean[]work,int depth){
+        int count=0;
+        Node best=null;
+        for(int v:adj[u]){
+            if(v==p||!work[v])
+                continue;
+            count++;
+            Node node=dfs(v,u,adj,cur,work,depth+1);
+            if(best==null||node.compareTo(best)<0)
+                best=node;
+        }
+        if(count==0||(p==-1&&count==1))
+            return new Node(depth,u,-1);
+        return best;
+    }
+    static void build(int u,int p,ArrayList<Integer>[]adj,ArrayList<Integer>cur,boolean[]work){
+        visited[u]=index;
+        cur.add(u);
+        for(int v:adj[u]){
+            if(v==p||!work[v]||visited[v]==index)
+                continue;
+            build(v,u,adj,cur,work);
+        }
+    }
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int t=scan.nextInt();
+        for(int temp=0;temp<t;temp++){
+            int n=scan.nextInt();
+            comp=new ArrayList<>();
+            comp.add(new ArrayList<>());
+            index=0;
+            parent=new int[n];
+            visited=new int[n];
+            boolean[]work=new boolean[n];
+            Arrays.fill(work,true);
+            ArrayList<Integer>[]adj=new ArrayList[n];
+            for(int i=0;i<n;i++){
+                adj[i]=new ArrayList<>();
+                comp.get(0).add(i);
+            }
+            for(int i=0;i<n-1;i++){
+                int u=scan.nextInt()-1;
+                int v=scan.nextInt()-1;
+                adj[u].add(v);
+                adj[v].add(u);
+            }
+            ArrayList<Node>ans=new ArrayList<>();
+            while(!comp.isEmpty()){
+                ArrayList<Integer>cur=comp.remove(comp.size()-1);
+                if(cur.isEmpty())
+                    continue;
+                solve(adj,cur,ans,work);
+            }
+            Collections.sort(ans);
+            for(Node node:ans){
+                System.out.print(node.d+" "+node.u+" "+node.v+" ");
+            }
+            System.out.println();
+        }
+    }
+}
