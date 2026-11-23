@@ -1,0 +1,65 @@
+import java.util.*;
+public class Main{
+    static class Pos implements Comparable<Pos>{
+        int a;
+        int b;
+        public Pos(int a,int b){
+            this.a=a;
+            this.b=b;
+        }
+        public int compareTo(Pos other){
+            if(this.a==other.a)
+                return this.b-other.b;
+            return this.a-other.a;
+        }
+    }
+    static class Neg implements Comparable<Neg>{
+        int a;
+        int b;
+        public Neg(int a,int b){
+            this.a=a;
+            this.b=b;
+        }
+        public int compareTo(Neg other){
+            return (other.a+other.b)-(this.a+this.b);
+        }
+    }
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int n=scan.nextInt();
+        int r=scan.nextInt();
+        ArrayList<Pos>pos=new ArrayList<Pos>();
+        ArrayList<Neg>neg=new ArrayList<Neg>();
+        for(int i=0;i<n;i++){
+            int a=scan.nextInt();
+            int b=scan.nextInt();
+            if(b>=0)
+                pos.add(new Pos(a,b));
+            else
+                neg.add(new Neg(Math.max(a,Math.abs(b)),b));
+        }
+        Collections.sort(pos);
+        Collections.sort(neg);
+        int count=0;
+        for(Pos p:pos){
+            if(r>=p.a){
+                r+=p.b;
+                count++;
+            }
+        }
+        int[][]dp=new int[neg.size()+1][r+1];
+        dp[0][r]=count;
+        for(int i=0;i<neg.size();i++){
+            for(int j=0;j<r+1;j++){
+                if(j>=neg.get(i).a&&(j+neg.get(i).b)>=0)
+                    dp[i+1][j+neg.get(i).b]=Math.max(dp[i+1][j+neg.get(i).b],dp[i][j]+1);
+                dp[i+1][j]=Math.max(dp[i][j],dp[i+1][j]);
+            }
+        }
+        int ans=0;
+        for(int i=0;i<r+1;i++){
+            ans=Math.max(ans,dp[neg.size()][i]);
+        }
+        System.out.println(ans);
+    }
+}
