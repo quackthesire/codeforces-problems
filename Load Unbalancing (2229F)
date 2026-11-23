@@ -1,0 +1,60 @@
+import java.util.*;
+public class Main{
+    static class Node{
+        int count;
+        long val;
+        public Node(int count,long val){
+            this.count=count;
+            this.val=val;
+        }
+        public void update(Node other,long add,long limit){
+            int curcount=other.count;
+            long curval=other.val+add;
+            if(curval>=limit){
+                curcount++;
+                curval=0;
+            }
+            if(curcount>this.count||(curcount==this.count&&curval>this.val)){
+                this.count=curcount;
+                this.val=curval;
+            }
+        }
+    }
+    static boolean solve(int count,long val,ArrayList<Long>array){
+        Node[]dp=new Node[(1<<array.size())];
+        for(int i=0;i<(1<<array.size());i++){
+            dp[i]=new Node(0,0L);
+        }
+        for(int i=0;i<(1<<array.size());i++){
+            for(int j=0;j<array.size();j++){
+                if((i&(1<<j))==0)
+                    dp[i|(1<<j)].update(dp[i],array.get(j),val);
+            }
+        }
+        return dp[(1<<array.size())-1].count>=count;
+    }
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int t=scan.nextInt();
+        for(int temp=0;temp<t;temp++){
+            int n=scan.nextInt();
+            int k=scan.nextInt();
+            ArrayList<Long>array=new ArrayList<>();
+            for(int i=0;i<n;i++){
+                array.add(scan.nextLong());
+            }
+            Collections.sort(array);
+            long max=array.remove(n-1);
+            long l=0L;
+            long r=100000000000L;
+            while(l<=r){
+                long m=(l+r)/2;
+                if(solve(k,m,array))
+                    l=m+1;
+                else
+                    r=m-1;
+            }
+            System.out.println(Math.max(0L,r)+max);
+        }
+    }
+}
