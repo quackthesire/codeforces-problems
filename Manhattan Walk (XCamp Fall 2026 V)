@@ -1,0 +1,40 @@
+#include <bits/stdc++.h>
+using namespace std;
+using ll=long long;
+int main(){
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+    int r;
+    int c;
+    double p;
+    cin>>r>>c>>p;
+    vector<vector<double>>dp(r,vector<double>(c));
+    for(int i=r-2;i>=0;i--){
+        dp[i][c-1]=dp[i+1][c-1]+p/4;
+    }
+    for(int i=c-2;i>=0;i--){
+        dp[r-1][i]=dp[r-1][i+1]+p/4;
+    }
+    for(int i=r-2;i>=0;i--){
+        for(int j=c-2;j>=0;j--){
+            double x=dp[i+1][j];
+            double y=dp[i][j+1];
+            double first=0;
+            double second=0;
+            if(x<=y)
+                first=x;
+            else if(x-y<=p)
+                first=x-(x-y)*(x-y)/2/p;
+            else
+                first=y+p/2;
+            if(y<=x)
+                second=y;
+            else if(y-x<=p)
+                second=y-(y-x)*(y-x)/2/p;
+            else
+                second=x+p/2;
+            dp[i][j]=(first+second)/2;
+        }
+    }
+    cout<<fixed<<setprecision(15)<<dp[0][0]<<"\n";
+}
