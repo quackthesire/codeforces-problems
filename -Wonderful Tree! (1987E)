@@ -1,0 +1,70 @@
+import java.util.*;
+public class Main{
+    static long ans;
+    static void dfs(int u,long[]temp,long[]array,ArrayList<Integer>[]adj){
+        if(adj[u].size()==0){
+            array[u]=Long.MAX_VALUE/2;
+            return;
+        }
+        array[u]-=temp[u];
+        for(int v:adj[u]){
+            array[u]+=temp[v];
+            dfs(v,temp,array,adj);
+        }
+    }
+    static void solve(int u,long[]array,int[]parent,ArrayList<Integer>[]adj){
+        ArrayList<Integer>[]dist=new ArrayList[array.length];
+        for(int i=0;i<array.length;i++){
+            dist[i]=new ArrayList<>();
+        }
+        for(int v:adj[u]){
+            dist(v,1,adj,dist);
+        }
+        for(int i=0;i<array.length;i++){
+            if(array[u]>=0)
+                break;
+            for(int j:dist[i]){
+                if(array[u]>=0)
+                    break;
+                if(array[j]<0)
+                    continue;
+                long need=-array[u];
+                ans+=i*Math.min(array[j],need);
+                array[u]+=Math.min(array[j],need);
+                array[j]-=Math.min(array[j],need);
+            }
+        }
+    }
+    static void dist(int u,int depth,ArrayList<Integer>[]adj,ArrayList<Integer>[]dist){
+        dist[depth].add(u);
+        for(int v:adj[u]){
+            dist(v,depth+1,adj,dist);
+        }
+    }
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int t=scan.nextInt();
+        for(int tempvar=0;tempvar<t;tempvar++){
+            int n=scan.nextInt();
+            long[]temp=new long[n];
+            long[]array=new long[n];
+            int[]parent=new int[n];
+            parent[0]=-1;
+            ArrayList<Integer>[]adj=new ArrayList[n];
+            for(int i=0;i<n;i++){
+                temp[i]=scan.nextLong();
+                adj[i]=new ArrayList<>();
+            }
+            for(int i=0;i<n-1;i++){
+                parent[i+1]=scan.nextInt()-1;
+                adj[parent[i+1]].add(i+1);
+            }
+            dfs(0,temp,array,adj);
+            ans=0;
+            for(int i=n-1;i>=0;i--){
+                solve(i,array,parent,adj);
+            }
+            System.out.println(ans);
+        }
+    }
+}
