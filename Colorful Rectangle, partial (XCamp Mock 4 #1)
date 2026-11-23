@@ -1,0 +1,79 @@
+import java.util.*;
+public class Main{
+    static class Node implements Comparable<Node>{
+        int x;
+        int y;
+        public Node(int x,int y){
+            this.x=x;
+            this.y=y;
+        }
+        public int compareTo(Node other){
+            if(this.x-other.x==0)
+                return this.y-other.y;
+            return this.x-other.x;
+        }
+    }
+    static int solve(ArrayList<Node>array,int x1,int x2,int y1,int y2,TreeMap<Integer,TreeSet<Integer>>map){
+        int perim=2*(Math.abs(x2-x1)+Math.abs(y2-y1));
+        int best=Integer.MAX_VALUE;
+        for(int x:map.subMap(Math.min(x1,x2),true,Math.max(x1,x2),true).keySet()){
+            TreeSet<Integer>y=map.get(x);
+            Integer floor=y.floor(Math.max(y1,y2));
+            Integer ceil=y.ceiling(Math.min(y1,y2));
+            if(floor!=null&&floor>=Math.min(y1,y2))
+                return perim;
+            if(floor!=null)
+                best=Math.min(best,Math.min(y1,y2)-floor);
+            if(ceil!=null)
+                best=Math.min(best,ceil-Math.max(y1,y2));
+        }
+        return best==Integer.MAX_VALUE?Integer.MAX_VALUE:perim+2*best;
+    }
+    static TreeMap<Integer,TreeSet<Integer>>rmap=new TreeMap<>();
+    static TreeMap<Integer,TreeSet<Integer>>bmap=new TreeMap<>();
+    static TreeMap<Integer,TreeSet<Integer>>gmap=new TreeMap<>();
+	public static void main(String[]args){
+	    Scanner scan=new Scanner(System.in);
+	    int n=scan.nextInt();
+	    ArrayList<Node>r=new ArrayList<>();
+	    ArrayList<Node>b=new ArrayList<>();
+	    ArrayList<Node>g=new ArrayList<>();
+	    for(int i=0;i<n;i++){
+	        int x=scan.nextInt();
+	        int y=scan.nextInt();
+	        int c=scan.nextInt();
+	        if(c==0)
+	            r.add(new Node(x,y));
+	        else if(c==1)
+	            b.add(new Node(x,y));
+	        else
+	            g.add(new Node(x,y));
+	    }
+        for(Node node:r){
+            rmap.computeIfAbsent(node.x,k->new TreeSet<>()).add(node.y);
+        }
+        for(Node node:b){
+            bmap.computeIfAbsent(node.x,k->new TreeSet<>()).add(node.y);
+        }
+        for(Node node:g){
+            gmap.computeIfAbsent(node.x,k->new TreeSet<>()).add(node.y);
+        }
+	    int best=Integer.MAX_VALUE;
+	    for(Node first:r){
+	        for(Node second:b){
+	            best=Math.min(best,solve(g,first.x,second.x,first.y,second.y,gmap));
+	        }
+	    }
+	    for(Node first:r){
+	        for(Node second:g){
+	            best=Math.min(best,solve(b,first.x,second.x,first.y,second.y,bmap));
+	        }
+	    }
+	    for(Node first:b){
+	        for(Node second:g){
+	            best=Math.min(best,solve(r,first.x,second.x,first.y,second.y,rmap));
+	        }
+	    }
+	    System.out.println(best);
+	}
+}
