@@ -1,0 +1,76 @@
+import java.util.*;
+public class Main{
+    static class Node{
+        long times;
+        long val;
+        public Node(long times,long val){
+            this.times=times;
+            this.val=val;
+        }
+    }
+	public static void main(String[]args){
+	    Scanner scan=new Scanner(System.in);
+	    int t=scan.nextInt();
+	    ArrayList<Long>nums=new ArrayList<>();
+	    Node[]base=new Node[86];
+	    nums.add(1L);
+	    nums.add(2L);
+	    nums.add(3L);
+	    for(int i=3;i<86;i++){
+	        nums.add(nums.get(nums.size()-1)+nums.get(nums.size()-2));
+	        long val=nums.get(i);
+	        long times=0;
+	        while(nums.contains(val)){
+	            val=nums.indexOf(val)+1;
+	            times++;
+	        }
+	        base[i]=new Node(times,val);
+	    }
+	    for(int temp=0;temp<t;temp++){
+	        long n=scan.nextLong();
+	        if(n==1){
+	            System.out.println(1);
+	            continue;
+	        }
+	        if(n==2){
+	            System.out.println(2);
+	            continue;
+	        }
+	        if(n==3){
+	            System.out.println(3);
+	            continue;
+	        }
+	        Node cur=new Node(0,n);
+	        if(nums.contains(n))
+	            cur=base[nums.indexOf(n)];
+            long ans=cur.val;
+	        if((cur.val+Collections.binarySearch(nums,cur.val)+1)%2==0){
+	            ans--;
+	            while(nums.contains(ans)){
+	                ans--;
+	            }
+	            for(int i=0;i<cur.times+1;i++){
+	                if(ans>86){
+	                    ans=-1;
+	                    break;
+	                }
+	                ans=nums.get((int)ans-1);
+	            }
+	        }
+	        else{
+	            ans++;
+	            while(nums.contains(ans)){
+	                ans++;
+	            }
+	            for(int i=0;i<cur.times;i++){
+	                if(ans>86){
+	                    ans=-1;
+	                    break;
+	                }
+	                ans=nums.get((int)ans-1);
+	            }
+	        }
+	        System.out.println(ans);
+	    }
+	}
+}
