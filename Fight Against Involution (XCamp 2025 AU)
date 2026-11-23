@@ -1,0 +1,39 @@
+import java.util.*;
+public class Main{
+    static class Node implements Comparable<Node>{
+        int l;
+        int r;
+        public Node(int l,int r){
+            this.l=l;
+            this.r=r;
+        }
+        public int compareTo(Node other){
+            if(this.r==other.r)
+                return this.l-other.l;
+            return this.r-other.r;
+        }
+    }
+	public static void main(String[]args){
+	    Scanner scan=new Scanner(System.in);
+	    int n=scan.nextInt();
+	    Node[]array=new Node[n];
+	    for(int i=0;i<n;i++){
+	        array[i]=new Node(scan.nextInt(),scan.nextInt());
+	    }
+	    Arrays.sort(array);
+	    long ans=0;
+	    long pre=0;
+	    long max=array[0].l;
+	    for(int i=1;i<n;i++){
+	        if(array[i].r==array[i-1].r)
+	            max=Math.max(max,array[i].l);
+	        else{
+	            ans+=max*(i-pre);
+	            pre=i;
+	            max=Math.max(max,array[i].l);
+	        }
+	    }
+	    ans+=max*(n-pre);
+	    System.out.println(ans);
+	}
+}
