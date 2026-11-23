@@ -1,0 +1,40 @@
+#include <bits/stdc++.h>
+using namespace std;
+using ll=long long;
+const ll MOD=998244353;
+struct Node{
+    ll a=1;//none
+    ll b=0;//above
+    ll c=0;//no restriction
+};
+Node solve(int u,vector<vector<int>>&adj){
+    Node res;
+    if(adj[u].size()==0){
+        res.a=0;
+        res.c=1;
+        return res;
+    }
+    for(int v:adj[u]){
+        Node child=solve(v,adj);
+        Node temp;
+        temp.a=res.a*(child.a+child.c)%MOD;
+        temp.b=((res.b*(child.a+child.c)%MOD+res.a*(child.b+child.c))%MOD)%MOD;
+        temp.c=(res.c*(child.a+child.b+2*child.c)%MOD+res.b*(child.b+child.c)%MOD)%MOD;
+        res=temp;
+    }
+    return res;
+}
+int main(){
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+    int n;
+    cin>>n;
+    vector<vector<int>>adj(n);
+    for(int i=1;i<n;i++){
+        int u;
+        cin>>u;
+        adj[u-1].push_back(i);
+    }
+    Node ans=solve(0,adj);
+    cout<<(ans.a+ans.c)%MOD;
+}
