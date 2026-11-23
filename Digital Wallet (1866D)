@@ -1,0 +1,39 @@
+import java.util.*;
+public class Main{
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int n=scan.nextInt();
+        int m=scan.nextInt();
+        int k=scan.nextInt();
+        long[][]array=new long[m][n];
+        for(int i=0;i<n;i++){
+            for(int j=0;j<m;j++){
+                array[j][i]=scan.nextLong();
+            }
+        }
+        for(int i=0;i<m;i++){
+            Arrays.sort(array[i]);
+        }
+        long[][]dp=new long[m][k];
+        for(int i=0;i<m;i++){
+            Arrays.fill(dp[i],Long.MIN_VALUE/4);
+        }
+        dp[0][k-1]=array[0][n-1];
+        if(k!=1)
+            dp[0][k-2]=0;
+        for(int i=1;i<m;i++){
+            for(int j=0;j<k;j++){
+                if(j>m-i-1)
+                    continue;
+                long count=0;
+                for(int l=0;l<=Math.min(n,k);l++){
+                    if(j-l+1>=0&&j-l+1<k&&dp[i-1][j-l+1]!=Long.MIN_VALUE/4)
+                        dp[i][j]=Math.max(dp[i][j],dp[i-1][j-l+1]+count);
+                    if(l!=Math.min(n,k))
+                        count+=array[i][n-l-1];
+                }
+            }
+        }
+        System.out.print(dp[m-1][0]);
+    }
+}
