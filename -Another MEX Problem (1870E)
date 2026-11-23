@@ -1,0 +1,84 @@
+import java.util.*;
+public class Main{
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int t=scan.nextInt();
+        for(int temp=0;temp<t;temp++){
+            int n=scan.nextInt();
+            int[]array=new int[n];
+            for(int i=0;i<n;i++){
+                array[i]=scan.nextInt();
+            }
+            int[][]mex=new int[n][n];
+            for(int i=0;i<n;i++){
+                TreeSet<Integer>vals=new TreeSet<>();
+                for(int j=0;j<=n;j++){
+                    vals.add(j);
+                }
+                for(int j=i;j<n;j++){
+                    vals.remove(array[j]);
+                    mex[i][j]=vals.first();
+                }
+            }
+            boolean[][]good=new boolean[n][n];
+            for(int i=0;i<n;i++){
+                good[i][i]=true;
+            }
+            for(int i=1;i<n;i++){
+                for(int j=0;j<n-i;j++){
+                    if(mex[j+1][j+i]!=mex[j][j+i]&&mex[j][j+i-1]!=mex[j][j+i])
+                        good[j][j+i]=true;
+                }
+            }
+            ArrayList<Integer>[]left=new ArrayList[n];
+            for(int i=0;i<n;i++){
+                left[i]=new ArrayList<>();
+                for(int j=0;j<=i;j++){
+                    if(good[j][i])
+                        left[i].add(j);
+                }
+                /*
+                System.out.print(i+" lefts: ");
+                for(int j:left[i]){
+                    System.out.print(j+" ");
+                }
+                System.out.println();
+                */
+            }
+            boolean[][]dp=new boolean[n][n+1];
+            for(int i=0;i<n;i++){
+                dp[i][0]=true;
+            }
+            for(int i=0;i<n;i++){
+                if(i!=0){
+                    for(int j=0;j<=n;j++){
+                        dp[i][j]|=dp[i-1][j];
+                    }
+                }
+                for(int j=0;j<n+1;j++){
+                    for(int k:left[i]){
+                        if((j^mex[k][i])>n)
+                            continue;
+                        if(k!=0)
+                            dp[i][j]|=dp[k-1][j^mex[k][i]];
+                        else if((j^mex[k][i])==0)
+                            dp[i][j]=true;
+                    }
+                }
+            }
+            for(int i=n;i>=0;i--){
+                boolean found=false;
+                for(int j=0;j<n;j++){
+                    if(dp[j][i]){
+                        found=true;
+                        break;
+                    }
+                }
+                if(found){
+                    System.out.println(i);
+                    break;
+                }
+            }
+        }
+    }
+}
