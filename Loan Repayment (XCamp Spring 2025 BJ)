@@ -1,0 +1,35 @@
+import java.util.*;
+import java.io.*;
+public class solution{
+    static boolean work(long x,long n,long k,long m){
+        long g=0;
+        while(g<n&&k>0){
+            long y=(n-g)/x;
+            if(y<m)
+                return m*k>=(n-g);
+            long t=Math.min(k,(n-g)/y-x+1);
+            g+=y*t;
+            k-=t;
+        }
+        return g>=n;
+    }
+    public static void main(String[]args) throws IOException{
+        BufferedReader br=new BufferedReader(new FileReader("loan.in"));
+        PrintWriter pw=new PrintWriter(new FileWriter("loan.out"));
+        StringTokenizer st=new StringTokenizer(br.readLine());
+        long n=Long.parseLong(st.nextToken());
+        long k=Long.parseLong(st.nextToken());
+        long min=Long.parseLong(st.nextToken());
+        long l=1;
+        long r=n;
+        while(l<=r){
+            long m=(l+r)/2;
+            if(work(m,n,k,min))
+                l=m+1;
+            else
+                r=m-1;
+        }
+        pw.println(r);
+        pw.close();
+    }
+}
