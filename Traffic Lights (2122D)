@@ -1,0 +1,41 @@
+import java.util.*;
+public class Main{
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int t=scan.nextInt();
+        for(int temp=0;temp<t;temp++){
+            int n=scan.nextInt();
+            int m=scan.nextInt();
+            ArrayList<Integer>[]adj=new ArrayList[n];
+            for(int i=0;i<n;i++){
+                adj[i]=new ArrayList<>();
+            }
+            for(int i=0;i<m;i++){
+                int u=scan.nextInt()-1;
+                int v=scan.nextInt()-1;
+                adj[u].add(v);
+                adj[v].add(u);
+            }
+            int inf=Integer.MAX_VALUE/2;
+            int[]dp=new int[n];
+            Arrays.fill(dp,inf);
+            dp[0]=0;
+            for(int i=0;i<=2*n-3;i++){
+                if(dp[n-1]!=inf){
+                    System.out.println(i+" "+dp[n-1]);
+                    break;
+                }
+                int[]next=new int[n];
+                Arrays.fill(next,inf);
+                for(int j=0;j<n;j++){
+                    if(dp[j]==inf)
+                        continue;
+                    int k=adj[j].get(i%adj[j].size());
+                    next[k]=Math.min(next[k],dp[j]);
+                    next[j]=Math.min(next[j],dp[j]+1);
+                }
+                dp=next;
+            }
+        }
+    }
+}
