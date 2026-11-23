@@ -1,0 +1,48 @@
+import java.util.*;
+public class Main{
+    static int MOD=1000000007;
+    static long pow(long num,long exp){
+        long res=1;
+        while(exp>0){
+            if(exp%2==1){
+                res=(res*num%MOD);
+            }
+            num=(num*num)%MOD;
+            exp/=2;
+        }
+        return res;
+    }
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int n=scan.nextInt();
+        int k=scan.nextInt();
+        int[]array=new int[k];
+        for(int i=0;i<k;i++){
+            array[i]=scan.nextInt();
+        }
+        long[]fact=new long[n+1];
+        fact[0]=1;
+        for(int i=1;i<=n;i++){
+            fact[i]=(fact[i-1]*i)%MOD;
+        }
+        long[]inv=new long[n+1];
+        inv[0]=1;
+        inv[n]=pow(fact[n],MOD-2);
+        for(int i=n-1;i>=1;i--){
+            inv[i]=(inv[i+1]*(i+1))%MOD;
+        }
+        long[][]dp=new long[k+1][n+1];
+        dp[0][0]=fact[n];
+        for(int i=0;i<k;i++){
+            for(int j=0;j<=n;j++){
+                if(dp[i][j]==0)
+                    continue;
+                for(int l=0;l<=Math.min(array[i],n-j);l++){
+                    long temp=(((fact[n-l]*inv[array[i]-l])%MOD*inv[n-array[i]])%MOD*inv[l])%MOD;
+                    dp[i+1][j+l]=(dp[i+1][j+l]+dp[i][j]*temp)%MOD;
+                }
+            }
+        }
+        System.out.println(dp[k][n]);
+    }
+}
