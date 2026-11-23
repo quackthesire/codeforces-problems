@@ -1,0 +1,35 @@
+import java.util.*;
+public class Main{
+    static class Node{
+        long h;
+        int t;
+        public Node(long h,int t){
+            this.h=h;
+            this.t=t;
+        }
+    }
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int n=scan.nextInt();
+        long[]array=new long[n];
+        for(int i=0;i<n;i++){
+            array[i]=scan.nextLong();
+        }
+        long best=0;
+        Stack<Node>s=new Stack<>();
+        for(int i=0;i<n;i++){
+            int cur=i;
+            while(!s.isEmpty()&&s.peek().h>array[i]){
+                Node board=s.pop();
+                best=Math.max(best,(i-board.t)*board.h);
+                cur=board.t;
+            }
+            s.push(new Node(array[i],cur));
+        }
+        while(!s.isEmpty()){
+            Node board=s.pop();
+            best=Math.max(best,(n-board.t)*board.h);
+        }
+        System.out.println(best);
+    }
+}
