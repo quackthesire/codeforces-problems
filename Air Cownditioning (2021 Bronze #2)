@@ -1,0 +1,50 @@
+import java.util.*;
+public class Main{
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int n=scan.nextInt();
+        int[]array=new int[n];
+        int[]array2=new int[n];
+        int[]check=new int[n];
+        int add=0;
+        int count=0;
+        for(int i=0;i<n;i++){
+            array[i]=scan.nextInt();
+        }
+        for(int j=0;j<n;j++){
+            array2[j]=scan.nextInt();
+            check[j]=array[j]-array2[j];
+        }
+        for(int k=0;k<n;k++){
+            while(check[k]!=0){
+                if(check[k]>0){
+                    while(k+add<n){
+                        if(check[k+add]>0){
+                            check[k+add]--;
+                        }
+                        else{
+                            break;
+                        }
+                        add++;
+                    }
+                    count++;
+                    add=0;
+                }
+                else if(check[k]<0){
+                    while(k+add<n){
+                        if(check[k+add]<0){
+                            check[k+add]++;
+                        }
+                        else{
+                            break;
+                        }
+                        add++;
+                    }
+                    count++;
+                    add=0;
+                }
+            }
+        }
+        System.out.println(count);
+    }
+}
