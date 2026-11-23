@@ -1,0 +1,73 @@
+import java.util.*;
+public class Main{
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int t=scan.nextInt();
+        for(int temp=0;temp<t;temp++){
+            int a=scan.nextInt();
+            int b=scan.nextInt();
+            int c=scan.nextInt();
+            int d=scan.nextInt();
+            int n=a+b+c*2+d*2;
+            String s=scan.next();
+            int count=0;
+            int[]array=new int[n];
+            for(int i=0;i<n;i++){
+                array[i]=s.charAt(i)=='A'?0:1;
+                if(array[i]==0)
+                    count++;
+            }
+            if(count!=a+c+d){
+                System.out.println("NO");
+                continue;
+            }
+            int tot=0;
+            ArrayList<Integer>bonusa=new ArrayList<>();
+            ArrayList<Integer>bonusb=new ArrayList<>();
+            int start=array[0];
+            int prev=array[0];
+            int size=1;
+            for(int i=1;i<n;i++){
+                if(array[i]!=prev){
+                    prev=array[i];
+                    size++;
+                }
+                else{
+                    if(size%2==1)
+                        tot+=size/2;
+                    else if(start==0)
+                        bonusa.add(size);
+                    else
+                        bonusb.add(size);
+                    start=array[i];
+                    prev=array[i];
+                    size=1;
+                }
+            }
+            if(size%2==1)
+                tot+=size/2;
+            else if(start==0)
+                bonusa.add(size);
+            else
+                bonusb.add(size);
+            Collections.sort(bonusa);
+            Collections.sort(bonusb);
+            for(int i:bonusa){
+                if(c<i/2)
+                    tot+=i/2-1;
+                else
+                    c-=i/2;
+            }
+            for(int i:bonusb){
+                if(d<i/2)
+                    tot+=i/2-1;
+                else
+                    d-=i/2;
+            }
+            if(c+d<=tot)
+                System.out.println("YES");
+            else
+                System.out.println("NO");
+        }
+    }
+}
