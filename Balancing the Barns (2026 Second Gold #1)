@@ -1,0 +1,74 @@
+import java.util.*;
+import java.math.*;
+public class Main{
+    static class Node implements Comparable<Node>{
+        long val;
+        int slope;
+        public Node(long val,int slope){
+            this.val=val;
+            this.slope=slope;
+        }
+        public int compareTo(Node other){ 
+            if(this.val==other.val)
+                return this.slope-other.slope;
+            return Long.compare(this.val,other.val);
+        }
+    }
+    static boolean check(long[]a,long[]b,long diff,long k){
+        ArrayList<Node>vals=new ArrayList<>();
+        for(int i=0;i<a.length;i++){
+            long l=a[i]-diff;
+            long r=b[i];
+            if(l<=r){
+                vals.add(new Node(l,1));
+                vals.add(new Node(r,1));
+            }
+            else
+                vals.add(new Node((a[i]+b[i]-diff)/2,2));
+        }
+        Collections.sort(vals);
+        long cur=vals.get(0).val;
+        BigInteger ops=new BigInteger("0");
+        for(int i=0;i<a.length;i++){
+            ops=ops.add(BigInteger.valueOf(Math.max(0,Math.max(cur-b[i],a[i]-diff-cur))));
+        }
+        BigInteger temp=new BigInteger(ops.toByteArray());
+        BigInteger slope=BigInteger.valueOf(-a.length);
+        for(Node node:vals){
+            temp=temp.add(slope.multiply(BigInteger.valueOf(node.val-cur)));
+            slope=slope.add(BigInteger.valueOf(node.slope));
+            cur=node.val;
+            ops=ops.min(temp);
+        }
+        return ops.compareTo(BigInteger.valueOf(k))<=0;
+    }
+	public static void main(String[]args){
+		Scanner scan=new Scanner(System.in);
+		int t=scan.nextInt();
+		for(int temp=0;temp<t;temp++){
+    		int n=scan.nextInt();
+    		long k=scan.nextLong();
+    		long[]a=new long[n];
+    		long[]b=new long[n];
+    		for(int i=0;i<n;i++){
+    		    a[i]=scan.nextLong()*2;
+    		}
+    		for(int i=0;i<n;i++){
+    		    b[i]=scan.nextLong()*2;
+    		}
+    		long l=-2*k-1000000005;
+    		long r=1000000005;
+    		long ans=r;
+    		while(l<=r){
+    		    long m=(l+r)/2;
+    		    if(check(a,b,m*2,k*2)){
+    		        ans=m;
+    		        r=m-1;
+    		    }
+    		    else
+    		        l=m+1;
+    		}
+    		System.out.println(ans);
+		}
+	}
+}
