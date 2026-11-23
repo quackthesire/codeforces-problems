@@ -1,0 +1,52 @@
+import java.util.*;
+public class Main{
+    static void update(int index,int val,int[]array){
+        for(int i=0;i<array.length;i++){
+            if(array[i]<array[index]&&array[i]>=val)
+                array[i]++;
+        }
+        array[index]=val;
+    }
+    static void solve(int index,int least,int[]array){
+        if(index>=array.length)
+            return;
+        if(array[index]<least){
+            solve(index+1,least,array);
+            return;
+        }
+        if((array[index]-least)%2==0){
+            update(index,least,array);
+            solve(index+1,least+1,array);
+        }
+        else{
+            int min=Integer.MAX_VALUE;
+            for(int j=index;j<array.length;j++){
+                if(array[j]<least)
+                    continue;
+                min=Math.min(min,array[j]);
+                if((array[j]-least)%2!=0||min<array[j])
+                    continue;
+                update(j,least,array);
+                break;
+            }
+            update(index,least+1,array);
+            solve(index+1,least+2,array);
+        }
+    }
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int t=scan.nextInt();
+        for(int temp=0;temp<t;temp++){
+            int n=scan.nextInt();
+            int[]array=new int[n];
+            for(int i=0;i<n;i++){
+                array[i]=scan.nextInt();
+            }
+            solve(0,1,array);
+            for(int i=0;i<n;i++){
+                System.out.print(array[i]+" ");
+            }
+            System.out.println();
+        }
+    }
+}
