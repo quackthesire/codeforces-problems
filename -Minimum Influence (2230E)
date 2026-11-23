@@ -1,0 +1,94 @@
+import java.util.*;
+public class Main{
+    static class News implements Comparable<News>{
+        int p;
+        int c;
+        public News(int p,int c){
+            this.p=p;
+            this.c=c;
+        }
+        public int compareTo(News other){
+            if(this.p==other.p)
+                return this.c-other.c;
+            return this.p-other.p;
+        }
+    }
+    static int cval(News news,int floor1,int floor2){
+        if(news.c>=floor2)
+            return floor2;
+        if(news.c>=floor1)
+            return news.c;
+        return 0;
+    }
+    static int pval(News news,int floor1,int floor2){
+        if(news.p>=floor2)
+            return floor2;
+        if(news.p>=floor1)
+            return news.p;
+        return 0;
+    }
+    static int bsp(ArrayList<News>list,int val){
+        int l=0;
+        int r=list.size()-1;
+        while(l<=r){
+            int m=(l+r)/2;
+            if(list.get(m).p<val)
+                l=m+1;
+            else
+                r=m-1;
+        }
+        return r;
+    }
+    static int bsc(ArrayList<News>list,int val){
+        int l=0;
+        int r=list.size()-1;
+        while(l<=r){
+            int m=(l+r)/2;
+            if(list.get(m).c>=val)
+                l=m+1;
+            else
+                r=m-1;
+        }
+        return l;
+    }
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int n=scan.nextInt();
+        int sum=Integer.MAX_VALUE;
+        int[]temp=new int[n];
+        News[]array=new News[n];
+        for(int i=0;i<n;i++){
+            temp[i]=scan.nextInt();
+        }
+        for(int i=0;i<n;i++){
+            array[i]=new News(temp[i],scan.nextInt());
+        }
+        Arrays.sort(array);
+        ArrayList<News>list=new ArrayList<>();
+        list.add(array[0]);
+        for(int i=1;i<n;i++){
+            if(array[i].c<list.get(list.size()-1).c)
+                list.add(array[i]);
+            sum=Math.min(sum,array[i].c+array[i].p);
+        }
+        int m=scan.nextInt();
+        int[][]users=new int[m][3];
+        for(int i=0;i<3;i++){
+            for(int j=0;j<m;j++){
+                users[j][i]=scan.nextInt();
+            }
+        }
+        for(int i=0;i<m;i++){
+            int p=users[i][0];
+            int c=users[i][1];
+            int d=users[i][2];
+            int best=Math.min(p+d+cval(list.get(list.size()-1),c,c+d),c+d+pval(list.get(0),p,p+d));
+            if(bsp(list,p)>=0&&bsp(list,p)<list.size())
+                best=Math.min(best,cval(list.get(bsp(list,p)),c,c+d));
+            if(bsc(list,c)>=0&&bsc(list,c)<list.size())
+                best=Math.min(best,pval(list.get(bsc(list,c)),p,p+d));
+            best=Math.min(best,sum);
+            System.out.println(best);
+        }
+    }
+}
