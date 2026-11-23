@@ -1,0 +1,69 @@
+import java.util.*;
+public class Main{
+    static class cow{
+        int num;
+        int weight;
+    }
+    static class compares implements Comparator<cow>{
+        public int compare(cow a,cow b){
+            return b.weight-a.weight;
+        }
+    }
+  	public static void main(String[]args){
+    		Scanner scan=new Scanner(System.in);
+    		int n=scan.nextInt();
+    		int m=scan.nextInt();
+    		int k=scan.nextInt();
+    		cow[]array=new cow[n];
+    		for(int i=0;i<n;i++){
+    		    array[i]=new cow();
+    		    array[i].weight=scan.nextInt();
+    		    array[i].num=scan.nextInt();
+    		}
+    		Arrays.sort(array,new compares());
+    		int sum=0;
+    		int count=0;
+    		int index=0;
+    		while(count<m){
+    		    boolean[]visited=new boolean[n];
+    		    visited[index]=true;
+    		    int times=array[index].num;
+    		    int cur=index;
+    		    int num=1;
+    		    for(int i=0;i<n;i++){
+    		        if(array[i].weight+k<=array[cur].weight&&array[i].num!=0){
+    		            visited[i]=true;
+    		            times=Math.min(times,array[i].num);
+    		            cur=i;
+    		            num++;
+    		        }
+    		    }
+    		    sum+=Math.min(times*num,(m-count)*num);
+    		    count+=times;
+    		    for(int i=0;i<n;i++){
+    		        if(visited[i]==true){
+    		            array[i].num-=times;
+    		        }
+    		    }
+    		    while(array[index].num==0){
+    		        if(index<n-1){
+    		            index++;
+    		        }
+    		        else{
+    		            break;
+    		        }
+    		    }
+    		    boolean check=false;
+    		    for(int i=0;i<n;i++){
+    		        if(array[i].num!=0){
+    		            check=true;
+    		            break;
+    		        }
+    		    }
+    		    if(check==false){
+    		        break;
+    		    }
+    		}
+    		System.out.println(sum);
+  	}
+}
