@@ -1,0 +1,54 @@
+import java.util.*;
+public class Main{
+    static int limit=10000;
+    static class Node{
+        int val;
+        int t;
+        public Node(int val,int t){
+            this.val=val;
+            this.t=t;
+        }
+    }
+	  public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int n=scan.nextInt();
+        int[]array=new int[n];
+        for(int i=0;i<n;i++){
+            array[i]=scan.nextInt();
+        }
+        long[]even=new long[2*limit+10];//offset 10^4
+        long[]odd=new long[2*limit+10];//offset 10^4
+        Arrays.fill(even,Long.MAX_VALUE);
+        Arrays.fill(odd,Long.MAX_VALUE);
+        even[limit]=0;
+        Queue<Node>queue=new LinkedList<>();
+        for(int i=0;i<n;i++){
+            queue.add(new Node(array[i],1));
+        }
+        while(!queue.isEmpty()){
+            Node state=queue.poll();
+            if(state.t%2==0&&even[state.val+limit]!=Long.MAX_VALUE)
+                continue;
+            else if(state.t%2==1&&odd[state.val+limit]!=Long.MAX_VALUE)
+                continue;
+            if(state.t%2==0)
+                even[state.val+limit]=state.t;
+            else
+                odd[state.val+limit]=state.t;
+            for(int i=0;i<n;i++){
+                if(array[i]-state.val>=-limit&&array[i]-state.val<=limit)
+                    queue.add(new Node(array[i]-state.val,state.t+1));
+            }
+        }
+        int q=scan.nextInt();
+        for(int i=0;i<q;i++){
+            int s=scan.nextInt();
+            int t=scan.nextInt();
+            long temp=Math.min(even[(t-s)/2+limit],odd[(t+s)/2+limit]);
+            if(s%2!=t%2||temp==Long.MAX_VALUE)
+                System.out.println("-1");
+            else
+                System.out.println(temp);
+        }
+	  }
+}
