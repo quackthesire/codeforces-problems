@@ -1,0 +1,60 @@
+import java.util.*;
+public class Main{
+    static long MOD=998244353;
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int n=scan.nextInt();
+        int[]array=new int[n];
+        for(int i=0;i<n;i++){
+            array[i]=scan.nextInt();
+        }
+        int[]spf=new int[1000001];
+        for(int i=1;i<=1000000;i++){
+            spf[i]=i;
+        }
+        for(int i=2;i*i<=1000000;i++){
+            if(spf[i]!=i)
+                continue;
+            for(int j=i*i;j<=1000000;j+=i){
+                if(spf[j]==j)
+                    spf[j]=i;
+            }
+        }
+        long[]pre=new long[1000001];
+        for(int i=0;i<n;i++){
+            long count=(i==0?1:0);
+            int cur=-1;
+            int temp=array[i];
+            ArrayList<Integer>fact=new ArrayList<>();
+            while(temp>1){
+                if(cur!=spf[temp])
+                    fact.add(spf[temp]);
+                cur=spf[temp];
+                temp/=spf[temp];
+            }
+            for(int j=1;j<(1<<fact.size());j++){
+                int val=1;
+                int mult=(Integer.bitCount(j)%2==0?-1:1);
+                String bin=String.format("%"+fact.size()+"s",Integer.toBinaryString(j)).replace(' ', '0');
+                for(int k=0;k<fact.size();k++){
+                    if(bin.charAt(k)=='1')
+                        val*=fact.get(k);
+                }
+                count=(count+mult*pre[val]+MOD)%MOD;
+                //System.out.println("COUNT: "+val+" "+pre[val]+" "+count);
+            }
+            for(int j=1;j<(1<<fact.size());j++){
+                int val=1;
+                String bin=String.format("%"+fact.size()+"s",Integer.toBinaryString(j)).replace(' ', '0');
+                for(int k=0;k<fact.size();k++){
+                    if(bin.charAt(k)=='1')
+                        val*=fact.get(k);
+                }
+                pre[val]=(pre[val]+count)%MOD;
+                //System.out.println("PRE: "+val+" "+pre[val]+" "+count);
+            }
+            if(i==n-1)
+                System.out.println(count);
+        }
+    }
+}
