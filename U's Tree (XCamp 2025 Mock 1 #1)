@@ -1,0 +1,58 @@
+import java.util.*;
+public class Main{
+    static void dfs(int u,ArrayList<Integer>[]adj,ArrayList<Integer>[]child,boolean[]visited){
+        visited[u]=true;
+        for(int v:adj[u]){
+            if(!visited[v]){
+                child[u].add(v);
+                dfs(v,adj,child,visited);
+            }
+        }
+    }
+    static void check(int u,int mod,ArrayList<Integer>[]child,boolean[][]work){
+        work[u][mod]=true;
+        for(int v:child[u]){
+            check(v,mod,child,work);
+        }
+    }
+	public static void main(String[]args){
+	    Scanner scan=new Scanner(System.in);
+	    int n=scan.nextInt();
+	    int m=scan.nextInt();
+	    int[][]mod=new int[m][2];
+	    boolean[][]work=new boolean[n][m];
+	    ArrayList<Integer>[]adj=new ArrayList[n];
+	    ArrayList<Integer>[]child=new ArrayList[n];
+	    for(int i=0;i<n;i++){
+	        adj[i]=new ArrayList<>();
+	        child[i]=new ArrayList<>();
+	    }
+	    for(int i=0;i<n-1;i++){
+	        int u=scan.nextInt()-1;
+	        int v=scan.nextInt()-1;
+	        adj[u].add(v);
+	        adj[v].add(u);
+	    }
+	    for(int i=0;i<m;i++){
+	        mod[i][0]=scan.nextInt()-1;
+	        mod[i][1]=scan.nextInt();
+	    }
+	    dfs(0,adj,child,new boolean[n]);
+	    for(int i=0;i<m;i++){
+	        check(mod[i][0],i,child,work);
+	    }
+	    long ans=0;
+	    for(int i=0;i<n;i++){
+	        long cur=0;
+	        long best=0;
+	        for(int j=0;j<m;j++){
+	            if(work[i][j]){
+	                cur+=mod[j][1];
+	                best=Math.max(cur,best);
+	            }
+	        }
+	        ans+=best;
+	    }
+	    System.out.println(ans);
+	}
+}
