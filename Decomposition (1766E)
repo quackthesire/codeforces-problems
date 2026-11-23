@@ -1,0 +1,56 @@
+import java.util.*;
+public class Main{
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int n=scan.nextInt();
+        long ans=0;
+        long zeros=0;
+        long[]vals=new long[13];//1,2,3,11,12,13,21,22,23,31,32,33,xxx
+        for(int i=0;i<n;i++){
+            int cur=scan.nextInt();
+            long[]temp=new long[13];
+            if(cur==0){
+                for(int j=0;j<13;j++){
+                    temp[j]=vals[j];
+                }
+                ans+=(long)(i+1)*(n-i);
+                zeros++;
+            }
+            else if(cur==1){
+                temp[0]+=vals[0]+vals[2]+zeros+1;
+                temp[3]+=vals[3]+vals[9];
+                temp[4]+=vals[4]+vals[10];
+                temp[5]+=vals[5]+vals[11];
+                temp[6]+=vals[1]+vals[6]+vals[8];
+                temp[12]+=vals[7]+vals[12];
+                zeros=0;
+            }
+            else if(cur==2){
+                temp[1]+=vals[1]+vals[2]+zeros+1;
+                temp[4]+=vals[0]+vals[4]+vals[5];
+                temp[6]+=vals[6]+vals[9];
+                temp[7]+=vals[7]+vals[10];
+                temp[8]+=vals[8]+vals[11];
+                temp[12]+=vals[3]+vals[12];
+                zeros=0;
+            }
+            else{
+                temp[2]+=vals[0]+vals[1]+vals[2]+zeros+1;
+                temp[9]+=vals[3]+vals[6]+vals[9];
+                temp[10]+=vals[4]+vals[7]+vals[10];
+                temp[11]+=vals[5]+vals[8]+vals[11];
+                temp[12]+=vals[12];
+                zeros=0;
+            }
+            for(int j=0;j<3;j++){
+                ans+=temp[j];
+            }
+            for(int j=3;j<12;j++){
+                ans+=temp[j]*2;
+            }
+            ans+=temp[12]*3;
+            vals=temp;
+        }
+        System.out.println(ans);
+    }
+}
