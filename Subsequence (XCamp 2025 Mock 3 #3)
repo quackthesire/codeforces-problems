@@ -1,0 +1,64 @@
+import java.util.*;
+public class Main{
+    static int lower(int[]array,int val){
+        int l=0;
+        int r=array.length-1;
+        int ans=-1;
+        while(l<=r){
+            int m=(l+r)/2;
+            if(array[m]==val){
+                ans=m;
+                r=m-1;
+            }
+            else if(array[m]<val)
+                l=m+1;
+            else
+                r=m-1;
+        }
+        return ans;
+    }
+    static int upper(int[]array,int val){
+        int l=0;
+        int r=array.length-1;
+        int ans=-1;
+        while(l<=r){
+            int m=(l+r)/2;
+            if(array[m]==val){
+                ans=m;
+                l=m+1;
+            }
+            else if(array[m]<val)
+                l=m+1;
+            else
+                r=m-1;
+        }
+        return ans;
+    }
+	public static void main(String[]args){
+	    Scanner scan=new Scanner(System.in);
+	    int t=scan.nextInt();
+	    for(int tempvar=0;tempvar<t;tempvar++){
+	        int n=scan.nextInt();
+	        int[]array=new int[n];
+	        for(int i=0;i<n;i++){
+	            array[i]=scan.nextInt();
+	        }
+	        Arrays.sort(array);
+	        int best=1;
+	        for(int i=0;i<n;i++){
+	            for(int j=i+1;j<n;j++){
+	                if((array[i]+array[j])%2==1)
+	                    continue;
+	                int lower=lower(array,(array[i]+array[j])/2);
+	                int upper=upper(array,(array[i]+array[j])/2);
+	                if(lower<0)
+	                    continue;
+	                int cur=(j-lower)+1+Math.min(lower-i,j-lower);
+	                cur=Math.min(cur,upper-i+1+Math.min(j-upper,upper-i+1));
+	                best=Math.max(best,cur);
+	            }
+	        }
+	        System.out.println(best);
+	    }
+	}
+}
