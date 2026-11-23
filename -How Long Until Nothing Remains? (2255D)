@@ -1,0 +1,42 @@
+import java.util.*;
+public class Main{
+    static boolean solve(long val,long[]array){
+        PriorityQueue<Long>pq=new PriorityQueue<>(Collections.reverseOrder());
+        for(int i=0;i<array.length;i++){
+            pq.add(array[i]);
+        }
+        while(!pq.isEmpty()&&val>=30){
+            pq.poll();
+            val--;
+        }
+        while(!pq.isEmpty()&&val>=0){
+            long cur=pq.poll();
+            cur-=(1<<val);
+            if(cur>0)
+                pq.add(cur);
+            val--;
+        }
+        return pq.isEmpty();
+    }
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int t=scan.nextInt();
+        for(int temp=0;temp<t;temp++){
+            int n=scan.nextInt();
+            long[]array=new long[n];
+            for(int i=0;i<n;i++){
+                array[i]=scan.nextLong();
+            }
+            long l=0;
+            long r=1000000;
+            while(l<=r){
+                long m=(l+r)/2;
+                if(solve(m,array))
+                    r=m-1;
+                else
+                    l=m+1;
+            }
+            System.out.println(l+1);
+        }
+    }
+}
