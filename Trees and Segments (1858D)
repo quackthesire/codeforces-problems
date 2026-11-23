@@ -1,0 +1,83 @@
+import java.util.*;
+public class Main{
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int t=scan.nextInt();
+        for(int temp=0;temp<t;temp++){
+            int n=scan.nextInt();
+            int k=scan.nextInt();
+            String s=scan.next();
+            int[]array=new int[n];
+            int[]pre=new int[n];
+            for(int i=0;i<n;i++){
+                array[i]=s.charAt(i)-'0';
+                pre[i]=1-array[i];
+                if(i!=0)
+                    pre[i]+=pre[i-1];
+            }
+            int[][]left=new int[n][k+1];
+            int[][]right=new int[n][k+1];
+            for(int i=0;i<=k;i++){
+                int pos=0;
+                int zeros=0;
+                for(int j=0;j<n;j++){
+                    if(array[j]==0)
+                        zeros++;
+                    while(zeros>i){
+                        if(array[pos]==0)
+                            zeros--;
+                        pos++;
+                    }
+                    left[j][i]=j-pos+1;
+                }
+                pos=n-1;
+                zeros=0;
+                for(int j=n-1;j>=0;j--){
+                    if(array[j]==0)
+                        zeros++;
+                    while(zeros>i){
+                        if(array[pos]==0)
+                            zeros--;
+                        pos--;
+                    }
+                    right[j][i]=pos-j+1;
+                }
+            }
+            for(int i=0;i<=k;i++){
+                for(int j=1;j<n;j++){
+                    left[j][i]=Math.max(left[j][i],left[j-1][i]);
+                }
+                for(int j=n-2;j>=0;j--){
+                    right[j][i]=Math.max(right[j][i],right[j+1][i]);
+                }
+            }
+            int[]best=new int[n+1];
+            Arrays.fill(best,-1);
+            best[0]=left[n-1][k];
+            for(int i=0;i<n;i++){
+                for(int j=i;j<n;j++){
+                    int zeros=pre[j]-(i==0?0:pre[i-1]);
+                    int cost=j-i+1-zeros;
+                    if(cost>k)
+                        continue;
+                    int len=j-i+1;
+                    best[len]=Math.max(best[len],0);
+                    if(i!=0)
+                        best[len]=Math.max(best[len],left[i-1][k-cost]);
+                    if(j!=n-1)
+                        best[len]=Math.max(best[len],right[j+1][k-cost]);
+                }
+            }
+            for(int i=1;i<=n;i++){
+                long ans=0;
+                for(int j=0;j<=n;j++){
+                    if(best[j]==-1)
+                        continue;
+                    ans=Math.max(ans,(long)i*j+best[j]);
+                }
+                System.out.print(ans+" ");
+            }
+            System.out.println();
+        }
+    }
+}
