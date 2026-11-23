@@ -1,0 +1,51 @@
+import java.util.*;
+public class Main{
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int t=scan.nextInt();
+        for(int temp=0;temp<t;temp++){
+            int n=scan.nextInt();
+            int s=scan.nextInt();
+            int[]a=new int[n];
+            int[]b=new int[n];
+            boolean work=true;
+            boolean[]exist=new boolean[n];
+            for(int i=0;i<n;i++){
+                a[i]=scan.nextInt()-1;
+            }
+            for(int i=0;i<n;i++){
+                b[i]=scan.nextInt()-1;
+                if(b[i]>=0&&a[i]-b[i]>s)
+                    work=false;
+                if(b[i]>=0)
+                    exist[b[i]]=true;
+            }
+            if(!work){
+                System.out.println(0);
+                continue;
+            }
+            ArrayList<Integer>alist=new ArrayList<>();
+            ArrayList<Integer>blist=new ArrayList<>();
+            for(int i=0;i<n;i++){
+                if(!exist[i])
+                    blist.add(i);
+            }
+            for(int i=0;i<n;i++){
+                if(b[i]<0)
+                    alist.add(a[i]);
+            }
+            Collections.sort(alist,Collections.reverseOrder());
+            Collections.sort(blist);
+            long ans=1;
+            long minus=0;
+            for(int i:alist){
+                int res=Collections.binarySearch(blist,i-s);
+                if(res<0)
+                    res=-res-1;
+                ans=ans*(blist.size()-res-minus)%998244353;
+                minus++;
+            }
+            System.out.println(ans);
+        }
+    }
+}
