@@ -1,0 +1,71 @@
+import java.util.*;
+public class Main{
+    static class Node implements Comparable<Node>{
+        long pos;
+        boolean start;
+        public Node(long pos,boolean start){
+            this.pos=pos;
+            this.start=start;
+        }
+        public int compareTo(Node other){
+            if(this.pos==other.pos){
+                if(this.start==other.start)
+                    return 0;
+                if(this.start)
+                    return -1;
+                return 1;
+            }
+            return Long.compare(this.pos,other.pos);
+        }
+    }
+    static boolean check(long a,long d,int k,long[][]array){
+        ArrayList<Node>segs=new ArrayList<>();
+        for(int i=0;i<array.length;i++){
+            long r=d-(array[i][0]+a-1)/a;
+            if(r>=0){
+                segs.add(new Node(array[i][1]-r,true));
+                segs.add(new Node(array[i][1]+r,false));
+            }
+        }
+        Collections.sort(segs);
+        int count=0;
+        for(int i=0;i<segs.size();i++){
+            if(segs.get(i).start)
+                count++;
+            else
+                count--;
+            if(count>=k)
+                return true;
+        }
+        return false;
+    }
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int t=scan.nextInt();
+        for(int temp=0;temp<t;temp++){
+            int n=scan.nextInt();
+            long d=scan.nextInt();
+            int k=scan.nextInt();
+            long[][]array=new long[n][2];
+            for(int i=0;i<n;i++){
+                array[i][0]=scan.nextLong();
+            }
+            for(int i=0;i<n;i++){
+                array[i][1]=scan.nextLong();
+            }
+            long l=1;
+            long r=Integer.MAX_VALUE;
+            long ans=-1;
+            while(l<=r){
+                long m=(l+r)/2;
+                if(check(m,d,k,array)){
+                    ans=m;
+                    r=m-1;
+                }
+                else
+                    l=m+1;
+            }
+            System.out.println(ans);
+        }
+    }
+}
