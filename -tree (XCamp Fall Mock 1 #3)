@@ -1,0 +1,92 @@
+import java.util.*;
+public class Main{
+    static int dfs(int u,ArrayList<Integer>[]child,int[]tin,int[]tout,int t){
+        tin[u]=t;
+        t++;
+        for(int v:child[u]){
+            t=dfs(v,child,tin,tout,t);
+        }
+        tout[u]=t-1;
+        return t;
+    }
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int n=scan.nextInt();
+        int[][]array=new int[n][2];
+        int[]parent=new int[n+1];
+        ArrayList<Integer>[]child=new ArrayList[n+1];
+        for(int i=0;i<=n;i++){
+            parent[i]=-1;
+            child[i]=new ArrayList<>();
+        }
+        int size=0;
+        for(int i=0;i<n;i++){
+            array[i][0]=scan.nextInt();
+            array[i][1]=scan.nextInt()-1;
+            if(array[i][0]==1){
+                size++;
+                parent[size]=array[i][1];
+                child[array[i][1]].add(size);
+            }
+        }
+        int[][]up=new int[n+1][20];
+        for(int i=0;i<=n;i++){
+            up[i][0]=parent[i];
+        }
+        for(int j=1;j<20;j++){
+            for(int i=0;i<=n;i++){
+                if(up[i][j-1]==-1)
+                    up[i][j]=-1;
+                else
+                    up[i][j]=up[up[i][j-1]][j-1];
+            }
+        }
+        int t=0;
+        int[]tin=new int[n+1];
+        int[]tout=new int[n+1];
+        int[]node=new int[n+1];
+        dfs(0,child,tin,tout,t);
+        for(int i=0;i<=size;i++){
+            node[tin[i]]=i;
+        }
+        size=0;
+        TreeSet<Integer>active=new TreeSet<>();
+        active.add(tin[0]);
+        for(int i=0;i<n;i++){
+            if(array[i][0]==1){
+                size++;
+                active.add(tin[size]);
+            }
+            if(array[i][0]==2){
+                if(active.contains(tin[array[i][1]]))
+                    active.remove(tin[array[i][1]]);
+                else
+                    active.add(tin[array[i][1]]);
+            }
+            if(array[i][0]==3){
+                int cur=array[i][1];
+                Integer pos=active.ceiling(tin[cur]);
+                if(pos!=null&&pos<=tout[cur]){
+                    System.out.println(node[pos]+1);
+                    continue;
+                }
+                for(int j=19;j>=0;j--){
+                    if(up[cur][j]==-1)
+                        continue;
+                    pos=active.ceiling(tin[up[cur][j]]);
+                    if(pos==null||pos>tout[up[cur][j]])
+                        cur=up[cur][j];
+                }
+                if(parent[cur]==-1){
+                    System.out.println(-1);
+                    continue;
+                }
+                pos=active.ceiling(tin[parent[cur]]);
+                if(pos!=null&&pos<=tout[parent[cur]])
+                    System.out.println(node[pos]+1);
+                else
+                    System.out.println(-1);
+            }
+        }
+    }
+}
