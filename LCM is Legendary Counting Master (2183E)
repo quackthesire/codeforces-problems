@@ -1,0 +1,53 @@
+import java.util.*;
+public class Main{
+    static int MOD=998244353;
+  	public static void main(String[]args){
+    		Scanner scan=new Scanner(System.in);
+    		int t=scan.nextInt();
+        ArrayList<Integer>[]divisors=new ArrayList[3010];
+        for(int i=1;i<=3005;i++){
+            divisors[i]=new ArrayList<>();
+        }
+        for(int i=1;i<=3005;i++){
+            for(int j=i;j<=3005;j+=i){
+                divisors[j].add(i);
+            }
+        }
+    		for(int temp=0;temp<t;temp++){
+    		    int n=scan.nextInt();
+            int m=scan.nextInt();
+            int[]array=new int[n];
+            for(int i=0;i<n;i++){
+                array[i]=scan.nextInt();
+            }
+            long[][]dp=new long[n+1][m+1];
+            dp[1][1]=1;
+            for(int i=1;i<n;i++){
+                if(array[i-1]!=0){
+                    for(int j=1;j<=m;j++){
+                        if(j!=array[i-1])
+                            dp[i][j]=0;
+                    }
+                }
+                for(int j=1;j<=m;j++){
+                    for(int k:divisors[j]){
+                        if(j+k>m)
+                            continue;
+                        dp[i+1][j+k]=(dp[i+1][j+k]+dp[i][j])%MOD;
+                    }
+                }
+            }
+            if(array[n-1]!=0){
+                for(int j=1;j<=m;j++){
+                    if(j!=array[n-1])
+                        dp[n][j]=0;
+                }
+            }
+            long ans=0;
+            for(int i=1;i<=m;i++){
+                ans=(ans+dp[n][i])%MOD;
+            }
+            System.out.println(ans);
+    		}
+  	}
+}
