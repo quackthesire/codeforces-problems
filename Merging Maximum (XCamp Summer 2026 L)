@@ -1,0 +1,43 @@
+import java.util.*;
+public class Main{
+    static long MOD=998244353;
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int t=scan.nextInt();
+        for(int temp=0;temp<t;temp++){
+            int n=scan.nextInt();
+            int[]array=new int[n+1];
+            for(int i=1;i<=n;i++){
+                array[i]=scan.nextInt();
+            }
+            long[][]dp=new long[n+1][n+1];
+            dp[0][0]=1;
+            long[][]pre=new long[n+1][n+1];
+            for(int i=0;i<=n;i++){
+                pre[0][i]=1;
+            }
+            for(int i=1;i<=n;i++){
+                int v=array[i];
+                dp[i][v]=(dp[i][v]+pre[i-1][n])%MOD;
+                for(int j=i-2;j>=1;j-=2){
+                    if(v<Math.max(array[j],array[j+1])){
+                        v=Math.max(v,Math.max(array[j],array[j+1]));
+                        dp[i][v]=(dp[i][v]+pre[j-1][n])%MOD;
+                    }
+                    else{
+                        v=Math.max(v,Math.max(array[j],array[j+1]));
+                        dp[i][v]=(dp[i][v]+pre[j-1][Math.max(array[j],array[j+1])])%MOD;
+                    }
+                }
+                for(int j=1;j<=n;j++){
+                    pre[i][j]=(dp[i][j]+pre[i][j-1])%MOD;
+                }
+            }
+            long ans=0;
+            for(int i=0;i<=n;i++){
+                ans=(ans+dp[n][i])%MOD;
+            }
+            System.out.println(ans);
+        }
+    }
+}
