@@ -1,0 +1,36 @@
+import java.util.*;
+public class Main{
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int t=scan.nextInt();
+        for(int temp=0;temp<t;temp++){
+            int n=scan.nextInt();
+            long[]a=new long[n];
+            long[]b=new long[n];
+            for(int i=0;i<n;i++){
+                a[i]=scan.nextLong();
+            }
+            for(int i=0;i<n;i++){
+                b[i]=scan.nextLong();
+            }
+            long ans=0;
+            for(int i=29;i>=0;i--){
+                ans+=(1<<i);
+                Map<Long,Long>map=new HashMap<>();
+                for(long x:a){
+                    map.put(x&ans,map.getOrDefault(x&ans,0L)+1);
+                }
+                for(long x:b){
+                    map.put((~x)&ans,map.getOrDefault((~x)&ans,0L)-1);
+                }
+                for(long j:map.values()){
+                    if(j!=0){
+                        ans-=(1<<i);
+                        break;
+                    }
+                }
+            }
+            System.out.println(ans);
+        }
+    }
+}
