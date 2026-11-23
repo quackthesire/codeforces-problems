@@ -1,0 +1,49 @@
+import java.util.*;
+import java.io.*;
+public class solution{
+    public static void main(String[]args) throws IOException{
+        BufferedReader br=new BufferedReader(new FileReader("pieaters.in"));
+        PrintWriter pw=new PrintWriter(new FileWriter("pieaters.out"));
+        StringTokenizer st=new StringTokenizer(br.readLine());
+        int n=Integer.parseInt(st.nextToken());
+        int m=Integer.parseInt(st.nextToken());
+        int[][]dp=new int[n][n];
+        int[][][]max=new int[n][n][n];
+        for(int i=0;i<m;i++){
+            st=new StringTokenizer(br.readLine());
+            int a=Integer.parseInt(st.nextToken());
+            int b=Integer.parseInt(st.nextToken())-1;
+            int c=Integer.parseInt(st.nextToken())-1;
+            for(int j=b;j<=c;j++){
+                max[j][b][c]=Math.max(max[j][b][c],a);
+            }
+        }
+        for(int i=0;i<n;i++){
+            for(int j=n-2;j>=0;j--){
+                for(int k=0;k<n;k++){
+                    max[i][j][k]=Math.max(max[i][j][k],max[i][j+1][k]);
+                }
+            }
+            for(int j=1;j<n;j++){
+                for(int k=0;k<n;k++){
+                    max[i][k][j]=Math.max(max[i][k][j],max[i][k][j-1]);
+                }
+            }
+        }
+        for(int i=1;i<=n;i++){
+            for(int j=0;j<n-i+1;j++){
+                int r=j+i-1;
+                for(int k=j;k<=r;k++){
+                    if(max[k][j][r]>0){
+                        dp[j][r]=Math.max(dp[j][r],((k>j)?dp[j][k-1]:0)+((k<r)?dp[k+1][r]:0)+max[k][j][r]);
+                    }
+                }
+                for(int k=j;k<r;k++){
+                    dp[j][r]=Math.max(dp[j][r],dp[j][k]+dp[k+1][r]);
+                }
+            }
+        }
+        pw.println(dp[0][n-1]);
+        pw.close();
+    }
+}
