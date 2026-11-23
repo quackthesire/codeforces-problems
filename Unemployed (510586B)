@@ -1,0 +1,63 @@
+import java.util.*;
+public class Main{
+    static class Tuple{
+        long p;
+        int r;
+        int s;
+        public Tuple(long p,int r,int s){
+            this.p=p;
+            this.r=r;
+            this.s=s;
+        }
+    }
+    static class Int implements Comparable<Int>{
+        int i;
+        public Int(int i){
+            this.i=i;
+        }
+        public int compareTo(Int other){
+            return Integer.bitCount(this.i)-Integer.bitCount(other.i);
+        }
+    }
+  	public static void main(String[]args){
+    		Scanner scan=new Scanner(System.in);
+    		int n=scan.nextInt();
+    		int r=scan.nextInt();
+    		int s=scan.nextInt();
+    		Tuple[]array=new Tuple[n];
+    		for(int i=0;i<n;i++){
+    		    array[i]=new Tuple(scan.nextLong(),Math.max(0,scan.nextInt()-r),Math.max(0,scan.nextInt()-s));
+    		}
+    		long[][]dp=new long[1<<n][n+1];
+    		for(int i=0;i<1<<n;i++){
+    		    Arrays.fill(dp[i],-1);
+    		}
+    		dp[0][0]=0;
+    		Int[]order=new Int[1<<n];
+    		for(int i=0;i<1<<n;i++){
+    		    order[i]=new Int(i);
+    		}
+    		Arrays.sort(order);
+    		for(int i=0;i<1<<n;i++){
+            int mask=order[i].i;
+            for(int j=0;j<=Integer.bitCount(mask);j++){
+                int k=Integer.bitCount(mask)-j;
+                if(dp[mask][j]==-1)
+                    continue;
+                for(int l=0;l<n;l++){
+                    if((mask&(1<<l))!=0)
+                        continue;
+                    long gaina=(j+1>=array[l].r&&k>=array[l].s)?array[l].p:0;
+                    long gainb=(j>=array[l].r&&k+1>=array[l].s)?array[l].p:0;
+                    dp[mask|(1<<l)][j+1]=Math.max(dp[mask|(1<<l)][j+1],dp[mask][j]+gaina);
+                    dp[mask|(1<<l)][j]=Math.max(dp[mask|(1<<l)][j],dp[mask][j]+gainb);
+                }
+            }
+        }
+        long best=0;
+        for(int i=0;i<=n;i++){
+            best=Math.max(best,dp[(1<<n)-1][i]);
+        }
+        System.out.println(best);
+  	}
+}
