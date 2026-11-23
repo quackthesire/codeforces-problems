@@ -1,0 +1,49 @@
+import java.util.*;
+public class Main{
+    static long gcd(long a,long b){
+        while(b!=0){
+            long temp=b;
+            b=a%b;
+            a=temp;
+        }
+        return a;
+    }
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int t=scan.nextInt();
+        for(int temp=0;temp<t;temp++){
+            int n=scan.nextInt();
+            long[]a=new long[n];
+            long[]b=new long[n];
+            for(int i=0;i<n;i++){
+                a[i]=scan.nextLong();
+                b[i]=scan.nextLong();
+            }
+            Arrays.sort(a);
+            Arrays.sort(b);
+            long gcda=0;
+            long gcdb=0;
+            for(int i=1;i<n;i++){
+                gcda=gcd(gcda,Math.abs(a[i]-a[i-1]));
+                gcdb=gcd(gcdb,Math.abs(b[i]-b[i-1]));
+            }
+            if(gcda!=gcdb){
+                System.out.println("NO");
+                continue;
+            }
+            if(gcda==0){
+                System.out.println(a[0]==b[0]?"YES":"NO");
+                continue;
+            }
+            HashMap<Long,Integer>mapa=new HashMap<>();
+            HashMap<Long,Integer>mapb=new HashMap<>();
+            for(int i=0;i<n;i++){
+                long vala=Math.floorMod(a[i],2*gcda);
+                long valb=Math.floorMod(b[i],2*gcdb);
+                mapa.put(vala,mapa.getOrDefault(vala,0)+1);
+                mapb.put(valb,mapb.getOrDefault(valb,0)+1);
+            }
+            System.out.println(mapa.equals(mapb)?"YES":"NO");
+        }
+    }
+}
