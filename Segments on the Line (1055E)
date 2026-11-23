@@ -1,0 +1,111 @@
+import java.util.*;
+public class Main{
+    static class Node implements Comparable<Node>{
+        int l;
+        int r;
+        public Node(int l,int r){
+            this.l=l;
+            this.r=r;
+        }
+        public int compareTo(Node other){
+            if(this.r==other.r)
+                return this.l-other.l;
+            return this.r-other.r;
+        }
+    }
+    static boolean solve(int val){
+        int[][]dp=new int[s+1][m+1];
+        int[][]max=new int[s+1][m+1];
+        int[]pre=new int[n+1];
+        for(int i=1;i<=n;i++){
+            pre[i]=pre[i-1]+(array[i-1]<=val?1:0);
+        }
+        for(int i=1;i<=s;i++){
+            dp[i][1]=pre[interval[i-1].r+1]-pre[interval[i-1].l];
+            max[i][1]=Math.max(max[i-1][1],dp[i][1]);
+        }
+        int[]nonover=new int[s];
+        Arrays.fill(nonover,-1);
+        for(int i=1;i<s;i++){
+            nonover[i]=bs(interval[i].l)-1;
+        }
+        int[]over=new int[s];
+        Arrays.fill(over,-1);
+        for(int i=0;i<s;i++){
+            int best=-1;
+            for(int j=i-1;j>=0;j--){
+                if(interval[j].r<interval[i].l)
+                    break;
+                if(best==-1||interval[j].l<interval[best].l){
+                    best=j;
+                }
+            }
+            over[i]=best;
+        }
+        for(int i=1;i<=s;i++){
+            int l=interval[i-1].l;
+            int r=interval[i-1].r+1;
+            for(int j=2;j<=m;j++){
+                int best=0;
+                if(nonover[i-1]>=0)
+                    best=Math.max(best,max[nonover[i-1]+1][j-1]+pre[r]-pre[l]);
+                if(over[i-1]>=0)
+                    best=Math.max(best,dp[over[i-1]+1][j-1]+pre[r]-pre[interval[over[i-1]].r+1]);
+                dp[i][j]=best;
+                max[i][j]=Math.max(max[i-1][j],best);
+            }
+        }
+        boolean work=false;
+        for(int i=1;i<=m;i++){
+            if(max[s][i]>=k)
+                work=true;
+        }
+        return work;
+    }
+    static int bs(int val){
+        int l=0;
+        int r=s-1;
+        while(l<=r){
+            int mid=(l+r)/2;
+            if(interval[mid].r<val)
+                l=mid+1;
+            else
+                r=mid-1;
+        }
+        return l;
+    }
+    static Scanner scan=new Scanner(System.in);
+	static int n=scan.nextInt();
+	static int s=scan.nextInt();
+	static int m=scan.nextInt();
+	static int k=scan.nextInt();
+	static int[]array=new int[n];
+	static Node[]interval=new Node[s];
+	public static void main(String[]args){
+	    int min=Integer.MAX_VALUE;
+	    int max=Integer.MIN_VALUE;
+	    for(int i=0;i<n;i++){
+	        array[i]=scan.nextInt();
+	        min=Math.min(min,array[i]);
+	        max=Math.max(max,array[i]);
+	    }
+	    for(int i=0;i<s;i++){
+	        interval[i]=new Node(scan.nextInt()-1,scan.nextInt()-1);
+	    }
+	    Arrays.sort(interval);
+	    boolean worked=false;
+	    while(min<=max){
+	        int mid=(min+max)/2;
+	        if(solve(mid)){
+	            max=mid-1;
+	            worked=true;
+	        }
+	        else
+	            min=mid+1;
+	    }
+	    if(!worked)
+	        System.out.println("-1");
+	    else
+	        System.out.println(min);
+	}
+}
