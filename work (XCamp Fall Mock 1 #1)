@@ -1,0 +1,83 @@
+import java.util.*;
+import java.io.*;
+public class Main{
+    static class Node{
+        int index;
+        long val;
+        public Node(int index,long val){
+            this.index=index;
+            this.val=val;
+        }
+    }
+    public static void main(String[]args) throws IOException{
+        Scanner scan=new Scanner(System.in);
+        int n=scan.nextInt();
+        int m=scan.nextInt();
+        int val=scan.nextInt();
+        int[][]dp=new int[n+1][m+1];//min time to complete j tasks with i employees
+        int[][]task=new int[n+1][m+1];
+        int[][]day=new int[n+1][m+1];
+        for(int i=0;i<=n;i++){
+            Arrays.fill(dp[i],Integer.MAX_VALUE/2);
+            dp[i][0]=0;
+        }
+        for(int i=0;i<n;i++){
+            for(int j=0;j<m;j++){
+                if(dp[i][j]==Integer.MAX_VALUE/2||val-j<1)
+                    continue;
+                int cur=1;
+                for(int k=1;k<=m-j;k++){
+                    if(val-j<k)
+                        break;
+                   	while(cur<=k){
+                        long q=k/cur;
+                        long r=k%cur;
+                        if(val-j>=r*(q+1)*(q+1)+(cur-r)*q*q)
+                            break;
+                        cur++;
+                    }
+                    if(cur>k||dp[i+1][j+k]<=dp[i][j]+cur)
+                        continue;
+                    dp[i+1][j+k]=dp[i][j]+cur;
+                    task[i+1][j+k]=k;
+                    day[i+1][j+k]=cur;
+                }
+            }
+        }
+        int best=-1;
+        int min=Integer.MAX_VALUE/2;
+        for(int i=0;i<=n;i++){
+            if(min<=dp[i][m])
+                continue;
+           	min=dp[i][m];
+            best=i;
+        }
+        if(min==Integer.MAX_VALUE/2){
+            System.out.print(-1);
+            System.out.close();
+            return;
+        }
+        System.out.println(min);
+        int cur=best;
+        int curtask=m;
+        ArrayList<Node>list=new ArrayList<>();
+        while(cur>0&&curtask>0){
+            long q=task[cur][curtask]/day[cur][curtask];
+            long r=task[cur][curtask]%day[cur][curtask];
+            for(int i=0;i<day[cur][curtask]-r;i++){
+                list.add(new Node(cur,q));
+            }
+            for(int i=0;i<r;i++){
+                list.add(new Node(cur,q+1));
+            }
+            curtask-=task[cur][curtask];
+            cur--;
+        }
+        Collections.reverse(list);
+        for(int i=0;i<list.size();i++){
+            System.out.print(list.get(i).index+" "+list.get(i).val);
+            if(i!=list.size()-1)
+               	System.out.println();
+        }
+    }
+}
