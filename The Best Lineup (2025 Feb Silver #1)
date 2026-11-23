@@ -1,0 +1,61 @@
+import java.util.*;
+public class Main {
+    static class Cow{
+        int w;
+        int i;
+        public Cow(int w,int i){
+            this.w=w;
+            this.i=i;
+        }
+    }
+    static class compares implements Comparator<Cow>{
+        public int compare(Cow a, Cow b){
+            if(a.w==b.w) {
+                return a.i-b.i;
+            }
+            return b.w-a.w;
+        }
+    }
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int t=scan.nextInt();
+        for(int temp=0;temp<t;temp++){
+            int n=scan.nextInt();
+            Cow[]array=new Cow[n];
+            for(int i=0;i<n;i++){
+                array[i]=new Cow(scan.nextInt(),i);
+            }
+            Arrays.sort(array,new compares());
+            int pre=-1;
+            int cur=0;
+            for(int i=1;i<n;i++){
+                if(pre!=-1&&array[i].i<array[pre].i)
+                    continue;
+                if(array[i].i<array[cur].i&&(pre==-1||array[i].i>array[pre].i)){
+                    for(int j=0;j<n;j++){
+                        if(array[j].i<array[cur].i&&(pre==-1||array[j].i>array[pre].i))
+                            array[j].i++;
+                    }
+                    if(pre==-1)
+                        array[cur].i=0;
+                    else
+                        array[cur].i=array[i].i-1;
+                    break;
+                }
+                pre=cur;
+                cur=i;
+            }
+            int index=-1;
+            for(int i=0;i<n;i++){
+                if(array[i].i>index){
+                    if(array[i].i==n-1)
+                        System.out.print(array[i].w);
+                    else
+                        System.out.print(array[i].w+" ");
+                    index=array[i].i;
+                }
+            }
+            System.out.println();
+        }
+    }
+}
