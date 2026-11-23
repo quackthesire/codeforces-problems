@@ -1,0 +1,68 @@
+import java.util.*;
+public class Main{
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int n=scan.nextInt();
+        int[]deg=new int[n];
+        int[]parent=new int[n];
+        ArrayList<Integer>[]adj=new ArrayList[n];
+        for(int i=0;i<n;i++){
+            adj[i]=new ArrayList<>();
+        }
+        for(int i=0;i<n;i++){
+            int val=scan.nextInt()-1;
+            deg[val]++;
+            parent[i]=val;
+            adj[val].add(i);
+        }
+        int[]ans=new int[n];
+        Arrays.fill(ans,-1);
+        Queue<Integer>q=new LinkedList<>();
+        for(int i=0;i<n;i++){
+            if(deg[i]==0)
+                q.add(i);
+        }
+        while(!q.isEmpty()){
+            int index=q.poll();
+            if(ans[index]!=-1)
+                continue;
+            ans[index]=1;
+            if(ans[parent[index]]==-1)
+                deg[parent[parent[index]]]--;
+            ans[parent[index]]=0;
+            if(deg[parent[parent[index]]]==0)
+                q.add(parent[parent[index]]);
+        }
+        boolean work=true;
+        for(int i=0;i<n;i++){
+            if(ans[i]!=-1)
+                continue;
+            int pos=i;
+            int cur=0;
+            while(ans[pos]==-1){
+                ans[pos]=cur;
+                cur=1-cur;
+                pos=parent[pos];
+            }
+            if(ans[pos]!=cur){
+                work=false;
+                break;
+            }
+        }
+        if(!work){
+            System.out.println(-1);
+            System.exit(0);
+        }
+        int count=0;
+        for(int i=0;i<n;i++){
+            if(ans[i]==1)
+                count++;
+        }
+        System.out.println(count);
+        for(int i=0;i<n;i++){
+            if(ans[i]==1)
+                System.out.print((parent[i]+1)+" ");
+        }
+        System.out.println();
+    }
+}
