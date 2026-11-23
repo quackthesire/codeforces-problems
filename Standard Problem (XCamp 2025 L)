@@ -1,0 +1,133 @@
+import java.util.*;
+public class Main{
+    static int MOD=998244353;
+    static class Node{
+        long val;
+        int count;
+        public Node(long val,int count){
+            this.val=val;
+            this.count=count;
+        }
+    }
+    static class Segtree{
+        int n;
+        long[]max;
+        int[]count;
+        long[]lazy;
+        public Segtree(int n){
+            this.n=n;
+            max=new long[4*(n+5)];
+            count=new int[4*(n+5)];
+            lazy=new long[4*(n+5)];
+            build(1,0,n);
+        }
+        public void build(int node,int l,int r){
+            lazy[node]=0;
+            if(l==r){
+                max[node]=0;
+                count[node]=(l==0)?1:0;
+                return;
+            }
+            int m=(l+r)/2;
+            build(node*2,l,m);
+            build(node*2+1,m+1,r);
+            pull(node);
+        }
+        public void apply(int node,long x){
+            max[node]+=x;
+            lazy[node]+=x;
+        }
+        public void push(int node){
+            if(lazy[node]!=0){
+                apply(node*2,lazy[node]);
+                apply(node*2+1,lazy[node]);
+                lazy[node]=0;
+            }
+        }
+        public void pull(int node){
+            if(max[node*2]>max[node*2+1]){
+                max[node]=max[node*2];
+                count[node]=count[node*2];
+            }
+            else if(max[node*2+1]>max[node*2]){
+                max[node]=max[node*2+1];
+                count[node]=count[node*2+1];
+            }
+            else{
+                max[node]=max[node*2];
+                count[node]=(int)(((long)count[node*2]+count[node*2+1])%MOD);
+            }
+        }
+        public void add(int node,int l,int r,int ll,int rr,long x){
+            if(ll>r||rr<l)
+                return;
+            if(ll<=l&&r<=rr){
+                apply(node,x);
+                return;
+            }
+            push(node);
+            int m=(l+r)/2;
+            add(node*2,l,m,ll,rr,x);
+            add(node*2+1,m+1,r,ll,rr,x);
+            pull(node);
+        }
+        public long[]query(int node,int l,int r,int ll,int rr){
+            if(ll>r||rr<l)
+                return new long[]{Long.MIN_VALUE/4,0};
+            if(ll<=l&&r<=rr)
+                return new long[]{max[node],count[node]};
+            push(node);
+            int m=(l+r)/2;
+            long[]temp=query(node*2,l,m,ll,rr);
+            long[]temp2=query(node*2+1,m+1,r,ll,rr);
+            if(temp[0]>temp2[0])
+                return temp;
+            if(temp2[0]>temp[0])
+                return temp2;
+            return new long[]{temp[0],(temp[1]+temp2[1])%MOD};
+        }
+        public void set(int node,int l,int r,int pos,long x,int c){
+            if(l==r){
+                max[node]=x;
+                count[node]=c%MOD;
+                return;
+            }
+            push(node);
+            int m=(l+r)/2;
+            if(pos<=m)
+                set(node*2,l,m,pos,x,c);
+            else
+                set(node*2+1,m+1,r,pos,x,c);
+            pull(node);
+        }
+    }
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int t=scan.nextInt();
+        for(int temp=0;temp<t;temp++){
+            int n=scan.nextInt();
+            int m=scan.nextInt();
+            Node[] dp=new Node[m+1];
+            for(int i=0;i<=m;i++){
+                dp[i]=new Node(0,0);
+            }
+            dp[0].count=1;
+            Segtree segtree=new Segtree(m);
+            for(int i=0;i<n;i++){
+                int l=scan.nextInt();
+                int r=scan.nextInt();
+                long c=scan.nextLong();
+                long[]best=segtree.query(1,0,m,0,l);
+                if(l!=r)
+                    segtree.add(1,0,m,l+1,r,c);
+                long[]cur=segtree.query(1,0,m,l,l);
+                if(best[0]+c>cur[0])
+                    segtree.set(1,0,m,l,best[0]+c,(int)(best[1]%MOD));
+                else if(best[0]+c==cur[0])
+                    segtree.set(1,0,m,l,cur[0],(int)((cur[1]+best[1]%MOD)%MOD));
+            }
+            long[]ans=segtree.query(1,0,m,0,m);
+            System.out.println(Math.max(ans[0],0)+" "+ans[1]%MOD);
+        }
+    }
+}
