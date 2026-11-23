@@ -1,0 +1,106 @@
+import java.util.*;
+public class Main{
+    static class Segtree{
+        int n;
+        long[]tree;
+        long[]premax;
+        long[]premin;
+        long[]sufmax;
+        long[]sufmin;
+        public Segtree(long[]array){
+            n=array.length;
+            tree=new long[4*n];
+            premax=new long[4*n];
+            premin=new long[4*n];
+            sufmax=new long[4*n];
+            sufmin=new long[4*n];
+            build(array,1,0,n-1);
+        }
+        public void build(long[]array,int node,int l,int r){
+            if(l==r){
+                tree[node]=-1;
+                premax[node]=array[l]-1;
+                premin[node]=-array[l]-1;
+                sufmax[node]=array[l]-1;
+                sufmin[node]=-array[l]-1;
+                return;
+            }
+            int m=(l+r)/2;
+            build(array,node*2,l,m);
+            build(array,node*2+1,m+1,r);
+            tree[node]=Math.max(Math.max(tree[node*2],tree[node*2+1]),Math.max(sufmax[node*2]+premin[node*2+1],sufmin[node*2]+premax[node*2+1]));
+            premax[node]=Math.max(premax[node*2],premax[node*2+1]-(m-l+1));
+            premin[node]=Math.max(premin[node*2],premin[node*2+1]-(m-l+1));
+            sufmax[node]=Math.max(sufmax[node*2+1],sufmax[node*2]-(r-m));
+            sufmin[node]=Math.max(sufmin[node*2+1],sufmin[node*2]-(r-m));
+        }
+        public long[] query(int l,int r){
+            return query(1,0,n-1,l,r);
+        }
+        public long[] query(int node,int l,int r,int ll,int rr){
+            if(ll>r||rr<l)
+                return new long[]{-1};
+            if(ll<=l&&r<=rr)
+                return new long[]{tree[node],premax[node],premin[node],sufmax[node],sufmin[node]};
+            int m=(l+r)/2;
+            long[]left=query(node*2,l,m,ll,rr);
+            long[]right=query(node*2+1,m+1,r,ll,rr);
+            if(left.length==1&&right.length==1)
+                return new long[]{-1};
+            if(left.length==1)
+                return right;
+            if(right.length==1)
+                return left;
+            long[]array=new long[5];
+            array[0]=Math.max(Math.max(left[0],right[0]),Math.max(left[3]+right[2],left[4]+right[1]));
+            array[1]=Math.max(left[1],right[1]-(m-l+1));
+            array[2]=Math.max(left[2],right[2]-(m-l+1));
+            array[3]=Math.max(right[3],left[3]-(r-m));
+            array[4]=Math.max(right[4],left[4]-(r-m));
+            return array;
+        }
+        public void update(int index,long val){
+            update(1,0,n-1,index,val);
+        }
+        public void update(int node,int l,int r,int index,long val){
+            if(l==r){
+                tree[node]=-1;
+                premax[node]=val-1;
+                premin[node]=-val-1;
+                sufmax[node]=val-1;
+                sufmin[node]=-val-1;
+                return;
+            }
+            int m=(l+r)/2;
+            if(index<=m)
+                update(node*2,l,m,index,val);
+            else
+                update(node*2+1,m+1,r,index,val);
+            tree[node]=Math.max(Math.max(tree[node*2],tree[node*2+1]),Math.max(sufmax[node*2]+premin[node*2+1],sufmin[node*2]+premax[node*2+1]));
+            premax[node]=Math.max(premax[node*2],premax[node*2+1]-(m-l+1));
+            premin[node]=Math.max(premin[node*2],premin[node*2+1]-(m-l+1));
+            sufmax[node]=Math.max(sufmax[node*2+1],sufmax[node*2]-(r-m));
+            sufmin[node]=Math.max(sufmin[node*2+1],sufmin[node*2]-(r-m));
+        }
+    }
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int t=scan.nextInt();
+        for(int temp=0;temp<t;temp++){
+            int n=scan.nextInt();
+            int q=scan.nextInt();
+            long[]array=new long[n];
+            for(int i=0;i<n;i++){
+                array[i]=scan.nextLong();
+            }
+            Segtree segtree=new Segtree(array);
+            System.out.println(segtree.query(0,n-1)[0]+1);
+            for(int i=0;i<q;i++){
+                int index=scan.nextInt()-1;
+                int val=scan.nextInt();
+                segtree.update(index,val);
+                System.out.println(segtree.query(0,n-1)[0]+1);
+            }
+        }
+    }
+}
