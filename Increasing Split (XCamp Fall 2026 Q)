@@ -1,0 +1,114 @@
+#include <bits/stdc++.h>
+using namespace std;
+using ll=long long;
+struct Segtree{
+    int n;
+    vector<int>tree;
+    Segtree(int n):n(n){
+        tree.resize(4*n,-1);
+    }
+    int query(int l,int r){
+        return query(1,0,n-1,l,r);
+    }
+    int query(int node,int l,int r,int ql,int qr){
+        if(r<ql||qr<l)
+            return -1;
+        if(ql<=l&&r<=qr)
+            return tree[node];
+        int m=(l+r)/2;
+        int left=query(node*2,l,m,ql,qr);
+        int right=query(node*2+1,m+1,r,ql,qr);
+        return max(left,right);
+    }
+    void update(int i,int val){
+        update(1,0,n-1,i,val);
+    }
+    void update(int node,int l,int r,int i,int val){
+        if(l==r){
+            tree[node]=max(tree[node],val);
+            return;
+        }
+        int m=(l+r)/2;
+        if(i<=m)
+            update(node*2,l,m,i,val);
+        else
+            update(node*2+1,m+1,r,i,val);
+        tree[node]=max(tree[node*2],tree[node*2+1]);
+    }
+};
+vector<bool> increasing_split(vector<int> a){
+    int n=a.size();
+    set<int>unique;
+    for(int i=0;i<n;i++){
+        unique.insert(a[i]);
+    }
+    int index=0;
+    unordered_map<int,int>comp;
+    for(int i:unique){
+        comp[i]=index;
+        index++;
+    }
+    for(int i=0;i<n;i++){
+        a[i]=comp[a[i]];
+    }
+    vector<int>last(n);
+    Segtree segtree(index);
+    for(int i=n-1;i>=0;i--){
+        segtree.update(a[i],i);
+        last[i]=segtree.query(0,a[i]);
+    }
+    bool work=true;
+    int best=INT_MAX;
+    pair<int,int>first;
+    pair<int,int>second;
+    vector<pair<int,int>>vals;
+    for(int i=0;i<n;i++){
+        if(best==INT_MAX){
+            first=make_pair(a[i],1);
+            second=make_pair(-1,0);
+            best=last[i];
+        }
+        else{
+            if(a[i]<=first.first){
+                if(second.first>=a[i]){
+                    work=false;
+                    break;
+                }
+                second.first=a[i];
+                second.second++;
+            }
+            else{
+                first.first=a[i];
+                first.second++;
+                best=max(best,last[i]);
+            }
+        }
+        if(i==best){
+            vals.push_back(make_pair(first.second,second.second));
+            best=INT_MAX;
+        }
+    }
+    if(!work){
+        return vector<bool>(n+1,false);
+    }
+    int base=0;
+    vector<int>freq(n+1);
+    for(pair<int,int>val:vals){
+        base+=min(val.first,val.second);
+        freq[abs(val.first-val.second)]++;
+    }
+    bitset<400001>dp;
+    dp.set(0);
+    for(int i=1;i<=n;i++){
+        int cur=freq[i];
+        for(int j=1;cur>0;j*=2){
+            dp|=(dp<<min(j,cur)*i);
+            cur-=min(j,cur);
+        }
+    }
+    vector<bool>ans(n+1,false);
+    for(int i=0;i<=n;i++){
+        ans[i]=(i>=base&&dp[i-base]);
+    }
+    return ans;
+}
