@@ -1,0 +1,64 @@
+import java.util.*;
+public class solution{
+    static long[]pow=new long[40];
+    static long[]count=new long[40];
+    static long solve(long x,long y,int cur){
+        if(x<0||y<0)
+            return 0;
+        if(cur==0)
+            return 1;
+        x%=pow[cur];
+        y%=pow[cur];
+        if(x<y){
+            long temp=x;
+            x=y;
+            y=temp;
+        }
+        if(x-y>=pow[cur-1]){
+            if(x<2*pow[cur-1])
+                return 0;
+            if(y<pow[cur-1])
+                return solve(x,y,cur-1);
+            return count[cur-1];
+        }
+        if(x<pow[cur-1])
+            return solve(x,y,cur-1);
+        if(y<pow[cur-1])
+            return count[cur-1];
+        if(x<2*pow[cur-1])
+            return count[cur-1]+solve(x,y,cur-1);
+        if(y<2*pow[cur-1])
+            return 2*count[cur-1];
+        return 2*count[cur-1]+solve(x,y,cur-1);
+    }
+    static void fill(long val,int cur){
+        if(cur==0){
+            count[cur]=(val==0)?1:0;
+            return;
+        }
+        if(val>=pow[cur-1]){
+            fill(Math.abs(val-2*pow[cur-1]),cur-1);
+            count[cur]=count[cur-1];
+        }
+        else{
+            fill(val,cur-1);
+            count[cur]=3*count[cur-1];
+        }
+    }
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        pow[0]=1;
+        for(int i=1;i<40;i++){
+            pow[i]=3*pow[i-1];
+        }
+        int q=scan.nextInt();
+        for(int i=0;i<q;i++){
+            long d=scan.nextLong();
+            long x=scan.nextLong();
+            long y=scan.nextLong();
+            Arrays.fill(count,0);
+            fill(Math.abs(x-y),39);
+            System.out.println(solve(x+d,y+d,39)-solve(x-1,y-1,39));
+        }
+    }
+}
