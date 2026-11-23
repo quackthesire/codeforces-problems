@@ -1,0 +1,207 @@
+#include <bits/stdc++.h>
+using namespace std;
+using ll=long long;
+int gcd(int a,int b){
+    while(b!=0){
+        int temp=b;
+        b=a%b;
+        a=temp;
+    }
+    return a;
+}
+struct Node{
+    int a;
+    int b;
+    int l;
+    int r;
+    Node(int a,int b,int l,int r):a(a),b(b),l(l),r(r){}
+};
+struct Segtree{
+    int n;
+    vector<int>tree;
+    Segtree(vector<int>&array){
+        n=array.size();
+        tree.resize(n*4);
+        build(1,0,n-1,array);
+    }
+    void build(int node,int l,int r,vector<int>&array){
+        if(l==r){
+            tree[node]=array[l];
+            return;
+        }
+        int m=(l+r)/2;
+        build(node*2,l,m,array);
+        build(node*2+1,m+1,r,array);
+        tree[node]=gcd(tree[node*2],tree[node*2+1]);
+    }
+    int query(int l,int r){
+        if(l>r)
+            return 0;
+        return query(1,0,n-1,l,r);
+    }
+    int query(int node,int l,int r,int ql,int qr){
+        if(r<ql||qr<l)
+            return 0;
+        if(ql<=l&&r<=qr)
+            return tree[node];
+        int m=(l+r)/2;
+        int left=query(2*node,l,m,ql,qr);
+        int right=query(2*node+1,m+1,r,ql,qr);
+        return gcd(left,right);
+    }
+};
+int bsl(int agcd,int bgcd,Segtree& asegtree,Segtree& bsegtree,int n){
+    int l=0;
+    int r=n-1;
+    while(l<r){
+        int m=(l+r)/2;
+        if(asegtree.query(0,m)%agcd==0&&bsegtree.query(0,m)%bgcd==0)
+            l=m+1;
+        else
+            r=m;
+    }
+    return l;
+}
+int bsr(int agcd,int bgcd,Segtree& asegtree,Segtree& bsegtree,int n){
+    int l=0;
+    int r=n-1;
+    while(l<r){
+        int m=(l+r+1)/2;
+        if(asegtree.query(m,n-1)%agcd==0&&bsegtree.query(m,n-1)%bgcd==0)
+            r=m-1;
+        else
+            l=m;
+    }
+    return l;
+}
+int bsl2(int agcd,int bgcd,Segtree& asegtree,Segtree& bsegtree,int first){
+    int l=0;
+    int r=first;
+    while(l<r){
+        int m=(l+r)/2;
+        if(bsegtree.query(m,first-1)%agcd==0&&asegtree.query(m,first-1)%bgcd==0)
+            r=m;
+        else
+            l=m+1;
+    }
+    return l;
+}
+int bsr2(int agcd,int bgcd,Segtree& asegtree,Segtree& bsegtree,int last,int n){
+    int l=last;
+    int r=n-1;
+    while(l<r){
+        int m=(l+r+1)/2;
+        if(bsegtree.query(last+1,m)%agcd==0&&asegtree.query(last+1,m)%bgcd==0)
+            l=m;
+        else
+            r=m-1;
+    }
+    return l;
+}
+int main(){
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+    int t;
+    cin>>t;
+    while(t--){
+        int n;
+        cin>>n;
+        vector<int>a(n);
+        vector<int>b(n);
+        for(int i=0;i<n;i++){
+            cin>>a[i];
+        }
+        for(int i=0;i<n;i++){
+            cin>>b[i];
+        }
+        vector<Node>pre;
+        vector<Node>suff;
+        pre.push_back(Node(0,0,-1,-1));
+        suff.push_back(Node(0,0,n,n));
+        int prev=0;
+        int aprev=a[0];
+        int bprev=b[0];
+        for(int i=1;i<n;i++){
+            int acur=gcd(aprev,a[i]);
+            int bcur=gcd(bprev,b[i]);
+            if(acur!=aprev||bcur!=bprev){
+                pre.push_back(Node(aprev,bprev,prev,i-1));
+                prev=i;
+                aprev=acur;
+                bprev=bcur;
+            }
+        }
+        pre.push_back(Node(aprev,bprev,prev,n-1));
+        prev=n-1;
+        aprev=a[n-1];
+        bprev=b[n-1];
+        for(int i=n-2;i>=0;i--){
+            int acur=gcd(aprev,a[i]);
+            int bcur=gcd(bprev,b[i]);
+            if(acur!=aprev||bcur!=bprev){
+                suff.push_back(Node(aprev,bprev,i+1,prev));
+                prev=i;
+                aprev=acur;
+                bprev=bcur;
+            }
+        }
+        suff.push_back(Node(aprev,bprev,0,prev));
+        int best=0;
+        Segtree asegtree(a);
+        Segtree bsegtree(b);
+        vector<pair<int,int>>works;
+        for(int i=0;i<pre.size();i++){
+            for(int j=0;j<suff.size();j++){
+                Node left=pre[i];
+                Node right=suff[j];
+                if(left.r+2>right.l)
+                    continue;
+                int agcd=gcd(left.a,right.a);
+                int bgcd=gcd(left.b,right.b);
+                agcd=gcd(agcd,bsegtree.query(left.r+1,right.l-1));
+                bgcd=gcd(bgcd,asegtree.query(left.r+1,right.l-1));
+                if(agcd+bgcd>best){
+                    works.clear();
+                    works.push_back(make_pair(agcd,bgcd));
+                    best=agcd+bgcd;
+                }
+                else if(agcd+bgcd==best)
+                    works.push_back(make_pair(agcd,bgcd));
+            }
+        }
+        int atot=asegtree.query(0,n-1);
+        int btot=bsegtree.query(0,n-1);
+        if(atot+btot==best)
+            works.push_back(make_pair(atot,btot));
+        sort(works.begin(),works.end());
+        works.erase(unique(works.begin(),works.end()),works.end());
+        ll count=0;
+        for(pair<int,int>work:works){
+            int agcd=work.first;
+            int bgcd=work.second;
+            if(asegtree.query(0,n-1)%agcd==0&&bsegtree.query(0,n-1)%bgcd==0){
+                if(agcd!=atot||bgcd!=btot)
+                    continue;
+                int len=0;
+                for(int i=0;i<n;i++){
+                    if(b[i]%agcd==0&&a[i]%bgcd==0)
+                        len++;
+                    else{
+                        count+=(ll)len*(len+1)/2;
+                        len=0;
+                    }
+                }
+                count+=(ll)len*(len+1)/2;
+                continue;
+            }
+            int first=bsl(agcd,bgcd,asegtree,bsegtree,n);
+            int last=bsr(agcd,bgcd,asegtree,bsegtree,n);
+            if(bsegtree.query(first,last)%agcd!=0||asegtree.query(first,last)%bgcd!=0)
+                continue;
+            int firstl=bsl2(agcd,bgcd,asegtree,bsegtree,first);
+            int lastr=bsr2(agcd,bgcd,asegtree,bsegtree,last,n);
+            count+=(ll)(first-firstl+1)*(lastr-last+1);
+        }
+        cout<<best<<" "<<count<<"\n";
+    }
+}
