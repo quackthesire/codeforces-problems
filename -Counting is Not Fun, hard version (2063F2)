@@ -1,5 +1,41 @@
 import java.util.*;
+import java.io.*;
 public class Main{
+    static class FastScanner{
+        int len=0;
+        int index=0;
+        byte[]buffer=new byte[1<<16];
+        public int read() throws IOException{
+            if(index>=len){
+                len=System.in.read(buffer);
+                index=0;
+                if(len<=0)
+                    return -1;
+            }
+            return buffer[index++];
+        }
+        public long nextLong() throws IOException{
+            int val;
+            do{
+                val=read();
+            }
+            while(val<=' '&&val!=-1);
+            long mult=1;
+            if(val=='-'){
+                mult=-1;
+                val=read();
+            }
+            long res=0;
+            while(val>' '){
+                res=res*10+val-'0';
+                val=read();
+            }
+            return res*mult;
+        }
+        public int nextInt() throws IOException{
+            return (int)nextLong();
+        }
+    }
     static class Segtree{
         int n;
         long[]tree;
@@ -112,8 +148,8 @@ public class Main{
     static long cat(int len){
         return fact[len]*inv[len/2]%MOD*inv[len/2+1]%MOD;
     }
-    public static void main(String[]args){
-        Scanner scan=new Scanner(System.in);
+    public static void main(String[]args) throws IOException{
+        FastScanner scan=new FastScanner();
         fact[0]=1;
         for(int i=1;i<1000000;i++){
             fact[i]=i*fact[i-1]%MOD;
