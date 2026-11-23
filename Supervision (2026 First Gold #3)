@@ -1,0 +1,62 @@
+import java.util.*;
+public class Main{
+    static int MOD=1000000007;
+    static class Cow{
+        long pos;
+        boolean camp;//true=coach,false=camper
+        public Cow(long pos,boolean camp){
+            this.pos=pos;
+            this.camp=camp;
+        }
+    }
+    static long modinv(long base,long exp){
+        long res=1;
+        while(exp>0){
+            if(exp%2==1)
+                res=(res*base)%MOD;
+            base=(base*base)%MOD;
+            exp/=2;
+        }
+        return res;
+    }
+	public static void main(String[]args){
+		Scanner scan=new Scanner(System.in);
+		int n=scan.nextInt();
+		long d=scan.nextLong();
+		int[]len=new int[n];//how many before to track
+		Cow[]array=new Cow[n];
+		for(int i=0;i<n;i++){
+		    array[i]=new Cow(scan.nextLong(),scan.nextInt()==1);
+		}
+		Queue<Long>q=new LinkedList<>();
+		for(int i=0;i<n;i++){
+		    while(!q.isEmpty()&&q.peek()<array[i].pos-d){
+		        q.poll();
+		    }
+		    len[i]=q.size();
+		    q.add(array[i].pos);
+		}
+		long ans=1;
+		long[]suff=new long[n+1];
+        long mult=1;
+        long add=0;
+        for(int i=0;i<n;i++){
+            long temp=0;
+            if(array[i].camp){
+                temp=ans;
+                ans=(ans+temp)%MOD;
+                suff[i+1]=((MOD-add)%MOD*modinv(mult,MOD-2))%MOD;
+                add=(add+temp)%MOD;
+            }
+            else{
+                if(len[i]!=0)
+                    temp=(suff[i-len[i]+1]*mult%MOD+add)%MOD;
+                ans=(ans+temp)%MOD;
+                mult=(mult*2)%MOD;
+                add=(add*2)%MOD;
+                suff[i+1]=((MOD-add)%MOD*modinv(mult,MOD-2))%MOD;
+            }
+        }
+		System.out.println(ans-1);
+	}
+}
