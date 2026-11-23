@@ -1,0 +1,71 @@
+import java.util.*;
+public class Main{
+    static class Interval implements Comparable<Interval>{
+        int l;
+        int r;
+        int index;
+        public Interval(int l,int r,int index){
+            this.l=l;
+            this.r=r;
+            this.index=index;
+        }
+        public int compareTo(Interval other){
+            return other.l-this.l;
+        }
+    }
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int n=scan.nextInt();
+        int s=scan.nextInt();
+        Interval[]array=new Interval[n];
+        for(int i=0;i<n;i++){
+            array[i]=new Interval(scan.nextInt(),scan.nextInt(),i+1);
+        }
+        Arrays.sort(array);
+        int index=n-1;
+        boolean[]visited=new boolean[n+1];
+        ArrayList<int[]>ans=new ArrayList<>();
+        TreeMap<Integer,ArrayList<Interval>>map=new TreeMap<>();
+        for(int i=0;i<n;i++){
+            Interval cur=array[i];
+            if(visited[cur.index])
+                continue;
+            visited[cur.index]=true;
+            while(index>=0&&cur.l+array[index].l<=s){
+                if(!visited[array[index].index])
+                    map.computeIfAbsent(array[index].r,k->new ArrayList<>()).add(array[index]);
+                index--;
+            }
+            boolean remove=false;
+            ArrayList<Interval>temp=map.get(cur.r);
+            if(temp!=null){
+                for(int j=temp.size()-1;j>=0;j--){
+                    if(temp.get(j).index==cur.index){
+                        temp.remove(j);
+                        remove=true;
+                        if(temp.isEmpty())
+                            map.remove(cur.r);
+                        break;
+                    }
+                }
+            }
+            Integer best=map.ceilingKey(s-cur.r);
+            if(best!=null){
+                Interval pair=map.get(best).remove(map.get(best).size()-1);
+                if(map.get(best).isEmpty())
+                    map.remove(best);
+                visited[pair.index]=true;
+                ans.add(new int[]{cur.index,pair.index});
+            }
+            else {
+                visited[cur.index]=false;
+                if(remove)
+                    map.computeIfAbsent(cur.r,k->new ArrayList<>()).add(cur);
+            }
+        }
+        System.out.println(ans.size());
+        for(int[]i:ans){
+            System.out.println(i[0]+" "+i[1]);
+        }
+    }
+}
