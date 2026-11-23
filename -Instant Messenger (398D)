@@ -1,0 +1,119 @@
+import java.util.*;
+public class Main{
+  	public static void main(String[]args){
+    		Scanner scan=new Scanner(System.in);
+    		int n=scan.nextInt();
+    		int m=scan.nextInt();
+    		int q=scan.nextInt();
+    		int o=scan.nextInt();
+    		int limit=(int)Math.sqrt((m+q)*2);
+    		int[]val=new int[n];
+    		for(int i=0;i<o;i++){
+    		    val[scan.nextInt()-1]=1;
+    		}
+    		HashSet<Integer>[]adj=new HashSet[n];
+    		for(int i=0;i<n;i++){
+    		    adj[i]=new HashSet<>();
+    		}
+    		for(int i=0;i<m;i++){
+    		    int u=scan.nextInt()-1;
+    		    int v=scan.nextInt()-1;
+    		    adj[u].add(v);
+    		    adj[v].add(u);
+    		}
+    		int[]light=new int[n];
+    		HashSet<Integer>[]heavy=new HashSet[n];
+    		for(int i=0;i<n;i++){
+    		    heavy[i]=new HashSet<>();
+    		}
+    		for(int i=0;i<n;i++){
+    		    for(int j:adj[i]){
+    		        if(adj[j].size()>limit)
+    		            heavy[i].add(j);
+    		        else
+    		            light[i]+=val[j];
+    		    }
+    		}
+    		for(int i=0;i<q;i++){
+    		    char c=scan.next().charAt(0);
+    		    if(c=='O'){
+                int u=scan.nextInt()-1;
+                val[u]=1;
+                if(adj[u].size()<=limit){
+                    for(int j:adj[u]){
+                        light[j]++;
+                    }
+                }
+            }
+            if(c=='F'){
+                int u=scan.nextInt()-1;
+                val[u]=0;
+                if(adj[u].size()<=limit){
+                    for(int j:adj[u]){
+                        light[j]--;
+                    }
+                }
+            }
+            if(c=='A'){
+                int u=scan.nextInt()-1;
+                int v=scan.nextInt()-1;
+                if(adj[u].size()==limit){
+                    for(int j:adj[u]){
+                        light[j]-=val[u];
+                        heavy[j].add(u);
+                    }
+                }
+                if(adj[v].size()==limit){
+                    for(int j:adj[v]){
+                        light[j]-=val[v];
+                        heavy[j].add(v);
+                    }
+                }
+                adj[u].add(v);
+                adj[v].add(u);
+                if(adj[u].size()>limit)
+                    heavy[v].add(u);
+                else
+                    light[v]+=val[u];
+                if(adj[v].size()>limit)
+                    heavy[u].add(v);
+                else
+                    light[u]+=val[v];
+            }
+            if(c=='D'){
+                int u=scan.nextInt()-1;
+                int v=scan.nextInt()-1;
+                if(adj[u].size()==limit+1){
+                    for(int j:adj[u]){
+                        light[j]+=val[u];
+                        heavy[j].remove(u);
+                    }
+                }
+                if(adj[v].size()==limit){
+                    for(int j:adj[v]){
+                        light[j]+=val[v];
+                        heavy[j].remove(v);
+                    }
+                }
+                adj[u].remove((Integer)v);
+                adj[v].remove((Integer)u);
+                if(adj[u].size()>limit)
+                    heavy[v].remove(u);
+                else
+                    light[v]-=val[u];
+                if(adj[v].size()>limit)
+                    heavy[u].remove(v);
+                else
+                    light[u]-=val[v];
+            }
+            if(c=='C'){
+                int u=scan.nextInt()-1;
+                int sum=light[u];
+                for(int v:heavy[u]){
+                    sum+=val[v];
+                }
+                System.out.println(sum);
+            }
+    		}
+  	}
+}
