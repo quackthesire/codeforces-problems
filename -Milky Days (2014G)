@@ -1,0 +1,47 @@
+import java.util.*;
+public class Main{
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int t=scan.nextInt();
+        for(int tempvar=0;tempvar<t;tempvar++){
+            int n=scan.nextInt();
+            int m=scan.nextInt();
+            int k=scan.nextInt();
+            TreeMap<Integer,Integer>map=new TreeMap<>();
+            ArrayList<Integer>[]list=new ArrayList[1100001];
+            for(int i=0;i<=1100000;i++){
+                list[i]=new ArrayList<>();
+            }
+            for(int i=0;i<n;i++){
+                int d=scan.nextInt();
+                int a=scan.nextInt();
+                list[d].add(a);
+                list[d+k].add(-a);
+            }
+            int ans=0;
+            for(int i=0;i<=1000000;i++){
+                int count=0;
+                for(int j:list[i]){
+                    if(j>0)
+                        map.put(i,j);
+                    else
+                        map.remove(i-k);
+                }
+                while(!map.isEmpty()&&count<m){
+                    Map.Entry<Integer,Integer> entry=map.lastEntry();
+                    if(entry.getValue()>m-count){
+                        map.put(entry.getKey(),entry.getValue()-(m-count));
+                        count=m;
+                    }
+                    else{
+                        count+=entry.getValue();
+                        map.remove(entry.getKey());
+                    }
+                }
+                if(count>=m)
+                    ans++;
+            }
+            System.out.println(ans);
+        }
+    }
+}
