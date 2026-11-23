@@ -1,0 +1,109 @@
+import java.util.*;
+public class Main{
+    static long MOD=998244353;
+    static class Point{
+        int pos;
+        int val;
+        public Point(int pos,int val){
+            this.pos=pos;
+            this.val=val;
+        }
+    }
+    static class Node{
+        long ul;
+        long ur;
+        long bl;
+        long br;
+        public Node(long ul,long ur,long bl,long br){
+            this.ul=ul;
+            this.ur=ur;
+            this.bl=bl;
+            this.br=br;
+        }
+    }
+    static Node mult(Node a,Node b){
+        return new Node((a.ul*b.ul+a.ur*b.bl)%MOD,(a.ul*b.ur+a.ur*b.br)%MOD,(a.bl*b.ul+a.br*b.bl)%MOD,(a.bl*b.ur+a.br*b.br)%MOD);
+    }
+    static class Segtree{
+        int n;
+        Node[]tree;
+        public Segtree(int n){
+            this.n=n;
+            tree=new Node[4*n];
+            build(1,0,n-1);
+        }
+        public void build(int node,int l,int r){
+            if(l==r){
+                tree[node]=new Node(3,0,1,2);
+                return;
+            }
+            int m=(l+r)/2;
+            build(node*2,l,m);
+            build(node*2+1,m+1,r);
+            tree[node]=mult(tree[node*2],tree[node*2+1]);
+        }
+        public Node query(int l,int r){
+            return query(1,0,n-1,l,r);
+        }
+        public Node query(int node,int l,int r,int ll,int rr){
+            if(ll>r||rr<l)
+                return new Node(1,0,0,1);
+            if(ll<=l&&r<=rr)
+                return new Node(tree[node].ul,tree[node].ur,tree[node].bl,tree[node].br);
+            int m=(l+r)/2;
+            Node left=query(node*2,l,m,ll,rr);
+            Node right=query(node*2+1,m+1,r,ll,rr);
+            return mult(left,right);
+        }
+        public void update(int i,int val){
+            update(1,0,n-1,i,val);
+        }
+        public void update(int node,int l,int r,int i,int val){
+            if(l==r){
+                if(val==1)
+                    tree[node]=new Node(1,2,1,2);
+                else
+                    tree[node]=new Node(3,0,1,2);
+                return;
+            }
+            int m=(l+r)/2;
+            if(i<=m)
+                update(node*2,l,m,i,val);
+            else
+                update(node*2+1,m+1,r,i,val);
+            tree[node]=mult(tree[node*2],tree[node*2+1]);
+        }
+    }
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int n=scan.nextInt();
+        ArrayList<Point>[]array=new ArrayList[300001];
+        for(int i=0;i<300001;i++){
+            array[i]=new ArrayList<>();
+        }
+        for(int i=0;i<n;i++){
+            int l=scan.nextInt();
+            int r=scan.nextInt();
+            array[l].add(new Point(i,1));
+            if(r!=300000)
+                array[r+1].add(new Point(i,0));
+        }
+        long ans=0;
+        int first=0;
+        Segtree segtree=new Segtree(n-1);
+        for(int i=0;i<300001;i++){
+            for(Point j:array[i]){
+                if(j.pos==0)
+                    first=j.val;
+                else
+                    segtree.update(j.pos-1,j.val);
+            }
+            Node temp=segtree.query(0,n-2);
+            if(first==0)
+                ans=(ans+temp.ur)%MOD;
+            else
+                ans=(ans+temp.br)%MOD;
+        }
+        System.out.println(ans);
+    }
+}
