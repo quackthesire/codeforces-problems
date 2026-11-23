@@ -1,0 +1,34 @@
+import java.util.*;
+public class Main{
+    static int MOD=998244353;
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int t=scan.nextInt();
+        for(int temp=0;temp<t;temp++){
+            int n=scan.nextInt();
+            int m=scan.nextInt();
+            int[]diff=new int[n];
+            Arrays.fill(diff,-1);
+            for(int i=0;i<m;i++){
+                int l=scan.nextInt()-1;
+                int r=scan.nextInt()-1;
+                diff[r]=Math.max(diff[r],l);
+            }
+            int max=1;
+            long sum=2;
+            Deque<Long>dq=new LinkedList<>();
+            dq.addFirst(2L);
+            for(int i=1;i<n;i++){
+                dq.addFirst(sum);
+                sum=(sum+dq.peekFirst())%MOD;
+                max++;
+                while(max>i-diff[i]){
+                    sum=(sum-dq.peekLast()+MOD)%MOD;
+                    dq.pollLast();
+                    max--;
+                }
+            }
+            System.out.println(sum);
+        }
+    }
+}
