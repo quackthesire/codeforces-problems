@@ -1,0 +1,78 @@
+#include <bits/stdc++.h>
+using namespace std;
+using ll=long long;
+const ll MOD=998244353;
+void dfs(int u,int p,int carry,vector<int>&depth,vector<int>&vals,vector<int>&x,vector<int>&y,vector<vector<int>>&adj){
+    vals[u]=carry^x[u]^y[u];
+    for(int v:adj[u]){
+        if(v==p)
+            continue;
+        depth[v]=depth[u]+1;
+        int newcarry=(((carry^x[u])==1&&y[u]==0)||(carry==1&&x[u]==1))?1:0;
+        dfs(v,u,newcarry,depth,vals,x,y,adj);
+    }
+}
+ll modpow(ll base,ll exp){
+    ll res=1;
+    while(exp>0){
+        if(exp%2==1)
+            res=(res*base)%MOD;
+        base=(base*base)%MOD;
+        exp/=2;
+    }
+    return res;
+}
+int main(){
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+    int t;
+    cin>>t;
+    while(t--){
+        int n;
+        cin>>n;
+        vector<int>x(n);
+        vector<int>y(n);
+        vector<vector<int>>adj(n);
+        for(int i=0;i<n-1;i++){
+            int u;
+            int v;
+            cin>>u>>v;
+            u--;
+            v--;
+            adj[u].push_back(v);
+            adj[v].push_back(u);
+        }
+        string bin;
+        cin>>bin;
+        for(int i=0;i<n;i++){
+            x[i]=bin[i]-'0';
+        }
+        cin>>bin;
+        for(int i=0;i<n;i++){
+            y[i]=bin[i]-'0';
+        }
+        vector<int>depth(n);
+        vector<int>vals(n);
+        dfs(0,-1,0,depth,vals,x,y,adj);
+        bool work=true;
+        vector<int>check(n,-1);
+        for(int i=0;i<n;i++){
+            if(check[depth[i]]!=-1&&check[depth[i]]!=vals[i]){
+                work=false;
+                break;
+            }
+            check[depth[i]]=vals[i];
+        }
+        if(!work){
+            cout<<"-1"<<"\n";
+        }
+        else{
+            ll ans=0;
+            for(int i=0;i<n;i++){
+                if(check[i]==1)
+                    ans=(ans+modpow(2,i))%MOD;
+            }
+            cout<<ans<<"\n";
+        }
+    }
+}
