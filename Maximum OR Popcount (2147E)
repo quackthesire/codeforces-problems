@@ -1,0 +1,59 @@
+import java.util.*;
+public class Main{
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int t=scan.nextInt();
+        for(int tempvar=0;tempvar<t;tempvar++){
+            int n=scan.nextInt();
+            int q=scan.nextInt();
+            long[]array=new long[n];
+            boolean[]visited=new boolean[32];
+            for(int i=0;i<n;i++){
+                array[i]=scan.nextLong();
+                for(int j=0;j<32;j++){
+                    if((array[i]&(1L<<j))!=0)
+                        visited[j]=true;
+                }
+            }
+            int count=0;
+            ArrayList<Integer>empty=new ArrayList<>();
+            for(int i=0;i<32;i++){
+                if(visited[i])
+                    count++;
+                else
+                    empty.add(i);
+            }
+            long[]min=new long[32];
+            for(int i=count+1;i<32;i++){
+                long cost=0;
+                long[]temp=array.clone();
+                for(int j=empty.get(i-count-1);j>=0;j--){
+                    long val=0;
+                    long bit=(1L<<j);
+                    for(int k=0;k<n;k++){
+                        val|=temp[k];
+                    }
+                    if((val&bit)!=0)
+                        continue;
+                    int best=0;
+                    for(int k=0;k<n;k++){
+                        if((temp[k]%bit)>(temp[best]%bit))
+                            best=k;
+                    }
+                    cost+=bit-(temp[best]%bit);
+                    temp[best]+=bit-(temp[best]%bit);
+                }
+                min[i]=cost;
+            }
+            for(int i=0;i<q;i++){
+                long b=scan.nextLong();
+                for(int j=31;j>=0;j--){
+                    if(min[j]<=b){
+                        System.out.println(j);
+                        break;
+                    }
+                }
+            }
+        }
+    }
+}
