@@ -1,0 +1,51 @@
+import java.util.*;
+public class Main{
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int t=scan.nextInt();
+        for(int temp=0;temp<t;temp++){
+            int m=scan.nextInt();
+            long[][]array=new long[m][2];
+            for(int i=0;i<m;i++){
+                array[i][0]=scan.nextLong();
+            }
+            for(int i=0;i<m;i++){
+                array[i][1]=scan.nextLong();
+            }
+            long[]top=new long[m+1];
+            long[]bot=new long[m+1];
+            for(int i=m-1;i>=0;i--){
+                top[i]=Math.max(array[i][1]-(m-i)*2+1,Math.max(array[i][0],Math.max(0,top[i+1]-1)));
+                bot[i]=Math.max(array[i][0]-(m-i)*2+1,Math.max(array[i][1],Math.max(0,bot[i+1]-1)));
+            }
+            long best=Long.MAX_VALUE/2;
+            long time=0;
+            for(int i=0;i<m;i++){
+                if(i%2==0){
+                    best=Math.min(best,Math.max(time,top[i])+(m-i)*2);
+                    time=Math.max(time,array[i][0]);
+                    if(i!=0)
+                        time++;
+                    time=Math.max(time,array[i][1]);
+                    time++;
+                }
+                else{
+                    best=Math.min(best,Math.max(time,bot[i])+(m-i)*2);
+                    time=Math.max(time,array[i][1]);
+                    time++;
+                    time=Math.max(time,array[i][0]);
+                    time++;
+                }
+            }
+            best=Math.min(best,time);
+            long wait=0;
+            for(int i=0;i<m;i++){
+                if(i!=0)
+                    wait=Math.max(array[i][0]-(i-1),wait);
+                wait=Math.max(array[i][1]-(2*m-i-2),wait);
+            }
+            best=Math.min(best,wait+2*m-1);
+            System.out.println(best);
+        }
+    }
+}
