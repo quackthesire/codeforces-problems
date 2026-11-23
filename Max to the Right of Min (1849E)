@@ -1,0 +1,94 @@
+import java.util.*;
+public class Main{
+    static class Segtree{
+        int n;
+        long[]tree;
+        long[]lazy;
+        public Segtree(int n){
+            this.n=n;
+            tree=new long[4*n];
+            lazy=new long[4*n];
+            Arrays.fill(lazy,-1);
+        }
+        public void push(int node,int l,int r){
+            if(lazy[node]==-1||l==r)
+                return;
+            int m=(l+r)/2;
+            tree[node*2]=(m-l+1)*lazy[node];
+            tree[node*2+1]=(r-m)*lazy[node];
+            lazy[node*2]=lazy[node];
+            lazy[node*2+1]=lazy[node];
+            lazy[node]=-1;
+        }
+        public long query(int l,int r){
+            return query(1,0,n-1,l,r);
+        }
+        public long query(int node,int l,int r,int ll,int rr){
+            if(ll>r||rr<l)
+                return 0;
+            if(ll<=l&&r<=rr)
+                return tree[node];
+            push(node,l,r);
+            int m=(l+r)/2;
+            long left=query(node*2,l,m,ll,rr);
+            long right=query(node*2+1,m+1,r,ll,rr);
+            return left+right;
+        }
+        public void update(int l,int r,long val){
+            if(l>r)
+                return;
+            update(1,0,n-1,l,r,val);
+        }
+        public void update(int node,int l,int r,int ll,int rr,long val){
+            if(ll>r||rr<l)
+                return;
+            if(ll<=l&&r<=rr){
+                tree[node]=(r-l+1)*val;
+                lazy[node]=val;
+                return;
+            }
+            push(node,l,r);
+            int m=(l+r)/2;
+            update(node*2,l,m,ll,rr,val);
+            update(node*2+1,m+1,r,ll,rr,val);
+            tree[node]=tree[node*2]+tree[node*2+1];
+        }
+    }
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int n=scan.nextInt();
+        int[]array=new int[n];
+        for(int i=0;i<n;i++){
+            array[i]=scan.nextInt();
+        }
+        int[]less=new int[n];
+        int[]more=new int[n];
+        Arrays.fill(less,-1);
+        Arrays.fill(more,-1);
+        Stack<Integer>sl=new Stack<>();
+        Stack<Integer>sr=new Stack<>();
+        for(int i=0;i<n;i++){
+            while(!sl.isEmpty()&&array[sl.peek()]>array[i]){
+                sl.pop();
+            }
+            while(!sr.isEmpty()&&array[sr.peek()]<array[i]){
+                sr.pop();
+            }
+            if(!sl.isEmpty())
+                less[i]=sl.peek();
+            if(!sr.isEmpty())
+                more[i]=sr.peek();
+            sl.add(i);
+            sr.add(i);
+        }
+        long ans=0;
+        Segtree segtree=new Segtree(n);
+        for(int i=0;i<n;i++){
+            segtree.update(less[i]+1,i-1,0);
+            segtree.update(more[i]+1,i-1,1);
+            segtree.update(i,i,0);
+            ans+=segtree.query(0,n-1);
+        }
+        System.out.print(ans);
+    }
+}
