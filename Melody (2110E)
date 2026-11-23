@@ -1,0 +1,119 @@
+import java.util.*;
+public class Main{
+    static class Edge{
+        int v;
+        int index;
+        public Edge(int v,int index){
+            this.v=v;
+            this.index=index;
+        }
+    }
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int t=scan.nextInt();
+        for(int tempvar=0;tempvar<t;tempvar++){
+            int n=scan.nextInt();
+            long[]v=new long[n];
+            long[]p=new long[n];
+            long[]vtemp=new long[n];
+            long[]ptemp=new long[n];
+            for(int i=0;i<n;i++){
+                v[i]=scan.nextLong();
+                p[i]=scan.nextLong();
+                vtemp[i]=v[i];
+                ptemp[i]=p[i];
+            }
+            Arrays.sort(vtemp);
+            Arrays.sort(ptemp);
+            int vcount=0;
+            int pcount=0;
+            for(int i=0;i<n;i++){
+                if(i==0||vtemp[i]!=vtemp[i-1]){
+                    vtemp[vcount]=vtemp[i];
+                    vcount++;
+                }
+                if(i==0||ptemp[i]!=ptemp[i-1]){
+                    ptemp[pcount]=ptemp[i];
+                    pcount++;
+                }
+            }
+            int tot=vcount+pcount;
+            ArrayList<Edge>[]adj=new ArrayList[tot];
+            for(int i=0;i<tot;i++){
+                adj[i]=new ArrayList<>();
+            }
+            for(int i=0;i<n;i++){
+                int a=Arrays.binarySearch(vtemp,0,vcount,v[i]);
+                int b=Arrays.binarySearch(ptemp,0,pcount,p[i])+vcount;
+                adj[a].add(new Edge(b,i));
+                adj[b].add(new Edge(a,i));
+            }
+            int odd=0;
+            int cur=-1;
+            for(int i=0;i<tot;i++){
+                if(!adj[i].isEmpty()&&cur==-1)
+                    cur=i;
+                if(adj[i].size()%2==1)
+                    odd++;
+            }
+            if(odd!=0&&odd!=2){
+                System.out.println("NO");
+                continue;
+            }
+            if(odd==2){
+                for(int i=0;i<tot;i++){
+                    if(adj[i].size()%2==1){
+                        cur=i;
+                        break;
+                    }
+                }
+            }
+            int first=0;
+            int count=0;
+            int[]ans=new int[n];
+            int[]last=new int[n+1];
+            int[]next=new int[tot];
+            int[]nodes=new int[n+1];
+            boolean[]visited=new boolean[n];
+            nodes[0]=cur;
+            last[0]=-1;
+            while(first>=0){
+                int u=nodes[first];
+                while(next[u]<adj[u].size()&&visited[adj[u].get(next[u]).index]){
+                    next[u]++;
+                }
+                if(next[u]==adj[u].size()){
+                    if(last[first]!=-1){
+                        ans[count]=last[first];
+                        count++;
+                    }
+                    first--;
+                }
+                else{
+                    Edge edge=adj[u].get(next[u]);
+                    if(visited[edge.index])
+                        continue;
+                    visited[edge.index]=true;
+                    first++;
+                    last[first]=edge.index;
+                    nodes[first]=edge.v;
+                    next[u]++;
+                }
+            }
+            if(count!=n){
+                System.out.println("NO");
+                continue;
+            }
+            for(int l=0,r=n-1;l<r;l++,r--){
+                int temp=ans[l];
+                ans[l]=ans[r];
+                ans[r]=temp;
+            }
+            System.out.println("YES");
+            for(int i=0;i<n;i++){
+                System.out.print((ans[i]+1)+" ");
+            }
+            System.out.println();
+        }
+    }
+}
