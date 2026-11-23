@@ -1,0 +1,75 @@
+import java.util.*;
+public class Main{
+    static class Node implements Comparable<Node>{
+        int index;
+        int val;
+        public Node(int index,int val){
+            this.index=index;
+            this.val=val;
+        }
+        public int compareTo(Node other){
+            if(this.val==other.val)
+                return other.index-this.index;
+            return this.val-other.val;
+        }
+    }
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int t=scan.nextInt();
+        for(int temp=0;temp<t;temp++){
+            int n=scan.nextInt();
+            Node[]array=new Node[n];
+            for(int i=0;i<n;i++){
+                array[i]=new Node(i,scan.nextInt()-1);
+            }
+            Arrays.sort(array);
+            Node[]dp=new Node[n];
+            ArrayList<Node>[]list=new ArrayList[n];
+            for(int i=0;i<n;i++){
+                list[i]=new ArrayList<>();
+                dp[i]=new Node(array[i].index,1);
+            }
+            for(int i=0;i<n;i++){
+                list[array[i].val].add(dp[i]);
+            }
+            int l=0;
+            int m=0;
+            int r=0;
+            int index=0;
+            for(int i=1;i<n;i++){
+                if(array[i-1].val==array[i].val){
+                    r=Math.max(r,dp[i-1].val);
+                    if(array[i].val!=0){
+                        ArrayList<Node>cur=list[array[i].val-1];
+                        while(index<cur.size()&&cur.get(index).index>array[i].index){
+                            m=Math.max(m,cur.get(index).val);
+                            index++;
+                        }
+                    }
+                }
+                else{
+                    for(int j=Math.max(0,array[i-1].val-1);j<array[i].val-1;j++){
+                        for(Node node:list[j]){
+                            l=Math.max(l,node.val);
+                        }
+                    }
+                    m=0;
+                    r=0;
+                    index=0;
+                    ArrayList<Node>cur=list[array[i].val-1];
+                    while(index<cur.size()&&cur.get(index).index>array[i].index){
+                        m=Math.max(m,cur.get(index).val);
+                        index++;
+                    }
+                }
+                dp[i].val=Math.max(dp[i].val,Math.max(Math.max(l,m),r)+1);
+                //System.out.println(array[i].index+" "+array[i].val+" "+dp[i].val);
+            }
+            int max=0;
+            for(int i=0;i<n;i++){
+                max=Math.max(max,dp[i].val);
+            }
+            System.out.println(n-max);
+        }
+    }
+}
