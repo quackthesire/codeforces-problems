@@ -1,0 +1,106 @@
+import java.util.*;
+public class Main{
+    static int[]dx={0,1,0,-1};
+    static int[]dy={1,0,-1,0};
+    static int dfs(int i,int j,int index,int[][]comp,boolean[][]visited,int[][]array,int[]bound){
+        if(visited[i][j])
+            return 0;
+        int res=1;
+        comp[i][j]=index;
+        visited[i][j]=true;
+        bound[0]=Math.min(bound[0],i);
+        bound[1]=Math.max(bound[1],i);
+        bound[2]=Math.min(bound[2],j);
+        bound[3]=Math.max(bound[3],j);
+        for(int k=0;k<4;k++){
+            if(i+dx[k]>=0&&i+dx[k]<array.length&&j+dy[k]>=0&&j+dy[k]<array[0].length&&array[i+dx[k]][j+dy[k]]==0)
+                res+=dfs(i+dx[k],j+dy[k],index,comp,visited,array,bound);
+        }
+        return res;
+    }
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int t=scan.nextInt();
+        for(int temp=0;temp<t;temp++){
+            int n=scan.nextInt();
+            int m=scan.nextInt();
+            int[][]array=new int[n][m];
+            for(int i=0;i<n;i++){
+                String s=scan.next();
+                for(int j=0;j<m;j++){
+                    array[i][j]=s.charAt(j)=='#'?0:1;
+                }
+            }
+            int[]row=new int[n];
+            int[]col=new int[m];
+            for(int i=0;i<n;i++){
+                for(int j=0;j<m;j++){
+                    row[i]+=array[i][j];
+                    col[j]+=array[i][j];
+                }
+            }
+            int index=0;
+            int[][]comp=new int[n][m];
+            boolean[][]visited=new boolean[n][m];
+            for(int i=0;i<n;i++){
+                Arrays.fill(comp[i],-1);
+            }
+            ArrayList<Integer>size=new ArrayList<>();
+            long[]rowline=new long[n];
+            long[]colline=new long[m];
+            long[][]bothline=new long[n][m];
+            for(int i=0;i<n;i++){
+                for(int j=0;j<m;j++){
+                    if(visited[i][j]||array[i][j]==1)
+                        continue;
+                    int[]bound={n,0,m,0};
+                    int val=dfs(i,j,index,comp,visited,array,bound);
+                    size.add(val);
+                    int r1=Math.max(0,bound[0]-1);
+                    int r2=Math.min(n-1,bound[1]+1);
+                    int c1=Math.max(0,bound[2]-1);
+                    int c2=Math.min(m-1,bound[3]+1);
+                    rowline[r1]+=val;
+                    if(r2+1<n)
+                        rowline[r2+1]-=val;
+                    colline[c1]+=val;
+                    if(c2+1<m)
+                        colline[c2+1]-=val;
+                    bothline[r1][c1]+=val;
+                    if(r2+1<n)
+                        bothline[r2+1][c1]-=val;
+                    if(c2+1<m)
+                        bothline[r1][c2+1]-=val;
+                    if(r2+1<n&&c2+1<m)
+                        bothline[r2+1][c2+1]+=val;
+                    index++;
+                }
+            }
+            for(int i=1;i<n;i++){
+                rowline[i]+=rowline[i-1];
+            }
+            for(int i=1;i<m;i++){
+                colline[i]+=colline[i-1];
+            }
+            for(int i=0;i<n;i++){
+                for(int j=0;j<m;j++){
+                    if(i>0)
+                        bothline[i][j]+=bothline[i-1][j];
+                    if(j>0)
+                        bothline[i][j]+=bothline[i][j-1];
+                    if(i>0&&j>0)
+                        bothline[i][j]-=bothline[i-1][j-1];
+                }
+            }
+            long best=0;
+            for(int i=0;i<n;i++){
+                for(int j=0;j<m;j++){
+                    long cur=row[i]+col[j]-array[i][j];
+                    cur+=rowline[i]+colline[j]-bothline[i][j];
+                    best=Math.max(best,cur);
+                }
+            }
+            System.out.println(best);
+        }
+    }
+}
