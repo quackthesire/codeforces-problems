@@ -1,0 +1,63 @@
+import java.util.*;
+public class Main{
+	static Scanner scan=new Scanner(System.in);
+	static int n=scan.nextInt();
+	static double[][]adj=new double[n][n];
+	static double[]fixed=new double[n];
+	static double[]prob=new double[n];
+	static double[]temp=new double[n];
+	static ArrayList<Integer>unfixed=new ArrayList<>();
+	static class Node implements Comparable<Node>{
+	    int u;
+	    double val;
+	    public Node(int u,double val){
+	        this.u=u;
+	        this.val=val;
+	    }
+	    public int compareTo(Node other){
+	        double diff=this.val-other.val;
+	        if(diff>0)
+	            return 1;
+	        else if(diff==0)
+	            return 0;
+	        else
+	            return -1;
+	    }
+	}
+	static void solve(int node){
+	    Node max=new Node(-1,Integer.MAX_VALUE);
+	    for(int i:unfixed){
+            temp[i]+=prob[i]*adj[i][node]*fixed[node];
+            prob[i]*=(1.0-adj[i][node]);
+	        double ans=(temp[i]+1.0)/(1.0-prob[i]);
+	        if(max.val>ans)
+	            max=new Node(i,ans);
+	    }
+	    unfixed.remove(Integer.valueOf(max.u));
+	    fixed[max.u]=max.val;
+	    if(max.u==0){
+	        System.out.println(max.val);
+	        System.exit(0);
+	    }
+	    solve(max.u);
+	}
+	public static void main(String[]args){
+	    if(n==1){
+	        System.out.println("0");
+	        System.exit(0);
+	    }
+	    for(int i=0;i<n;i++){
+	        for(int j=0;j<n;j++){
+	            adj[i][j]=scan.nextDouble()/100.0;
+	        }
+	    }
+	    Arrays.fill(prob,1.0);
+	    fixed[n-1]=0.0;
+	    for(int i=0;i<n-1;i++){
+	        unfixed.add(i);
+	        fixed[i]=-1.0;
+	    }
+	    solve(n-1);
+	    System.out.println(fixed[0]);
+	}
+}
