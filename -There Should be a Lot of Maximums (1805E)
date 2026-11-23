@@ -1,0 +1,136 @@
+import java.util.*;
+public class Main{
+    static class Edge{
+        int v;
+        int index;
+        public Edge(int v,int index){
+            this.v=v;
+            this.index=index;
+        }
+    }
+    static boolean dfs(int u,int v,int p,ArrayList<Edge>[]adj,ArrayList<Edge>path){
+        if(u==v)
+            return true;
+        for(Edge e:adj[u]){
+            if(e.v==p)
+                continue;
+            if(dfs(e.v,v,u,adj,path)){
+                path.add(e);
+                return true;
+            }
+        }
+        return false;
+    }
+    static void solve(int u,int p,ArrayList<Edge>[]adj,int[]parent){
+        parent[u]=p;
+        for(Edge e:adj[u]){
+            if(e.v==p)
+                continue;
+            solve(e.v,u,adj,parent);
+        }
+    }
+    static void update(int u,int p,ArrayList<Edge>[]adj,int[]array,TreeMap<Integer,Integer>freq1,TreeMap<Integer,Integer>freq2,TreeSet<Integer>work1,TreeSet<Integer>work2){
+        freq1.put(array[u],freq1.getOrDefault(array[u],0)+1);
+        if(freq1.get(array[u])>=2)
+            work1.add(array[u]);
+        freq2.put(array[u],freq2.get(array[u])-1);
+        if(freq2.get(array[u])<=1)
+            work2.remove(array[u]);
+        if(freq2.get(array[u])==0)
+            freq2.remove(array[u]);
+        for(Edge e:adj[u]){
+            if(e.v==p)
+                continue;
+            update(e.v,u,adj,array,freq1,freq2,work1,work2);
+        }
+    }
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int n=scan.nextInt();
+        int[]array=new int[n];
+        ArrayList<Edge>[]adj=new ArrayList[n];
+        TreeMap<Integer,Integer>map=new TreeMap<>();
+        for(int i=0;i<n;i++){
+            adj[i]=new ArrayList<>();
+        }
+        for(int i=0;i<n-1;i++){
+            int u=scan.nextInt()-1;
+            int v=scan.nextInt()-1;
+            adj[u].add(new Edge(v,i));
+            adj[v].add(new Edge(u,i));
+        }
+        for(int i=0;i<n;i++){
+            array[i]=scan.nextInt();
+            map.put(array[i],map.getOrDefault(array[i],0)+1);
+        }
+        int val=0;
+        boolean work=true;
+        for(Map.Entry<Integer,Integer>entry:map.descendingMap().entrySet()){
+            if(entry.getValue()==1)
+                continue;
+            if(entry.getValue()>=3){
+                val=entry.getKey();
+                break;
+            }
+            work=false;
+            val=entry.getKey();
+            break;
+        }
+        if(work){
+            for(int i=0;i<n-1;i++){
+                System.out.println(val);
+            }
+            return;
+        }
+        int u=-1;
+        int v=-1;
+        for(int i=0;i<n;i++){
+            if(array[i]==val&&u==-1)
+                u=i;
+            else if(array[i]==val)
+                v=i;
+        }
+        int[]parent=new int[n];
+        solve(u,-1,adj,parent);
+        parent[u]=u;
+        ArrayList<Edge>path=new ArrayList<>();
+        dfs(u,v,-1,adj,path);
+        Collections.reverse(path);
+        int[]ans=new int[n-1];
+        TreeMap<Integer,Integer>freq1=new TreeMap<>();
+        TreeMap<Integer,Integer>freq2=new TreeMap<>();
+        TreeSet<Integer>work1=new TreeSet<>();
+        TreeSet<Integer>work2=new TreeSet<>();
+        Arrays.fill(ans,val);
+        for(int i=0;i<n;i++){
+            freq2.put(array[i],freq2.getOrDefault(array[i],0)+1);
+            if(freq2.get(array[i])>=2)
+                work2.add(array[i]);
+        }
+        for(int i=0;i<path.size();i++){
+            freq1.put(array[u],freq1.getOrDefault(array[u],0)+1);
+            if(freq1.get(array[u])>=2)
+                work1.add(array[u]);
+            freq2.put(array[u],freq2.get(array[u])-1);
+            if(freq2.get(array[u])<=1)
+                work2.remove(array[u]);
+            if(freq2.get(array[u])==0)
+                freq2.remove(array[u]);
+            for(Edge e:adj[u]){
+                if(e.v==parent[u]||e.v==path.get(i).v)
+                    continue;
+                update(e.v,u,adj,array,freq1,freq2,work1,work2);
+            }
+            int cur=0;
+            if(!work1.isEmpty())
+                cur=Math.max(cur,work1.last());
+            if(!work2.isEmpty())
+                cur=Math.max(cur,work2.last());
+            ans[path.get(i).index]=cur;
+            u=path.get(i).v;
+        }
+        for(int i=0;i<n-1;i++){
+            System.out.println(ans[i]);
+        }
+    }
+}
