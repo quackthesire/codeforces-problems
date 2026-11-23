@@ -1,0 +1,36 @@
+import java.util.*;
+public class Main{
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int t=scan.nextInt();
+        for(int temp=0;temp<t;temp++){
+            int n=scan.nextInt();
+            String s=scan.next();
+            int cw=0;
+            int tw=0;
+            int cr=0;
+            int tr=0;
+            boolean w=false;
+            boolean r=false;
+            for(int i=0;i<n;i++){
+                if(s.charAt(i)=='W'){
+                    if(!w)
+                        cw++;
+                    tw++;
+                }
+                else
+                    w=true;
+            }
+            for(int i=2*n-1;i>=n;i--){
+                if(s.charAt(i)=='R'){
+                    if(!r)
+                        cr++;
+                    tr++;
+                }
+                else
+                    r=true;
+            }
+            System.out.println((cw>=tw/2&&cr>=tr/2&&tw%2==0&&tr%2==0)?"YES":"NO");
+        }
+    }
+}
