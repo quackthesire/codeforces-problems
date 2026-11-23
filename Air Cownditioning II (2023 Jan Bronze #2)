@@ -1,0 +1,64 @@
+import java.util.*;
+public class Main{
+    static int best=Integer.MAX_VALUE;
+    static void check(int n,int m,int[][]array,int[][]array2,int bin){
+        int[]stall=new int[100];
+        boolean[]t=new boolean[m];
+        int index=m-1;
+        int bin2=bin;
+        while(bin>0){
+            if(bin%2==0){
+                t[index]=false;
+            }
+            else{
+                t[index]=true;
+            }
+            index--;
+            bin/=2;
+        }
+        boolean correct=true;
+        int cur=0;
+        for(int i=0;i<m;i++){
+            if(t[i]==true){
+                cur+=array2[i][3];
+                for(int j=array2[i][0]-1;j<array2[i][1];j++){
+                    stall[j]+=array2[i][2];
+                }
+            }
+        }
+        for(int i=0;i<n;i++){
+            for(int j=array[i][0]-1;j<array[i][1];j++){
+                if(array[i][2]>stall[j]){
+                    correct=false;
+                }
+            }
+        }
+        if(correct==true&&best>cur){
+            best=cur;
+        }
+        if(bin2<Math.pow(2,m)-1){
+            check(n,m,array,array2,bin2+1);
+        }
+        return;
+    }
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int n=scan.nextInt();
+        int m=scan.nextInt();
+        int[][]array=new int[n][3];
+        int[][]array2=new int[m][4];
+        for(int i=0;i<n;i++){
+            array[i][0]=scan.nextInt();
+            array[i][1]=scan.nextInt();
+            array[i][2]=scan.nextInt();
+        }
+        for(int i=0;i<m;i++){
+            array2[i][0]=scan.nextInt();
+            array2[i][1]=scan.nextInt();
+            array2[i][2]=scan.nextInt();
+            array2[i][3]=scan.nextInt();
+        }
+        check(n,m,array,array2,0);
+        System.out.println(best);
+    }
+}
