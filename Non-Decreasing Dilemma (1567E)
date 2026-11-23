@@ -1,0 +1,115 @@
+import java.util.*;
+public class Main{
+    static class Segtree{
+        int n;
+        long[]ans;
+        long[]pre;
+        long[]suff;
+        boolean[]array;
+        public Segtree(boolean[]array){
+            this.n=array.length;
+            this.array=array;
+            ans=new long[4*n];
+            pre=new long[4*n];
+            suff=new long[4*n];
+            build(1,0,n-1);
+        }
+        public void build(int node,int l,int r){
+            if(l==r){
+                ans[node]=1;
+                pre[node]=1;
+                suff[node]=1;
+                return;
+            }
+            int m=(l+r)/2;
+            build(node*2,l,m);
+            build(node*2+1,m+1,r);
+            calc(node,l,r);
+        }
+        public long query(int l,int r){
+            return query(1,0,n-1,l,r)[0];
+        }
+        public long[] query(int node,int l,int r,int ll,int rr){
+            if(ll<=l&&r<=rr)
+                return new long[]{ans[node],pre[node],suff[node],r-l+1};
+            int m=(l+r)/2;
+            if(rr<=m)
+                return query(node*2,l,m,ll,rr);
+            if(ll>m)
+                return query(node*2+1,m+1,r,ll,rr);
+            long[]ans=new long[4];
+            long[]arrayl=query(node*2,l,m,ll,rr);
+            long[]arrayr=query(node*2+1,m+1,r,ll,rr);
+            ans[0]=arrayl[0]+arrayr[0];
+            ans[1]=arrayl[1];
+            ans[2]=arrayr[2];
+            ans[3]=arrayl[3]+arrayr[3];
+            if(array[m])
+                return ans;
+            ans[0]+=arrayl[2]*arrayr[1];
+            if(arrayl[1]==arrayl[3])
+                ans[1]=arrayl[3]+arrayr[1];
+            if(arrayr[2]==arrayr[3])
+                ans[2]=arrayr[3]+arrayl[2];
+            return ans;
+        }
+        public void update(int i,boolean val){
+            array[i]=val;
+            update(1,0,n-1,i);
+        }
+        public void update(int node,int l,int r,int i){
+            if(l==r)
+                return;
+            int m=(l+r)/2;
+            if(i<=m)
+                update(node*2,l,m,i);
+            else
+                update(node*2+1,m+1,r,i);
+            calc(node,l,r);
+        }
+        public void calc(int node,int l,int r){
+            int m=(l+r)/2;
+            int left=node*2;
+            int right=node*2+1;
+            ans[node]=ans[left]+ans[right];
+            pre[node]=pre[left];
+            suff[node]=suff[right];
+            if(array[m])
+                return;
+            ans[node]+=suff[left]*pre[right];
+            if(pre[left]==m-l+1)
+                pre[node]=m-l+1+pre[right];
+            if(suff[right]==r-m)
+                suff[node]=r-m+suff[left];
+        }
+    }
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int n=scan.nextInt();
+        int q=scan.nextInt();
+        int[]array=new int[n];
+        boolean[]bad=new boolean[n];
+        for(int i=0;i<n;i++){
+            array[i]=scan.nextInt();
+            if(i!=0)
+                bad[i-1]=array[i-1]>array[i];
+        }
+        Segtree segtree=new Segtree(bad);
+        for(int i=0;i<q;i++){
+            if(scan.nextInt()==1){
+                int index=scan.nextInt()-1;
+                array[index]=scan.nextInt();
+                if(index!=0){
+                    bad[index-1]=array[index-1]>array[index];
+                    segtree.update(index-1,bad[index-1]);
+                }
+                if(index!=n-1){
+                    bad[index]=array[index]>array[index+1];
+                    segtree.update(index,bad[index]);
+                }
+            }
+            else
+                System.out.println(segtree.query(scan.nextInt()-1,scan.nextInt()-1));
+        }
+    }
+}
