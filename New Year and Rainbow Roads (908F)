@@ -1,0 +1,89 @@
+import java.util.*;
+public class Main{
+    static class Point implements Comparable<Point>{
+        int pos;
+        int color;//0=red,1=green,2=blue
+        public Point(int pos,String color){
+            this.pos=pos;
+            if(color.equals("R"))
+                this.color=0;
+            else if(color.equals("G"))
+                this.color=1;
+            else
+                this.color=2;
+        }
+        public int compareTo(Point other){
+            return this.pos-other.pos;
+        }
+    }
+	public static void main(String[]args){
+    	Scanner scan=new Scanner(System.in);
+    	int n=scan.nextInt();
+    	Point[]array=new Point[n];
+    	for(int i=0;i<n;i++){
+    	    array[i]=new Point(scan.nextInt(),scan.next());
+    	    
+    	}
+    	Arrays.sort(array);
+    	ArrayList<Integer>temp=new ArrayList<Integer>();
+    	for(int i=0;i<n;i++){
+    	    if(array[i].color==1)
+    	        temp.add(i);
+    	}
+    	int firstr=Integer.MAX_VALUE;
+    	int firstb=Integer.MAX_VALUE;
+    	int lastr=Integer.MIN_VALUE;
+    	int lastb=Integer.MIN_VALUE;
+    	for(int i=0;i<n;i++){
+    	    if(array[i].color==0){
+    	        if(firstr==Integer.MAX_VALUE)
+    	            firstr=array[i].pos;
+    	        lastr=array[i].pos;
+    	    }
+    	    if(array[i].color==2){
+    	        if(firstb==Integer.MAX_VALUE)
+    	            firstb=array[i].pos;
+    	        lastb=array[i].pos;
+    	    }
+    	}
+    	int ans=0;
+    	int[]green=temp.stream().mapToInt(i->i).toArray();
+    	if(green.length==0){
+    	    if(firstr!=Integer.MAX_VALUE&&lastr!=Integer.MIN_VALUE)
+    	        ans+=lastr-firstr;
+    	    if(firstb!=Integer.MAX_VALUE&&lastb!=Integer.MIN_VALUE)
+    	        ans+=lastb-firstb;
+    	    System.out.println(ans);
+    	    System.exit(0);
+	    }
+    	if(firstr<array[green[0]].pos)
+    	    ans+=array[green[0]].pos-firstr;
+    	if(firstb<array[green[0]].pos)
+    	    ans+=array[green[0]].pos-firstb;
+    	if(lastr>array[green[green.length-1]].pos)
+    	    ans+=lastr-array[green[green.length-1]].pos;
+    	if(lastb>array[green[green.length-1]].pos)
+    	    ans+=lastb-array[green[green.length-1]].pos;
+    	for(int i=0;i<green.length-1;i++){
+    	    int bestr=0;
+    	    int bestb=0;
+    	    int prevr=-1;
+    	    int prevb=-1;
+    	    for(int j=green[i];j<=green[i+1];j++){
+    	        if(array[j].color!=2){
+    	            if(prevr!=-1)
+    	                bestr=Math.max(bestr,array[j].pos-prevr);
+    	            prevr=array[j].pos;
+    	        }
+    	        if(array[j].color!=0){
+    	            if(prevb!=-1)
+    	                bestb=Math.max(bestb,array[j].pos-prevb);
+    	            prevb=array[j].pos;
+    	        }
+    	    }
+    	    int len=array[green[i+1]].pos-array[green[i]].pos;
+    	    ans+=Math.min(2*len,3*len-bestr-bestb);
+    	}
+    	System.out.println(ans);
+	}
+}
