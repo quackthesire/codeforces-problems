@@ -1,0 +1,73 @@
+import java.util.*;
+public class Main{
+    static class Node{
+        long l;
+        long r;
+        public Node(long l,long r){
+            this.l=l;
+            this.r=r;
+        }
+    }
+    static class Seg implements Comparable<Seg>{
+        long pos;
+        int start;
+        public Seg(long pos,int start){
+            this.pos=pos;
+            this.start=start;
+        }
+        public int compareTo(Seg other){
+            if(this.pos==other.pos)
+                return other.start-this.start;
+            return Long.compare(this.pos,other.pos);
+        }
+    }
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int n=scan.nextInt();
+        Node[]array=new Node[n];
+        for(int i=0;i<n;i++){
+            array[i]=new Node(scan.nextLong(),scan.nextLong());
+        }
+        long[]ans=new long[30];
+        for(int i=0;i<30;i++){
+            int cur=0;
+            int best=0;
+            int count=0;
+            ArrayList<Seg>segs=new ArrayList<>();
+            for(int j=0;j<n;j++){
+                if(array[j].r-array[j].l+1>=(1<<i)){
+                    count++;
+                    continue;
+                }
+                long l=array[j].l%(1<<i);
+                long r=array[j].r%(1<<i);
+                if(l<=r){
+                    segs.add(new Seg(l,1));
+                    segs.add(new Seg(r,-1));
+                }
+                else{
+                    segs.add(new Seg(0,1));
+                    segs.add(new Seg(r,-1));
+                    segs.add(new Seg(l,1));
+                    segs.add(new Seg(1<<i,-1));
+                }
+            }
+            Collections.sort(segs);
+            for(int j=0;j<segs.size();j++){
+                cur+=segs.get(j).start;
+                best=Math.max(best,cur);
+            }
+            ans[i]=best+count;
+        }
+        int q=scan.nextInt();
+        for(int i=0;i<q;i++){
+            long val=scan.nextLong();
+            for(int j=0;j<30;j++){
+                if((val&(1<<j))!=0){
+                    System.out.println(ans[j]);
+                    break;
+                }
+            }
+        }
+    }
+}
