@@ -1,0 +1,57 @@
+import java.util.*;
+public class Main{
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int t=scan.nextInt();
+        for(int temp=0;temp<t;temp++){
+            int l=scan.nextInt();
+            int n=scan.nextInt();
+            int m=scan.nextInt();
+            int[]array=new int[l];
+            ArrayList<Integer>[]pos=new ArrayList[Math.min(7,m*n)];
+            for(int i=0;i<pos.length;i++){
+                pos[i]=new ArrayList<>();
+            }
+            for(int i=0;i<l;i++){
+                array[i]=scan.nextInt()-1;
+                pos[array[i]].add(i);
+            }
+            int[][]grid=new int[n][m];
+            for(int i=0;i<n;i++){
+                for(int j=0;j<m;j++){
+                    grid[i][j]=scan.nextInt()-1;
+                }
+            }
+            int[][][]dp=new int[n][m][l];//current index is k, subtangle of i,j, does current player win?
+            boolean[][][]losing=new boolean[n+1][m+1][l];//is everything from subtangle i,j current index k losing?
+            for(int i=0;i<=n;i++){
+                for(int j=0;j<=m;j++){
+                    Arrays.fill(losing[i][j],true);
+                }
+            }
+            for(int i=n-1;i>=0;i--){
+                for(int j=m-1;j>=0;j--){
+                    for(int k:pos[grid[i][j]]){
+                        if(k!=l-1&&!losing[i+1][j+1][k+1])
+                            dp[i][j][k]=1;
+                        else
+                            dp[i][j][k]=2;
+                        //System.out.println(i+" "+j+" "+(k+1)+" "+dp[i][j][k]);
+                    }
+                    for(int k=0;k<l;k++){
+                        losing[i][j][k]=losing[i+1][j][k]&losing[i][j+1][k]&(dp[i][j][k]!=2);
+                        //System.out.println("losing: "+i+" "+j+" "+(k+1)+" "+losing[i][j][k]);
+                    }
+                }
+            }
+            boolean work=false;
+            for(int i=0;i<n;i++){
+                for(int j=0;j<m;j++){
+                    if(grid[i][j]==array[0]&&dp[i][j][0]==2)
+                        work=true;
+                }
+            }
+            System.out.println(work?'T':'N');
+        }
+    }
+}
