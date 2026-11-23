@@ -1,0 +1,74 @@
+#include <bits/stdc++.h>
+using namespace std;
+using ll=long long;
+const ll MOD=998244353;
+ll modpow(ll base,ll exp){
+    ll res=1;
+    while(exp>0){
+        if(exp%2==1)
+            res=res*base%MOD;
+        base=base*base%MOD;
+        exp/=2;
+    }
+    return res;
+}
+ll modinv(ll val){
+    return modpow(val,MOD-2);
+}
+int main(){
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+    int n;
+    cin>>n;
+    int sum=0;
+    vector<int>array(n);
+    for(int i=0;i<n;i++){
+        cin>>array[i];
+        sum+=array[i];
+    }
+    if(sum>360){
+        cout<<0<<"\n";
+        return 0;
+    }
+    vector<vector<ll>>dp(181,vector<ll>(361));
+    dp[180][180]=1;
+    for(int i=0;i<n;i++){
+        vector<vector<ll>>newdp(181,vector<ll>(361));
+        for(int j=0;j<=180;j++){
+            ll pre=0;
+            for(int k=180;k<=360-array[i];k++){
+                pre=(pre+dp[j][k])%MOD;
+                newdp[j][k+array[i]]=(newdp[j][k+array[i]]+pre)%MOD;
+            }
+        }
+        for(int j=180;j<=360;j++){
+            ll suff=0;
+            for(int k=180;k>=array[i];k--){
+                suff=(suff+dp[k][j])%MOD;
+                newdp[k-array[i]][j]=(newdp[k-array[i]][j]+suff)%MOD;
+            }
+        }
+        if(i==0){
+            for(int j=181-array[i];j<=179;j++){
+                newdp[j][j+array[i]]++;
+            }
+        }
+        if(i==n-1){
+            for(int j=0;j<=180;j++){
+                for(int k=180;k<=360;k++){
+                    ll mult=max(0,min(359,360+j-array[i])-max(361-array[i],k)+1);
+                    newdp[0][360]=(newdp[0][360]+dp[j][k]*mult%MOD)%MOD;
+                }
+            }
+        }
+        dp=newdp;
+    }
+    ll tot=0;
+    for(int i=0;i<=180;i++){
+        for(int j=180;j<=360;j++){
+            tot=(tot+dp[i][j])%MOD;
+        }
+    }
+    ll mult=modpow(modinv(360),n);
+    cout<<(tot*mult%MOD);
+}
