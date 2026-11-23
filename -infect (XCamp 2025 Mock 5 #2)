@@ -1,0 +1,79 @@
+import java.util.*;
+import java.math.BigInteger;
+public class Main{
+    static class Frac{
+        BigInteger a;
+        BigInteger b;
+        public Frac(long a,long b){
+            this.a=BigInteger.valueOf(a);
+            this.b=BigInteger.valueOf(b);
+        }
+        public Frac(BigInteger a,BigInteger b){
+            this.a=a;
+            this.b=b;
+        }
+        public void add(Frac other){
+            BigInteger tempa=this.a.multiply(other.b).add(other.a.multiply(this.b));
+            BigInteger tempb=this.b.multiply(other.b);
+            BigInteger gcd=tempa.gcd(tempb);
+            if(gcd.equals(BigInteger.ZERO))
+                gcd=BigInteger.ONE;
+            this.a=tempa.divide(gcd);
+            this.b=tempb.divide(gcd);
+        }
+    }
+    static Frac mult(Frac x,Frac y){
+        BigInteger tempa=x.a.multiply(y.a);
+        BigInteger tempb=x.b.multiply(y.b);
+        BigInteger gcd=tempa.gcd(tempb);
+        if(gcd.equals(BigInteger.ZERO))
+            gcd=BigInteger.ONE;
+        return new Frac(tempa.divide(gcd),tempb.divide(gcd));
+    }
+	public static void main(String[]args){
+	    Scanner scan=new Scanner(System.in);
+	    int n=scan.nextInt();
+	    int m=scan.nextInt();
+	    int k=scan.nextInt()-1;
+	    Frac[][]dp=new Frac[m+1][(int)Math.pow(2,n)];
+	    for(int i=0;i<m+1;i++){
+	        for(int j=0;j<(int)Math.pow(2,n);j++){
+	            dp[i][j]=new Frac(0,1);
+	        }
+	    }
+	    for(int i=0;i<(int)Math.pow(2,n);i++){
+	        if(Integer.bitCount(i)==1)
+	            dp[0][i]=new Frac(1,n);
+	    }
+	    for(int i=0;i<m;i++){
+	        int u=(int)Math.pow(2,scan.nextInt()-1);
+	        int v=(int)Math.pow(2,scan.nextInt()-1);
+	        for(int j=0;j<(int)Math.pow(2,n);j++){
+	            if((j&u)>0&&(j&v)==0){
+	                dp[i+1][j|v].add(mult(dp[i][j],new Frac(1,2)));
+	                dp[i+1][j].add(mult(dp[i][j],new Frac(1,2)));
+	            }
+	            else if((j&u)==0&&(j&v)>0){
+	                dp[i+1][j|u].add(mult(dp[i][j],new Frac(1,2)));
+	                dp[i+1][j].add(mult(dp[i][j],new Frac(1,2)));
+	            }
+	            else
+	                dp[i+1][j].add(dp[i][j]);
+	        }
+	    }
+	    Frac tot=new Frac(0,1);
+        for(int i=0;i<(int)Math.pow(2,n);i++){
+            if((i&(int)Math.pow(2,k))>0)
+                tot.add(dp[m][i]);
+        }
+	    for(int i=0;i<n;i++){
+	        Frac temp=new Frac(0,1);
+	        for(int j=0;j<(int)Math.pow(2,n);j++){
+	            if((j&(int)Math.pow(2,i))>0&&(j&(int)Math.pow(2,k))>0)
+	                temp.add(dp[m][j]);
+	        }
+	        Frac ans=mult(temp,new Frac(tot.b,tot.a));
+	        System.out.println(ans.a+"/"+ans.b);
+	    }
+	}
+}
