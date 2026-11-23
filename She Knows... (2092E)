@@ -1,0 +1,48 @@
+import java.util.*;
+public class Main{
+    static long MOD=1000000007;
+    static long pow(long base,long exp){
+        long res=1;
+        while(exp>0){
+            if(exp%2==1)
+                res=(res*base)%MOD;
+            base=(base*base)%MOD;
+            exp/=2;
+        }
+        return res;
+    }
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int t=scan.nextInt();
+        for(int temp=0;temp<t;temp++){
+            long n=scan.nextLong();
+            long m=scan.nextLong();
+            int k=scan.nextInt();
+            int black=0;
+            int tot=0;
+            for(int i=0;i<k;i++){
+                long x=scan.nextLong();
+                long y=scan.nextLong();
+                int c=scan.nextInt();
+                int count=0;
+                if(x==1||x==n)
+                    count++;
+                if(y==1||y==m)
+                    count++;
+                if(count==1){
+                    tot++;
+                    if(c==0)
+                        black++;
+                }
+            }
+            if(tot==2*(n-2)+2*(m-2)){
+                if(black%2==0)
+                    System.out.println(pow(2,n*m-k));
+                else
+                    System.out.println(0);
+            }
+            else
+                System.out.println(pow(2,n*m-k-1));
+        }
+    }
+}
