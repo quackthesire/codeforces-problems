@@ -1,0 +1,58 @@
+import java.util.*;
+public class Main{
+    static long[]tree;
+    static long[]mult;
+    static int n;
+    static int q;
+    static void add(int index,int l,int r,int i,int j,long times) {
+        if(l>j||r<i)
+            return;
+        if(i<=l&&r<=j){
+            tree[index]+=(r-l+1)*times;
+            mult[index]+=times;
+            return;
+        }
+        int m=(l+r)>>>1;
+        push(index,l,r,m);
+        add(index<<1,l,m,i,j,times);
+        add(index<<1|1,m+1,r,i,j,times);
+        tree[index]=tree[index<<1]+tree[index<<1|1];
+    }
+    static void push(int index,int l,int r,int m){
+        if(mult[index]!=0){
+            long times=mult[index];
+            tree[index<<1]+=times*(m-l+1);
+            mult[index<<1]+=times;
+            tree[index<<1|1]+=times*(r-m);
+            mult[index<<1|1]+=times;
+            mult[index]=0;
+        }
+    }
+    static long sum(int index,int l,int r,int i,int j){
+        if(l>j||r<i)
+            return 0;
+        if(i<=l&&r<=j){
+            return tree[index];
+        }
+        int m=(l+r)>>>1;
+        push(index,l,r,m);
+        return sum(index<<1,l,m,i,j)+sum(index<<1|1,m+1,r,i,j);
+    }
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int t=scan.nextInt();
+        for(int temp=0;temp<t;temp++){
+            n=scan.nextInt();
+            q=scan.nextInt();
+            tree=new long[4*n];
+            mult=new long[4*n];
+            for(int i=0;i<q;i++){
+                int a=scan.nextInt();
+                if(a==0)
+                    add(1,0,n-1,scan.nextInt()-1,scan.nextInt()-1,scan.nextLong());
+                else
+                    System.out.println(sum(1,0,n-1,scan.nextInt()-1,scan.nextInt()-1));
+            }
+        }
+    }
+}
