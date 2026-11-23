@@ -1,0 +1,61 @@
+import java.util.*;
+public class Main{
+    static boolean[]visited;
+    static int dfs(int u,ArrayList<Integer>[]adj,int[]array,int index){
+        visited[u]=true;
+        array[u]=index;
+        int size=1;
+        for(int v:adj[u]){
+            if(!visited[v])
+                size+=dfs(v,adj,array,index);
+        }
+        return size;
+    }
+    public static void main(String[]args){
+      Scanner scan=new Scanner(System.in);
+      int n=scan.nextInt();
+      visited=new boolean[n];
+      int[]zero=new int[n];
+      int[]one=new int[n];
+      ArrayList<Integer>array0=new ArrayList<>();
+      ArrayList<Integer>array1=new ArrayList<>();
+      ArrayList<Integer>[]adj0=new ArrayList[n];
+      ArrayList<Integer>[]adj1=new ArrayList[n];
+      for(int i=0;i<n;i++){
+          adj0[i]=new ArrayList<>();
+          adj1[i]=new ArrayList<>();
+      }
+      for(int i=0;i<n-1;i++){
+          int u=scan.nextInt()-1;
+          int v=scan.nextInt()-1;
+          if(scan.nextInt()==0){
+              adj0[u].add(v);
+              adj0[v].add(u);
+          }
+          else{
+              adj1[u].add(v);
+              adj1[v].add(u);
+          }
+      }
+      for(int i=0;i<n;i++){
+        if(!visited[i])
+            array0.add(dfs(i,adj0,zero,array0.size()));
+      }
+      Arrays.fill(visited,false);
+      for(int i=0;i<n;i++){
+          if(!visited[i])
+              array1.add(dfs(i,adj1,one,array1.size()));
+      }
+      long ans=0;
+      for(int i=0;i<array0.size();i++){
+          ans+=(long)array0.get(i)*(array0.get(i)-1);
+      }
+      for(int i=0;i<array1.size();i++){
+          ans+=(long)array1.get(i)*(array1.get(i)-1);
+      }
+      for(int i=0;i<n;i++){
+          ans+=(long)(array0.get(zero[i])-1)*(array1.get(one[i])-1);
+      }
+      System.out.println(ans);
+	}
+}
