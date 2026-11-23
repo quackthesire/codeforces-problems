@@ -1,0 +1,74 @@
+import java.util.*;
+public class Main{
+    static class Node{
+        long t;
+        int p;
+        int index;
+        public Node(long t,int p,int index){
+            this.t=t;
+            this.p=p;
+            this.index=index;
+        }
+    }
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int t=scan.nextInt();
+        for(int temp=0;temp<t;temp++){
+            int n=scan.nextInt();
+            int m=scan.nextInt();
+            long[]array=new long[n];
+            ArrayList<Node>[]list=new ArrayList[n];
+            for(int i=0;i<n;i++){
+                array[i]=scan.nextLong();
+                list[i]=new ArrayList<>();
+            }
+            for(int i=0;i<m;i++){
+                list[scan.nextInt()-1].add(new Node(scan.nextLong(),scan.nextInt(),i));
+            }
+            long cur=0;
+            boolean work=true;
+            ArrayList<Integer>ans=new ArrayList<>();
+            for(int i=0;i<n;i++){
+                long[]dp=new long[101];
+                int[][]last=new int[list[i].size()][101];
+                Arrays.fill(dp,Long.MAX_VALUE/4);
+                dp[0]=0;
+                for(int j=0;j<list[i].size();j++){
+                    Arrays.fill(last[j],-1);
+                }
+                for(int j=0;j<list[i].size();j++){
+                    for(int k=100;k>=0;k--){
+                        if(dp[k]>=Long.MAX_VALUE/4)
+                            continue;
+                        int index=Math.min(100,k+list[i].get(j).p);
+                        if(dp[k]+list[i].get(j).t<dp[index]){
+                            dp[index]=dp[k]+list[i].get(j).t;
+                            last[j][index]=k;
+                        }
+                    }
+                }
+                cur+=dp[100];
+                if(cur>array[i]){
+                    work=false;
+                    break;
+                }
+                int p=100;
+                for(int j=list[i].size()-1;j>=0;j--){
+                    if(last[j][p]!=-1){
+                        ans.add(list[i].get(j).index);
+                        p=last[j][p];
+                    }
+                }
+            }
+            if(!work){
+                System.out.println(-1);
+                continue;
+            }
+            System.out.println(ans.size());
+            for(int i:ans){
+                System.out.print((i+1)+" ");
+            }
+            System.out.println();
+        }
+    }
+}
