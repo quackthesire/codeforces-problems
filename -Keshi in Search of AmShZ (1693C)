@@ -1,0 +1,46 @@
+import java.util.*;
+public class Main{
+    static class Node implements Comparable<Node>{
+        int v;
+        int w;
+        public Node(int v,int w){
+            this.v=v;
+            this.w=w;
+        }
+        public int compareTo(Node other){
+            return this.w-other.w;
+        }
+    }
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int n=scan.nextInt();
+        int m=scan.nextInt();
+        ArrayList<Integer>[]adj=new ArrayList[n];
+        for(int i=0;i<n;i++){
+            adj[i]=new ArrayList<>();
+        }
+        int[]add=new int[n];
+        for(int i=0;i<m;i++){
+            int u=scan.nextInt()-1;
+            int v=scan.nextInt()-1;
+            adj[v].add(u);
+            add[u]++;
+        }
+        int[]dist=new int[n];
+        Arrays.fill(dist,Integer.MAX_VALUE/4);
+        dist[n-1]=0;
+        PriorityQueue<Node>pq=new PriorityQueue<>();
+        pq.add(new Node(n-1,0));
+        while(!pq.isEmpty()){
+            Node node=pq.poll();
+            for(int i:adj[node.v]){
+                if(node.w+add[i]<dist[i]){
+                    dist[i]=node.w+add[i];
+                    pq.add(new Node(i,dist[i]));
+                }
+                add[i]--;
+            }
+        }
+        System.out.print(dist[0]);
+    }
+}
