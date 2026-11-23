@@ -1,0 +1,85 @@
+import java.util.*;
+public class Main{
+    static class Node{
+        int len;
+        long req;
+        long count;
+        public Node(int len,long req,long count){
+            this.len=len;
+            this.req=req;
+            this.count=count;
+        }
+    }
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int t=scan.nextInt();
+        for(int temp=0;temp<t;temp++){
+            int n=scan.nextInt();
+            long x=scan.nextLong();
+            int[]index=new int[n];
+            ArrayList<Node>[]list=new ArrayList[n];
+            ArrayList<Node>[]array=new ArrayList[n];
+            int[]ans=new int[n];
+            for(int i=0;i<n;i++){
+                list[i]=new ArrayList<>();
+                array[i]=new ArrayList<>();
+                int m=scan.nextInt();
+                int len=0;
+                int cur=0;
+                long req=0;
+                long count=0;
+                long[]a=new long[m];
+                long[]b=new long[m];
+                for(int j=0;j<m;j++){
+                    a[j]=scan.nextLong();
+                }
+                for(int j=0;j<m;j++){
+                    b[j]=scan.nextLong();
+                }
+                for(int j=0;j<m;j++){
+                    array[i].add(new Node(1,a[j],b[j]-a[j]));
+                    len++;
+                    req=Math.max(req,a[j]-count);
+                    count+=b[j]-a[j];
+                    if(count>=0){
+                        list[i].add(new Node(len,req,count));
+                        cur=j+1;
+                        len=0;
+                        req=0;
+                        count=0;
+                    }
+                }
+            }
+            PriorityQueue<Integer>pq=new PriorityQueue<>((a,b)->(Long.compare(list[a].get(index[a]).req,list[b].get(index[b]).req)));
+            for(int i=0;i<n;i++){
+                if(index[i]<list[i].size())
+                    pq.add(i);
+            }
+            while(!pq.isEmpty()){
+                int val=pq.poll();
+                if(x<list[val].get(index[val]).req)
+                    break;
+                x+=list[val].get(index[val]).count;
+                ans[val]+=list[val].get(index[val]).len;
+                index[val]++;
+                if(index[val]<list[val].size())
+                    pq.add(val);
+            }
+            long best=-1;
+            int bestindex=-1;
+            for(int i=0;i<n;i++){
+                int cur=ans[i];
+                long tempx=x;
+                while(cur<array[i].size()&&tempx>=array[i].get(cur).req){
+                    tempx+=array[i].get(cur).count;
+                    cur++;
+                }
+                if(cur>best){
+                    best=cur;
+                    bestindex=i;
+                }
+            }
+            System.out.println(best+" "+(bestindex+1));
+        }
+    }
+}
