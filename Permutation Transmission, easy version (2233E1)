@@ -1,0 +1,66 @@
+import java.util.*;
+public class Main{
+    static class Node implements Comparable<Node>{
+        int ones;
+        int[]array;
+        public Node(String s){
+            array=new int[s.length()];
+            for(int i=0;i<s.length();i++){
+                array[i]=s.charAt(i)-'0';
+                if(array[i]==1)
+                    ones++;
+            }
+        }
+        public int compareTo(Node other){
+            return this.ones-other.ones;
+        }
+    }
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int[]fact=new int[12];
+        fact[0]=1;
+        for(int i=1;i<12;i++){
+            fact[i]=i*fact[i-1];
+        }
+        int t=scan.nextInt();
+        for(int temp=0;temp<t;temp++){
+            int n=scan.nextInt();
+            int size=(int)Math.ceil(Math.log(n+1)/Math.log(2));
+            Node[]array=new Node[size];
+            for(int i=0;i<size;i++){
+                array[i]=new Node(scan.next());
+            }
+            Arrays.sort(array);
+            boolean[]visited=new boolean[n+1];
+            for(int i=0;i<n;i++){
+                int sum=0;
+                for(int j=0;j<size;j++){
+                    sum*=2;
+                    sum+=array[j].array[i];
+                }
+                if(sum<=n)
+                    visited[sum]=true;
+            }
+            boolean work=true;
+            for(int i=1;i<=n;i++){
+                if(!visited[i]){
+                    work=false;
+                    break;
+                }
+            }
+            if(!work){
+                System.out.println(0);
+                continue;
+            }
+            int[]count=new int[n+1];
+            for(int i=0;i<size;i++){
+                count[array[i].ones]++;
+            }
+            int ans=1;
+            for(int i=0;i<=n;i++){
+                ans*=fact[count[i]];
+            }
+            System.out.println(ans);
+        }
+    }
+}
