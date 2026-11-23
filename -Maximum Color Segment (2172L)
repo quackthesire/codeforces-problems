@@ -1,0 +1,82 @@
+import java.util.*;
+public class Main{
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int n=scan.nextInt();
+        int m=scan.nextInt();
+        int len=scan.nextInt();
+        String s=scan.next();
+        if(n==1){
+            System.out.println(1);
+            return;
+        }
+        int[]array=new int[n-1];
+        for(int i=0;i<n-1;i++){
+            array[i]=(s.charAt(i)=='R'?0:1)^(s.charAt(i+1)=='R'?0:1);
+        }
+        int[][][]dp=new int[n-1][m+1][2];
+        for(int i=0;i<n-1;i++){
+            for(int j=0;j<=m;j++){
+                dp[i][j][0]=Integer.MIN_VALUE/2;
+                dp[i][j][1]=Integer.MIN_VALUE/2;
+            }
+        }
+        for(int i=0;i<Math.min(len,n-1);i++){
+            dp[i][0][array[i]]=array[i];
+        }
+        if(len<=n-1&&m>=1)
+            dp[len-1][1][1-array[len-1]]=Math.max(dp[len-1][1][1-array[len-1]],1-array[len-1]);
+        for(int i=len;i<n-1;i++){
+            for(int j=0;j<=m;j++){
+                if(array[i]==0){
+                    dp[i][j][0]=Math.max(dp[i-len][j][0],dp[i-len][j][1]);
+                    if(j!=0)
+                        dp[i][j][1]=Math.max(dp[i-len][j-1][0]+1,dp[i-len][j-1][1]-1)+1;
+                }
+                else{
+                    if(j!=0)
+                        dp[i][j][0]=Math.max(dp[i-len][j-1][0]+1,dp[i-len][j-1][1]-1);
+                    dp[i][j][1]=Math.max(dp[i-len][j][0],dp[i-len][j][1])+1;
+                }
+            }
+        }
+        int[]best=new int[m+1];
+        Arrays.fill(best,Integer.MIN_VALUE/2);
+        best[0]=0;
+        for(int i=Math.max(0,n-len-1);i<n-1;i++){
+            int[]cur=new int[m+1];
+            Arrays.fill(cur,Integer.MIN_VALUE/2);
+            for(int j=0;j<=m;j++){
+                cur[j]=Math.max(dp[i][j][0],dp[i][j][1]);
+            }
+            if(i==n-len-1){
+                for(int j=0;j<m;j++){
+                    cur[j+1]=Math.max(cur[j+1],dp[i][j][0]+1);
+                    cur[j+1]=Math.max(cur[j+1],dp[i][j][1]-1);
+                }
+            }
+            int count=i/len;
+            if(i%len==len-1)
+                count++;
+            if(i==n-len-1)
+                count++;
+            int[]next=new int[m+1];
+            Arrays.fill(next,Integer.MIN_VALUE/2);
+            for(int j=0;j<=m;j++){
+                if(best[j]==Integer.MIN_VALUE/2)
+                    continue;
+                for(int k=0;k<=Math.min(Math.min(count,m),m-j);k++){
+                    if(cur[k]==Integer.MIN_VALUE/2)
+                        continue;
+                    next[j+k]=Math.max(next[j+k],best[j]+cur[k]);
+                }
+            }
+            best=next;
+        }
+        int ans=0;
+        for(int j=0;j<=m;j++){
+            ans=Math.max(ans,best[j]);
+        }
+        System.out.println(ans+1);
+    }
+}
