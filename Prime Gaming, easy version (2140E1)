@@ -1,0 +1,48 @@
+import java.util.*;
+public class Main{
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int t=scan.nextInt();
+        for(int temp=0;temp<t;temp++){
+            int n=scan.nextInt();
+            int m=scan.nextInt();
+            int q=scan.nextInt();
+            boolean[]array=new boolean[n];
+            for(int i=0;i<q;i++){
+                array[scan.nextInt()-1]=true;
+            }
+            if(m==1){
+                System.out.println(1);
+                continue;
+            }
+            int[][][]dp=new int[n+1][][];
+            for(int i=1;i<=n;i++){
+                dp[i]=new int[1<<i][2];
+            }
+            dp[1][0][0]=1;
+            dp[1][0][1]=1;
+            dp[1][1][0]=2;
+            dp[1][1][1]=2;
+            for(int i=2;i<=n;i++){
+                for(int j=0;j<(1<<i);j++){
+                    int max=1;
+                    int min=2;
+                    for(int k=0;k<i;k++){
+                        if(array[k]){
+                            int val=(j%(1<<k))+((j/(1<<(k+1)))<<k);
+                            max=Math.max(max,dp[i-1][val][1]);
+                            min=Math.min(min,dp[i-1][val][0]);
+                        }
+                    }
+                    dp[i][j][0]=max;
+                    dp[i][j][1]=min;
+                }
+            }
+            long ans=0;
+            for(int j=0;j<(1<<n);j++){
+                ans+=dp[n][j][0];
+            }
+            System.out.println(ans);
+        }
+    }
+}
