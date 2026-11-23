@@ -1,0 +1,125 @@
+import java.util.*;
+public class Main{
+    static class DSU{
+        int[]parent;
+        int[]size;
+        int[]left;
+        boolean[]even;
+        boolean[]odd;
+        public DSU(int n){
+            parent=new int[n];
+            size=new int[n];
+            left=new int[n];
+            even=new boolean[n];
+            odd=new boolean[n];
+            for(int i=0;i<n;i++){
+                parent[i]=i;
+                size[i]=1;
+                left[i]=i;
+            }
+        }
+        public int find(int u){
+            if(parent[u]==u)
+                return u;
+            parent[u]=find(parent[u]);
+            return parent[u]; 
+        }
+        public boolean good(int u){
+            u=find(u);
+            if(size[u]%2==1)
+                return even[u];
+            return even[u]||odd[u];
+        }
+        public int merge(int u,int v){
+            u=find(u);
+            v=find(v);
+            if(u==v)
+                return u;
+            if(left[u]>left[v]){
+                int temp=u;
+                u=v;
+                v=temp;
+            }
+            boolean e=even[v];
+            boolean o=odd[v];
+            if(size[u]%2==1){
+                boolean temp=e;
+                e=o;
+                o=temp;
+            }
+            parent[v]=u;
+            size[u]+=size[v];
+            left[u]=Math.min(left[u],left[v]);
+            even[u]=even[u]||e;
+            odd[u]=odd[u]||o;
+            return u;
+        }
+    }
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int t=scan.nextInt();
+        for(int temp=0;temp<t;temp++){
+            int n=scan.nextInt();
+            int max=0;
+            int[]array=new int[n];
+            ArrayList<int[]>list=new ArrayList<>();
+            for(int i=0;i<n;i++){
+                array[i]=scan.nextInt();
+                list.add(new int[]{i,array[i]});
+                max=Math.max(max,array[i]);
+            }
+            Collections.sort(list,(a,b)->(b[1]-a[1]));
+            long ans=0;
+            long sum=0;
+            int work=0;
+            boolean[]active=new boolean[n];
+            DSU dsu=new DSU(n);
+            for(int i=0;i<n;i++){
+                int val=list.get(i)[1];
+                while(i<n&&list.get(i)[1]==val){
+                    int index=list.get(i)[0];
+                    active[index]=true;
+                    if(array[index]==max)
+                        dsu.even[index]=true;
+                    sum++;
+                    if(dsu.good(index))
+                        work++;
+                    if(index>0&&active[index-1]){
+                        int u=dsu.find(index);
+                        int v=dsu.find(index-1);
+                        if(dsu.good(u))
+                            work--;
+                        if(dsu.good(v))
+                            work--;
+                        sum-=(dsu.size[u]+1)/2;
+                        sum-=(dsu.size[v]+1)/2;
+                        int uv=dsu.merge(index,index-1);
+                        sum+=(dsu.size[uv]+1)/2;
+                        if(dsu.good(uv))
+                            work++;
+                    }
+                    if(index<n-1&&active[index+1]){
+                        int u=dsu.find(index);
+                        int v=dsu.find(index+1);
+                        if(u!=v){
+                            if(dsu.good(u))
+                                work--;
+                            if(dsu.good(v))
+                                work--;
+                            sum-=(dsu.size[u]+1)/2;
+                            sum-=(dsu.size[v]+1)/2;
+                            int uv=dsu.merge(index,index+1);
+                            sum+=(dsu.size[uv]+1)/2;
+                            if(dsu.good(uv))
+                                work++;
+                        }
+                    }
+                    i++;
+                }
+                i--;
+                ans=Math.max(ans,max+val+sum-(work==0?1:0));
+            }
+            System.out.println(ans);
+        }
+    }
+}
