@@ -1,0 +1,19 @@
+import java.util.*;
+public class Main{
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int t=scan.nextInt();
+        for(int temp=0;temp<t;temp++){
+            int n=scan.nextInt();
+            long min=0;
+            long max=0;
+            long cur=0;
+            for(int i=0;i<n;i++){
+                cur+=scan.nextLong();
+                min=Math.min(min,cur);
+                max=Math.max(max,cur);
+            }
+            System.out.println(max-min);
+        }
+    }
+}
