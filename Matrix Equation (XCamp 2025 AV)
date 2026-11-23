@@ -1,0 +1,68 @@
+import java.util.*;
+public class Main{
+    static int MOD=998244353;
+    static long pow(long base,long exp){
+        if(exp==0)
+            return 1;
+        if(exp==1)
+            return base;
+        if(exp%2==0)
+            return pow((base*base)%MOD,exp/2);
+        return (base*pow(base,exp-1))%MOD;
+    }
+	public static void main(String[]args){
+	    Scanner scan=new Scanner(System.in);
+	    int n=scan.nextInt();
+	    BitSet[]a=new BitSet[n];
+	    BitSet[]b=new BitSet[n];
+	    for(int i=0;i<n;i++){
+	        a[i]=new BitSet(n);
+	        for(int j=0;j<n;j++){
+	            if(scan.nextInt()==1)
+	                a[i].set(j);
+	        }
+	    }
+	    for(int i=0;i<n;i++){
+	        b[i]=new BitSet(n);
+	        for(int j=0;j<n;j++){
+	            if(scan.nextInt()==1)
+	                b[i].set(j);
+	        }
+	    }
+	    long ans=1;
+	    for(int i=0;i<n;i++){
+	        BitSet[]eq=new BitSet[n];
+	        for(int j=0;j<n;j++){
+	            eq[j]=new BitSet(n);
+	            for(int k=0;k<n;k++){
+	                if(j==k&&b[j].get(i))
+	                    eq[j].set(k,!a[j].get(k));
+	                else
+	                    eq[j].set(k,a[j].get(k));
+	            }
+	        }
+    	    int cur=0;
+            for(int j=0;j<n;j++){
+                int helper=-1;
+                for(int k=cur;k<n;k++){
+                    if(eq[k].get(j)){
+                        helper=k;
+                        break;
+                    }
+                }
+                if(helper==-1)
+                    continue;
+                BitSet temp=eq[cur];
+                eq[cur]=eq[helper];
+                eq[helper]=temp;
+                for(int k=0;k<n;k++){
+                    if(k!=cur&&eq[k].get(j))
+                        eq[k].xor(eq[cur]);
+                }
+                cur++;
+            }
+            ans=(ans*pow(2,n-cur))%MOD;
+	    }
+	    System.out.println(ans);
+	}
+}
