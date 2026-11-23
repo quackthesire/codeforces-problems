@@ -1,0 +1,215 @@
+import java.util.*;
+public class Main{
+    static class Node{
+        int timer=0;
+        int[]low;
+        int[]disc;
+        int[]index;
+        ArrayList<Integer>[]adj;
+        Stack<int[]>stack=new Stack<>();
+        ArrayList<ArrayList<Integer>>blocks=new ArrayList<>();
+        public Node(ArrayList<Integer>[]adj){
+            this.adj=adj;
+            this.low=new int[adj.length];
+            this.disc=new int[adj.length];
+            this.index=new int[adj.length];
+        }
+    }
+    static class Edge{
+        int v;
+        int rev;
+        int val;
+        boolean start;
+        boolean visited;
+        public Edge(int v,int rev,int val,boolean start){
+            this.v=v;
+            this.rev=rev;
+            this.val=val;
+            this.start=start;
+        }
+    }
+    static boolean update(ArrayList<Edge>[]adj,int start,int end){
+        int[]parent=new int[adj.length];
+        Edge[]edges=new Edge[adj.length];
+        ArrayDeque<Integer>q=new ArrayDeque<>();
+        Arrays.fill(parent,-1);
+        parent[start]=start;
+        q.add(start);
+        while(!q.isEmpty()&&parent[end]==-1){
+            int u=q.poll();
+            for(Edge edge:adj[u]){
+                if(edge.val==0||parent[edge.v]!=-1)
+                    continue;
+                parent[edge.v]=u;
+                edges[edge.v]=edge;
+                q.add(edge.v);
+            }
+        }
+        if(parent[end]==-1)
+            return false;
+        for(int i=end;i!=start;i=parent[i]){
+            edges[i].val--;
+            adj[edges[i].v].get(edges[i].rev).val++;
+        }
+        return true;
+    }
+    static ArrayList<Integer>path(ArrayList<Edge>[]adj,int start,int end,int startu){
+        int[]parent=new int[adj.length];
+        Edge[]edges=new Edge[adj.length];
+        ArrayDeque<Integer>q=new ArrayDeque<>();
+        Arrays.fill(parent,-1);
+        parent[start]=start;
+        q.add(start);
+        while(!q.isEmpty()&&parent[end]==-1){
+            int u=q.poll();
+            for(Edge edge:adj[u]){
+                if(!edge.visited||parent[edge.v]!=-1)
+                    continue;
+                parent[edge.v]=u;
+                edges[edge.v]=edge;
+                q.add(edge.v);
+            }
+        }
+        if(parent[end]==-1)
+            return null;
+        ArrayList<Integer>nodes=new ArrayList<>();
+        for(int i=end;i!=start;i=parent[i]){
+            edges[i].visited=false;
+            nodes.add(i);
+        }
+        Collections.reverse(nodes);
+        ArrayList<Integer>path=new ArrayList<>();
+        path.add(startu);
+        for(int i:nodes){
+            if(i%2==0)
+                path.add(i/2);
+        }
+        return path;
+    }
+    static ArrayList<Integer>cycle(ArrayList<Integer>[]temp,int max,int min){
+        ArrayList<Edge>[]adj=new ArrayList[2*temp.length];
+        for(int i=0;i<adj.length;i++){
+            adj[i]=new ArrayList<>();
+        }
+        for(int i=0;i<temp.length;i++){
+            if(i!=max&&i!=min){
+                adj[2*i].add(new Edge(2*i+1,adj[2*i+1].size(),1,true));
+                adj[2*i+1].add(new Edge(2*i,adj[2*i].size(),0,false));
+            }
+            for(int j:temp[i]){
+                adj[2*i+1].add(new Edge(2*j,adj[2*j].size(),1,true));
+                adj[2*j].add(new Edge(2*i+1,adj[2*i+1].size(),0,false));
+            }
+        }
+        if(!update(adj,2*max+1,2*min)||!update(adj,2*max+1,2*min))
+            return null;
+        for(ArrayList<Edge>edges:adj){
+            for(Edge edge:edges){
+                edge.visited=(edge.start&&edge.val==0);
+            }
+        }
+        ArrayList<Integer>path1=path(adj,2*max+1,2*min,max);
+        ArrayList<Integer>path2=path(adj,2*max+1,2*min,max);
+        if(path1==null||path2==null)
+            return null;
+        ArrayList<Integer>cycle=new ArrayList<>(path1);
+        for(int i=path2.size()-2;i>0;i--){
+            cycle.add(path2.get(i));
+        }
+        return cycle;
+    }
+    static void dfs(int u,int p,Node node){
+        node.timer++;
+        node.disc[u]=node.timer;
+        node.low[u]=node.timer;
+        for(int v:node.adj[u]){
+            if(v==p)
+                continue;
+            if(node.disc[v]==0){
+                node.stack.push(new int[]{u,v});
+                dfs(v,u,node);
+                node.low[u]=Math.min(node.low[u],node.low[v]);
+                if(node.low[v]<node.disc[u])
+                    continue;
+                ArrayList<Integer>block=new ArrayList<>();
+                while(true){
+                    int[]edge=node.stack.pop();
+                    if(node.index[edge[0]]!=node.blocks.size()+1){
+                        node.index[edge[0]]=node.blocks.size()+1;
+                        block.add(edge[0]);
+                    }
+                    if(node.index[edge[1]]!=node.blocks.size()+1){
+                        node.index[edge[1]]=node.blocks.size()+1;
+                        block.add(edge[1]);
+                    }
+                    if(edge[0]==u&&edge[1]==v)
+                        break;
+                }
+                node.blocks.add(block);
+            }
+            else if(node.disc[v]<node.disc[u]){
+                node.stack.push(new int[]{u,v});
+                node.low[u]=Math.min(node.low[u],node.disc[v]);
+            }
+        }
+    }
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int id=scan.nextInt();
+        int t=scan.nextInt();
+        for(int tempvar=0;tempvar<t;tempvar++){
+            int n=scan.nextInt();
+            int m=scan.nextInt();
+            int[]l=new int[n];
+            int[]r=new int[n];
+            for(int i=0;i<n;i++){
+                l[i]=scan.nextInt();
+                r[i]=scan.nextInt();
+            }
+            ArrayList<Integer>[]adj=new ArrayList[n];
+            for(int i=0;i<n;i++){
+                adj[i]=new ArrayList<>();
+            }
+            for(int i=0;i<m;i++){
+                int u=scan.nextInt()-1;
+                int v=scan.nextInt()-1;
+                adj[u].add(v);
+                adj[v].add(u);
+            }
+            Node node=new Node(adj);
+            for(int i=0;i<adj.length;i++){
+                if(node.disc[i]!=0)
+                    continue;
+                dfs(i,-1,node);
+            }
+            boolean work=false;
+            for(ArrayList<Integer>block:node.blocks){
+                if(block.size()<=2)
+                    continue;
+                int min=block.get(0);
+                int max=block.get(0);
+                for(int i:block){
+                    if(r[i]<r[min])
+                        min=i;
+                    if(l[i]>l[max])
+                        max=i;
+                }
+                if(l[max]>r[min]){
+                    ArrayList<Integer>cycle=cycle(adj,max,min);
+                    if(cycle==null)
+                        continue;
+                    System.out.println("YES");
+                    System.out.println(cycle.size());
+                    for(int i=0;i<cycle.size();i++){
+                        System.out.print((cycle.get(i)+1)+" ");
+                    }
+                    System.out.println();
+                    work=true;
+                    break;
+                }
+            }
+            if(!work)
+                System.out.println("NO");
+        }
+    }
+}
