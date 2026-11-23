@@ -1,0 +1,49 @@
+import java.util.*;
+public class Main{
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int t=scan.nextInt();
+        for(int temp=0;temp<t;temp++){
+            int n=scan.nextInt();
+            int[]left=new int[n];
+            int[]right=new int[n];
+            int[]array=new int[n];
+            boolean[]visited=new boolean[n];
+            for(int i=0;i<n;i++){
+                array[i]=scan.nextInt();
+                left[i]=i-1;
+                right[i]=i+1;
+            }
+            PriorityQueue<Integer>pq=new PriorityQueue<>((a,b)->(array[b]-array[a]));
+            for(int i=0;i<n-1;i++){
+                if(array[i]==array[i+1]+1)
+                    pq.add(i);
+                if(array[i]+1==array[i+1])
+                    pq.add(i+1);
+            }
+            while(!pq.isEmpty()){
+                int index=pq.poll();
+                visited[index]=true;
+                if(left[index]>=0&&right[index]<=n-1){
+                    if(array[left[index]]==array[right[index]]+1)
+                        pq.add(left[index]);
+                    if(array[left[index]]+1==array[right[index]])
+                        pq.add(right[index]);
+                }
+                if(left[index]>=0)
+                    right[left[index]]=right[index];
+                if(right[index]<=n-1)
+                    left[right[index]]=left[index];
+            }
+            int count=0;
+            int max=0;
+            for(int i=0;i<n;i++){
+                if(!visited[i]){
+                    count++;
+                    max=Math.max(max,array[i]);
+                }
+            }
+            System.out.println((count==1&&max==0)?"YES":"NO");
+        }
+    }
+}
