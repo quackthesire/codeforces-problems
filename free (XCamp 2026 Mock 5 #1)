@@ -1,0 +1,157 @@
+#include <bits/stdc++.h>
+using namespace std;
+using ll=long long;
+const int MAX=1000005;
+struct Edge{
+    int v;
+    int index;
+    Edge(int v,int index):v(v),index(index){}
+};
+void dfs(int u,int p,const vector<vector<Edge>>&adj,vector<int>&tin,vector<int>&low,int&timer,vector<bool>&bridge){
+    tin[u]=timer;
+    low[u]=timer;
+    timer++;
+    for(Edge e:adj[u]){
+        if(e.index==p)
+            continue;
+        if(tin[e.v]==-1){
+            dfs(e.v,e.index,adj,tin,low,timer,bridge);
+            low[u]=min(low[u],low[e.v]);
+            if(low[e.v]>tin[u])
+                bridge[e.index]=true;
+        }
+        else{
+            low[u]=min(low[u],tin[e.v]);
+        }
+    }
+}
+void dfs2(int u,int index,vector<vector<Edge>>&adj,vector<int>&rev,vector<bool>&bridge,vector<vector<int>>&comp){
+    rev[u]=index;
+    comp[index].push_back(u);
+    for(Edge e:adj[u]){
+        if(rev[e.v]!=-1||bridge[e.index])
+            continue;
+        dfs2(e.v,index,adj,rev,bridge,comp);
+    }
+}
+ll dfs3(int u,int p,vector<vector<int>>&tree,vector<vector<int>>&comp,vector<ll>&size,vector<int>&parent){
+    parent[u]=p;
+    size[u]=comp[u].size();
+    for(int v:tree[u]){
+        if(v==p)
+            continue;
+        size[u]+=dfs3(v,u,tree,comp,size,parent);
+    }
+    return size[u];
+}
+ll solve(int u,int p,ll count,vector<vector<int>>&tree,vector<vector<int>>&comp){
+    ll res=comp[u].size()*comp[u].size();
+    res+=comp[u].size()*count;
+    for(int v:tree[u]){
+        if(v==p)
+            continue;
+        res+=solve(v,u,count+comp[u].size(),tree,comp);
+    }
+    return res;
+}
+int main(){
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+    int n;
+    int m;
+    cin>>n>>m;
+    vector<vector<Edge>>adj(n);
+    for(int i=0;i<m;i++){
+        int u;
+        int v;
+        cin>>u>>v;
+        u--;
+        v--;
+        adj[u].push_back(Edge(v,i));
+        adj[v].push_back(Edge(u,i));
+    }
+    int timer=0;
+    vector<int>tin(n,-1);
+    vector<int>low(n);
+    vector<bool>bridge(m,false);
+    vector<int>rev(n,-1);
+    vector<vector<int>>comp;
+    dfs(0,-1,adj,tin,low,timer,bridge);
+    for(int i=0;i<n;i++){
+        if(rev[i]!=-1)
+            continue;
+        comp.push_back({});
+        dfs2(i,comp.size()-1,adj,rev,bridge,comp);
+    }
+    vector<vector<int>>tree(comp.size());
+    for(int i=0;i<n;i++){
+        for(Edge e:adj[i]){
+            if(!bridge[e.index]||i>e.v)
+                continue;
+            tree[rev[i]].push_back(rev[e.v]);
+            tree[rev[e.v]].push_back(rev[i]);
+        }
+    }
+    vector<ll>temp(comp.size());
+    vector<int>parent(comp.size(),-1);
+    ll tot=dfs3(0,-1,tree,comp,temp,parent);
+    int root=-1;
+    for(int i=0;i<comp.size();i++){
+        ll maxsize=tot-temp[i];
+        for(int j:tree[i]){
+            if(parent[j]==i)
+                maxsize=max(maxsize,temp[j]);
+        }
+        if(maxsize*2<=tot){
+            root=i;
+            break;
+        }
+    }
+    dfs3(root,-1,tree,comp,temp,parent);
+    vector<ll>size(tree[root].size());
+    for(int i=0;i<tree[root].size();i++){
+        size[i]=temp[tree[root][i]];
+    }
+    sort(size.begin(),size.end());
+    vector<pair<int,ll>>group;
+    if(n!=1){
+        int cur=size[0];
+        int count=1;
+        for(int i=1;i<size.size();i++){
+            if(size[i]==cur){
+                count++;
+            }
+            else{
+                group.push_back(pair(cur,count));
+                cur=size[i];
+                count=1;
+            }
+        }
+        group.push_back(pair(cur,count));
+    }
+    vector<ll>vals;
+    for(pair p:group){
+        ll val=1;
+        while(p.second>0){
+            vals.push_back(min(val,(ll)p.second)*p.first);
+            p.second-=min(val,(ll)p.second);
+            val*=2;
+        }
+    }
+    bitset<MAX>dp;
+    dp.set(0);
+    for(ll val:vals){
+        dp|=(dp<<val);
+    }
+    ll ans=0;
+    ll subsize=tot-comp[root].size();
+    for(int i=0;i<=subsize;i++){
+        if(dp[i])
+            ans=max(ans,1LL*i*(subsize-i));
+    }
+    ans+=comp[root].size()*tot;
+    for(int i=0;i<tree[root].size();i++){
+        ans+=solve(tree[root][i],root,0,tree,comp);
+    }
+    cout<<ans;
+}
