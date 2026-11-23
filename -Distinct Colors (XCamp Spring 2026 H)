@@ -1,0 +1,85 @@
+import java.util.*;
+public class solution{
+    static int t=0;
+    static class BIT{
+        int n;
+        int[]bit;
+        public BIT(int n){
+            this.n=n;
+            this.bit=new int[n+1];
+        }
+        public void add(int i,int val){
+            i++;
+            while(i<=n){
+                bit[i]+=val;
+                i+=i&-i;
+            }
+        }
+        public int sum(int i){
+            i++;
+            int res=0;
+            while(i>0){
+                res+=bit[i];
+                i-=i&-i;
+            }
+            return res;
+        }
+        public int query(int l,int r){
+            if(l>r)
+                return 0;
+            return sum(r)-(l==0?0:sum(l-1));
+        }
+    }
+    static void dfs(int u,int p,ArrayList<Integer>[]adj,int[]tin,int[]tout,long[]array,long[]colors){
+        tin[u]=t;
+        array[t++]=colors[u];
+        for(int v:adj[u]){
+            if(v==p)
+                continue;
+            dfs(v,u,adj,tin,tout,array,colors);
+        }
+        tout[u]=t;
+    }
+  	public static void main(String[]args){
+    		Scanner scan=new Scanner(System.in);
+    		int n=scan.nextInt();
+    		long[]colors=new long[n];
+    		ArrayList<Integer>[]adj=new ArrayList[n];
+            ArrayList<int[]>[]q=new ArrayList[n];
+    		for(int i=0;i<n;i++){
+    		    colors[i]=scan.nextLong();
+    		    adj[i]=new ArrayList<>();
+    		    q[i]=new ArrayList<>();
+    		}
+    		for(int i=0;i<n-1;i++){
+    		    int a=scan.nextInt()-1;
+    		    int b=scan.nextInt()-1;
+    		    adj[a].add(b);
+    		    adj[b].add(a);
+    		}
+        int[]tin=new int[n];
+        int[]tout=new int[n];
+        long[]array=new long[n];
+        dfs(0,-1,adj,tin,tout,array,colors);
+        BIT bit=new BIT(n);
+        for(int i=0;i<n;i++){
+            int l=tin[i];
+            int r=tout[i]-1;
+            q[r].add(new int[]{l,i});
+        }
+        HashMap<Long,Integer>last=new HashMap<>();
+        int[]ans=new int[n];
+        for(int i=0;i<n;i++){
+            if(last.containsKey(array[i]))
+                bit.add(last.get(array[i]),-1);
+            bit.add(i,1);
+            last.put(array[i],i);
+            for(int[]j:q[i]){
+                ans[j[1]]=bit.query(j[0],i);
+            }
+        }
+        for(int i=0;i<n;i++){
+            System.out.print(ans[i]+" ");
+        }
+	  }
+}
