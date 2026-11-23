@@ -1,0 +1,58 @@
+import java.util.*;
+public class Main{
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int t=scan.nextInt();
+        for(int temp=0;temp<t;temp++){
+            int n=scan.nextInt();
+            int x=scan.nextInt();
+            long[]array=new long[n];
+            long[]pre=new long[n+1];
+            for(int i=0;i<n;i++){
+                array[i]=scan.nextLong();
+                pre[i+1]=pre[i]+array[i];
+            }
+            int[]l=new int[n];
+            int[]r=new int[n];
+            int[]ans=new int[n+1];
+            int end=-1;
+            for(int i=0;i<n;i++){
+                l[i]=i;
+                r[i]=i+1;
+                boolean work=true;
+                while(l[i]>0){
+                    while(pre[r[i]]-pre[l[i]]<array[l[i]-1]){
+                        if(r[i]==n){
+                            work=false;
+                            break;
+                        }
+                        if(pre[r[i]]-pre[l[i]]<array[r[i]]){
+                            work=false;
+                            break;
+                        }
+                        r[i]++;
+                    }
+                    if(!work)
+                        break;
+                    l[i]--;
+                    r[i]=Math.max(r[i],r[l[i]]);
+                    l[i]=l[l[i]];
+                }
+                if(!work)
+                    continue;
+                end=Math.max(end,r[i]);
+                while(end<n&&pre[end]>=array[end]){
+                    end++;
+                }
+                ans[r[i]-1]++;
+                ans[end]--;
+            }
+            int cur=0;
+            for(int i=0;i<n;i++){
+                cur+=ans[i];
+                System.out.print(cur+" ");
+            }
+            System.out.println();
+        }
+    }
+}
