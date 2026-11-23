@@ -1,0 +1,104 @@
+import java.util.*;
+public class Main{
+    static ArrayList<Integer>[]pos;
+    static class Node{
+        int val;
+        int count;
+        public Node(int val,int count){
+            this.val=val;
+            this.count=count;
+        }
+    }
+    static class Segtree{
+        int n;
+        Node[]tree;
+        public Segtree(int[]array){
+            this.n=array.length;
+            tree=new Node[4*n];
+            build(array,1,0,n-1);
+        }
+        public void build(int[]array,int node,int l,int r){
+            if(l==r){
+                tree[node]=new Node(array[l],1);
+                return;
+            }
+            int m=(l+r)/2;
+            build(array,node*2,l,m);
+            build(array,node*2+1,m+1,r);
+            tree[node]=merge(tree[node*2],tree[node*2+1],l,r);
+        }
+        public Node merge(Node left,Node right,int l,int r){
+            if(left.val==right.val)
+                return new Node(left.val,left.count+right.count);
+            int lval=count(left.val,l,r);
+            int rval=count(right.val,l,r);
+            if(lval>=rval)
+                return new Node(left.val,lval);
+            return new Node(right.val,rval);
+        }
+        public Node query(int l,int r){
+            return query(1,0,n-1,l,r);
+        }
+        public Node query(int node,int l,int r,int ll,int rr){
+            if(ll>r||rr<l)
+                return null;
+            if(ll<=l&&r<=rr)
+                return tree[node];
+            int m=(l+r)/2;
+            Node left=query(node*2,l,m,ll,rr);
+            Node right=query(node*2+1,m+1,r,ll,rr);
+            if(left==null)
+                return right;
+            if(right==null)
+                return left;
+            return merge(left,right,Math.max(l,ll),Math.min(r,rr));
+        }
+        public int count(int val,int l,int r){
+            return bsu(pos[val],r)-bsl(pos[val],l);
+        }
+        public int bsl(ArrayList<Integer>array,int val){
+            int l=0;
+            int r=array.size()-1;
+            while(l<=r){
+                int m=(l+r)/2;
+                if(array.get(m)>=val)
+                    r=m-1;
+                else
+                    l=m+1;
+            }
+            return l;
+        }
+        public int bsu(ArrayList<Integer>array,int val){
+            int l=0;
+            int r=array.size()-1;
+            while(l<=r){
+                int m=(l+r)/2;
+                if(array.get(m)>val)
+                    r=m-1;
+                else
+                    l=m+1;
+            }
+            return l;
+        }
+    }
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int n=scan.nextInt();
+        int q=scan.nextInt();
+        int[]array=new int[n];
+        pos=new ArrayList[n];
+        for(int i=0;i<n;i++){
+            pos[i]=new ArrayList<>();
+        }
+        for(int i=0;i<n;i++){
+            array[i]=scan.nextInt()-1;
+            pos[array[i]].add(i);
+        }
+        Segtree segtree=new Segtree(array);
+        for(int i=0;i<q;i++){
+            int l=scan.nextInt()-1;
+            int r=scan.nextInt()-1;
+            System.out.println(Math.max(1,2*(segtree.query(l,r).count)-(r-l+1)));
+        }
+    }
+}
