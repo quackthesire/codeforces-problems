@@ -1,0 +1,57 @@
+import java.util.*;
+public class Main{
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        char[]array=scan.next().toCharArray();
+        int n=array.length;
+        int[][]pref=new int[n][n];
+        for(int i=n-1;i>=0;i--){
+            for(int j=n-1;j>=0;j--){
+                if(array[i]!=array[j])
+                    continue;
+                if(i!=n-1&&j!=n-1)
+                    pref[i][j]=pref[i+1][j+1];
+                pref[i][j]++;
+            }
+        }
+        int[][]dp=new int[n][n];
+        int[][]max=new int[n][n];
+        for(int i=n-1;i>=0;i--){
+            for(int j=n-2;j>=i;j--){
+                int len=Math.min(j-i+1,pref[i][j+1]);
+                char next=(i+len-1==j?'0':array[i+len]);
+                if(len+j!=n-1&&array[len+j+1]>next)
+                    dp[i][j]=max[j+1][len+j+1]+1;
+                else
+                    dp[i][j]=-1;
+                max[i][j]=Math.max(dp[i][j],max[i][j+1]);
+            }
+        }
+                int best=0;
+        for(int i=1;i<n;i++){
+            if(dp[0][i]>dp[0][best])
+                best=i;
+        }
+        System.out.println(dp[0][best]+1);
+        int prev=0;
+        int cur=best;
+        for(int i=prev;i<=cur;i++){
+            System.out.print(array[i]);
+        }
+        System.out.println();
+        while(cur!=n-1){
+            int len=Math.min(cur-prev+1,pref[prev][cur+1]);
+            best=cur+len+1;
+            for(int i=cur+len+1;i<n;i++){
+                if((len==cur-prev+1||array[cur+len+1]>array[prev+len])&&dp[cur+1][i]>dp[cur+1][best])
+                    best=i;
+            }
+            prev=cur+1;
+            cur=best;
+            for(int i=prev;i<=cur;i++){
+                System.out.print(array[i]);
+            }
+            System.out.println();
+        }
+    }
+}
