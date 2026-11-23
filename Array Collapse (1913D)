@@ -1,0 +1,45 @@
+import java.util.*;
+public class Main{
+    static long MOD=998244353;
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int t=scan.nextInt();
+        for(int temp=0;temp<t;temp++){
+            int n=scan.nextInt();
+            long[]suff=new long[n+1];
+            long[]array=new long[n+1];
+            for(int i=1;i<=n;i++){
+                array[i]=scan.nextLong();
+            }
+            for(int i=n;i>=1;i--){
+                suff[i]=array[i];
+                if(i!=n)
+                    suff[i]=Math.min(suff[i],suff[i+1]);
+            }
+            int[]prev=new int[n+1];
+            Stack<Integer>s=new Stack<>();
+            for(int i=1;i<=n;i++){
+                while(!s.isEmpty()&&array[s.peek()]>=array[i]){
+                    s.pop();
+                }
+                if(!s.isEmpty())
+                    prev[i]=s.peek();
+                s.push(i);
+            }
+            long[]dp=new long[n+1];
+            long[]sum=new long[n+1];
+            long[]pref=new long[n+1];
+            for(int i=1;i<=n;i++){
+                dp[i]=(pref[i-1]-pref[prev[i]]+sum[prev[i]]+(prev[i]==0?1:0)+MOD)%MOD;
+                pref[i]=(dp[i]+pref[i-1])%MOD;
+                sum[i]=(dp[i]+sum[prev[i]])%MOD;
+            }
+            long ans=0;
+            for(int i=1;i<=n;i++){
+                if(array[i]==suff[i])
+                    ans=(ans+dp[i])%MOD;
+            }
+            System.out.println(ans);
+        }
+    }
+}
