@@ -1,0 +1,68 @@
+import java.util.*;
+public class Main{
+    static class Node{
+        int card;
+        char person;
+        public Node(int card,char person){
+            this.card=card;
+            this.person=person;
+        }
+    }
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int t=scan.nextInt();
+        for(int temp=0;temp<t;temp++){
+            int n=scan.nextInt();
+            int[]q=new int[n];
+            int[]k=new int[n];
+            int[]j=new int[n];
+            for(int i=0;i<n;i++){
+                q[i]=scan.nextInt();
+            }
+            for(int i=0;i<n;i++){
+                k[i]=scan.nextInt();
+            }
+            for(int i=0;i<n;i++){
+                j[i]=scan.nextInt();
+            }
+            int[]valid=new int[3];
+            Arrays.fill(valid,n-1);
+            ArrayList<Node>[]ans=new ArrayList[n];
+            for(int i=0;i<n;i++){
+                ans[i]=new ArrayList<>();
+            }
+            for(int i=n-2;i>=0;i--){
+                if(q[valid[0]]<q[i]||k[valid[1]]<k[i]||j[valid[2]]<j[i]){
+                    if(q[valid[0]]<q[i]){
+                        ans[i]=new ArrayList<>(ans[valid[0]]);
+                        ans[i].add(new Node(valid[0],'q'));
+                    }
+                    else if(k[valid[1]]<k[i]){
+                        ans[i]=new ArrayList<>(ans[valid[1]]);
+                        ans[i].add(new Node(valid[1],'k'));
+                    }
+                    else{
+                        ans[i]=new ArrayList<>(ans[valid[2]]);
+                        ans[i].add(new Node(valid[2],'j'));
+                    }
+                    if(q[valid[0]]>q[i])
+                        valid[0]=i;
+                    if(k[valid[1]]>k[i])
+                        valid[1]=i;
+                    if(j[valid[2]]>j[i])
+                        valid[2]=i;
+                }
+            }
+            if(ans[0].size()>0){
+                System.out.println("YES");
+                System.out.println(ans[0].size());
+                for(int i=0;i<ans[0].size();i++){
+                    Node node=ans[0].get(ans[0].size()-i-1);
+                    System.out.println(node.person+" "+(node.card+1));
+                }
+            }
+            else
+                System.out.println("NO");
+        }
+    }
+}
