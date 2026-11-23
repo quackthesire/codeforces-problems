@@ -1,0 +1,112 @@
+import java.util.*;
+public class Main{
+    static class Node implements Comparable<Node>{
+        int index;
+        int val;
+        public Node(int index,int val){
+            this.index=index;
+            this.val=val;
+        }
+        public int compareTo(Node other){
+            return this.val-other.val;
+        }
+    }
+    static void dfs1(int u,int p,int cur,ArrayList<Integer>[]adj,int[]dist,int[]depth){
+        depth[u]=cur;
+        for(int v:adj[u]){
+            if(v==p)
+                continue;
+            dfs1(v,u,cur+1,adj,dist,depth);
+            dist[u]=Math.max(dist[u],dist[v]+1);
+        }
+    }
+    static void dfs2(int u,int p,int[][]array,ArrayList<Integer>[]adj,int[]dist,int[][]up,int[][]vals){
+        int best=0;
+        int second=-1;
+        int index=-1;
+        for(int v:adj[u]){
+            if(v==p)
+                continue;
+            if(dist[v]+1>best){
+                second=best;
+                best=dist[v]+1;
+                index=v;
+            }
+            else if(dist[v]+1>second)
+                second=dist[v]+1;
+        }
+        for(int v:adj[u]){
+            if(v==p)
+                continue;
+            array[v][0]=best;
+            array[v][1]=(v==index?second:best);
+            vals[v][0]=1+array[v][1];
+            up[v][0]=u;
+            dfs2(v,u,array,adj,dist,up,vals);
+        }
+    }
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int t=scan.nextInt();
+        for(int temp=0;temp<t;temp++){
+            int n=scan.nextInt();
+            int[][]array=new int[n][2];
+            ArrayList<Integer>[]adj=new ArrayList[n];
+            for(int i=0;i<n;i++){
+                adj[i]=new ArrayList<>();
+            }
+            for(int i=0;i<n-1;i++){
+                int u=scan.nextInt()-1;
+                int v=scan.nextInt()-1;
+                adj[u].add(v);
+                adj[v].add(u);
+            }
+            int[]depth=new int[n];
+            int[]dist=new int[n];
+            int[][]up=new int[n][20];
+            int[][]vals=new int[n][20];
+            for(int i=0;i<n;i++){
+                Arrays.fill(up[i],-1);
+                Arrays.fill(vals[i],-1);
+            }
+            dfs1(0,-1,0,adj,dist,depth);
+            dfs2(0,-1,array,adj,dist,up,vals);
+            for(int j=1;j<20;j++){
+                for(int i=0;i<n;i++){
+                    if(up[i][j-1]!=-1){
+                        up[i][j]=up[up[i][j-1]][j-1];
+                        vals[i][j]=Math.max(vals[i][j-1],vals[up[i][j-1]][j-1]+(1<<(j-1)));
+                    }
+                }
+            }
+            int q=scan.nextInt();
+            for(int i=0;i<q;i++){
+                int u=scan.nextInt()-1;
+                int k=Math.min(depth[u],scan.nextInt());
+                int cur=u;
+                int add=0;
+                int ans=dist[u];
+                for(int j=0;j<20;j++){
+                    if(cur==-1)
+                        break;
+                    if((k&(1<<j))!=0){
+                        ans=Math.max(ans,vals[cur][j]+add);
+                        add+=(1<<j);
+                        cur=up[cur][j];
+                    }
+                }
+                System.out.print(ans+" ");
+            }
+            System.out.println();
+            /*
+            for(int i=0;i<n;i++){
+                System.out.print(i+": ");
+                for(int j=0;j<20;j++){
+                    System.out.print(vals[i][j]+" ");
+                }
+                System.out.println();
+            }
+            */
+        }
+    }
+}
