@@ -1,0 +1,89 @@
+import java.util.*;
+public class Main{
+    static int MOD=998244353;
+    static int bs(int[]array,int val){
+        int l=0;
+        int r=array.length;
+        while(l<r){
+            int m=(l+r)/2;
+            if(array[m]>=val)
+                r=m;
+            else
+                l=m+1;
+        }
+        return l;
+    }
+    static long modinv(long base){
+        long res=1;
+        long exp=MOD-2;
+        while(exp>0){
+            if(exp%2==1)
+                res=(res*base)%MOD;
+            base=(base*base)%MOD;
+            exp/=2;
+        }
+        return res;
+    }
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int n=scan.nextInt();
+        int m=scan.nextInt();
+        int[]array=new int[n];
+        for(int i=0;i<n;i++){
+            array[i]=scan.nextInt();
+        }
+        int[]left=new int[n];
+        Arrays.fill(left,-1);
+        int[]right=new int[n];
+        Arrays.fill(right,n);
+        Stack<Integer>s=new Stack<>();
+        for(int i=0;i<n;i++){
+            while(!s.isEmpty()){
+                if(array[s.peek()]<=array[i]){
+                    left[i]=s.peek();
+                    break;
+                }
+                else
+                    s.pop();
+            }
+            s.push(i);
+        }
+        s=new Stack<>();
+        for(int i=n-1;i>=0;i--){
+            while(!s.isEmpty()){
+                if(array[s.peek()]<array[i]){
+                    right[i]=s.peek();
+                    break;
+                }
+                else
+                    s.pop();
+            }
+            s.push(i);
+        }
+        int[]k=new int[m];
+        for(int i=0;i<m;i++){
+            k[i]=scan.nextInt();
+        }
+        long extra=0;
+        long[]prevar=new long[m];
+        long[]precons=new long[m];
+        for(int i=0;i<n;i++){
+            long min=((long)(i-left[i])*(right[i]-i))%MOD;
+            extra=(extra+((((long)(i+1)*(n-i)-min+MOD))%MOD*modinv(array[i]))%MOD)%MOD;
+            int index=bs(k,array[i]);
+            prevar[0]=(prevar[0]+(min*modinv(array[i]))%MOD)%MOD;
+            precons[0]=(precons[0]+(min*modinv(array[i]))%MOD)%MOD;
+            if(index<m){
+                prevar[index]=(prevar[index]+min-(min*modinv(array[i]))%MOD+MOD)%MOD;
+                precons[index]=(precons[index]+(min*(2-array[i]+MOD))%MOD-(min*modinv(array[i]))%MOD+MOD)%MOD;
+            }
+        }
+        for(int i=1;i<m;i++){
+            prevar[i]=(prevar[i]+prevar[i-1])%MOD;
+            precons[i]=(precons[i]+precons[i-1])%MOD;
+        }
+        for(int i=0;i<m;i++){
+            System.out.println((extra+(prevar[i]*k[i])%MOD+precons[i])%MOD);
+        }
+    }
+}
