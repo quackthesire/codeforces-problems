@@ -1,0 +1,97 @@
+import java.util.*;
+public class Main{
+    static class Node implements Comparable<Node>{
+        long t;
+        long d;
+        public Node(long t,long d){
+            this.t=t;
+            this.d=d;
+        }
+        public int compareTo(Node other){
+            return Long.compare(other.d,this.d);
+        }
+    }
+    static long solve(long[]array,Node[]times,long[]suff,long val){
+        int l=0;
+        int r=array.length-1;
+        int res=array.length;
+        long ans=val;
+        while(l<=r){
+            int m=(l+r)/2;
+            if(array[m]<val){
+                res=m;
+                r=m-1;
+            }
+            else
+                l=m+1;
+        }
+        if(res!=array.length&&array[res]+times[res].t>val){
+            ans=array[res];
+            res++;
+        }
+        ans-=(res==array.length?0:suff[res]);
+        /*
+        System.out.print("VAL: "+val+" ");
+        System.out.print("RES: "+res+" ");
+        System.out.print("SUFF: "+(res==array.length?0:suff[res])+" ");
+        */
+        return ans;
+    }
+    static int bs2(long[]array,long val){
+        int l=0;
+        int r=array.length-1;
+        int res=-1;
+        while(l<=r){
+            int m=(l+r)/2;
+            if(array[m]<=val){
+                res=m;
+                l=m+1;
+            }
+            else
+                r=m-1;
+        }
+        return res;
+    }
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int t=scan.nextInt();
+        for(int temp=0;temp<t;temp++){
+            int n=scan.nextInt();
+            int m=scan.nextInt();
+            int q=scan.nextInt();
+            Node[]array=new Node[n];
+            long[]pre=new long[m];
+            for(int i=0;i<n;i++){
+                array[i]=new Node(scan.nextLong(),0);
+            }
+            for(int i=0;i<n;i++){
+                array[i]=new Node(array[i].t,scan.nextLong());
+            }
+            for(int i=0;i<m;i++){
+                pre[i]=scan.nextLong();
+                if(i!=0)
+                    pre[i]+=pre[i-1];
+            }
+            Arrays.sort(array);
+            long[]last=new long[n];
+            long[]suff=new long[n];
+            for(int i=0;i<n;i++){
+                last[i]=array[i].d-array[i].t;
+                if(i!=0)
+                    last[i]=Math.min(last[i],last[i-1]-array[i].t);
+            }
+            for(int i=n-1;i>=0;i--){
+                suff[i]=array[i].t;
+                if(i!=n-1)
+                    suff[i]+=suff[i+1];
+            }
+            for(int i=0;i<q;i++){
+                long time=scan.nextLong();
+                long left=solve(last,array,suff,time);
+                //System.out.print("LEFT: "+left+" ");
+                System.out.print((bs2(pre,left)+1)+" ");
+            }
+            System.out.println();
+        }
+    }
+}
