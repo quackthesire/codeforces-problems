@@ -1,0 +1,32 @@
+import java.util.*;
+public class Main{
+    static int MOD=1000000007;
+  	public static void main(String[]args){
+  	    Scanner scan=new Scanner(System.in);
+  	    int n=scan.nextInt();
+  	    int m=scan.nextInt();
+  	    boolean[][]array=new boolean[n][m];
+  	    for(int i=0;i<n;i++){
+  	        String s=scan.next();
+  	        for(int j=0;j<m;j++){
+  	            array[i][j]=s.charAt(j)=='W';
+  	        }
+  	    }
+  	    long ans=1;
+  	    for(int i=0;i<n;i++){
+  	        for(int j=0;j<m;j++){
+  	            boolean color=array[i][j];
+  	            if(i!=0&&color!=array[i-1][j])
+  	                continue;
+  	            if(j!=0&&color!=array[i][j-1])
+  	                continue;
+  	            if(i!=n-1&&color!=array[i+1][j])
+  	                continue;
+  	            if(j!=m-1&&color!=array[i][j+1])
+  	                continue;
+  	            ans=(ans*2)%MOD;
+  	        }
+  	    }
+  	    System.out.println(ans);
+  	}
+}
