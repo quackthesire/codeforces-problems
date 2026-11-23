@@ -1,0 +1,41 @@
+import java.util.*;
+public class Main{
+    static int MOD=998244353;
+    static void solve(long[]dp,String[]eq,int node){
+        if(node*2>=dp.length){
+            dp[node]=1;
+            return;
+        }
+        if(dp[node*2]==0)
+            solve(dp,eq,node*2);
+        if(dp[node*2+1]==0)
+            solve(dp,eq,node*2+1);
+        if(eq[node*2].equals(eq[node*2+1]))
+            dp[node]=(dp[node*2]*dp[node*2+1])%MOD;
+        else
+            dp[node]=(2*dp[node*2]*dp[node*2+1])%MOD;
+    }
+    static void dfs(String[]eq,String s,int node){
+        if(node*2>=eq.length){
+            eq[node]=""+s.charAt(node-1);
+            return;
+        }
+        if(eq[node*2]==null)
+            dfs(eq,s,node*2);
+        if(eq[node*2+1]==null)
+            dfs(eq,s,node*2+1);
+        String l=eq[node*2]+s.charAt(node-1)+eq[node*2+1];
+        String r=eq[node*2+1]+s.charAt(node-1)+eq[node*2];
+        eq[node]=l.compareTo(r)<=0?l:r;
+    }
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int n=scan.nextInt();
+        String s=scan.next();
+        String[]eq=new String[(int)Math.pow(2,n)];
+        dfs(eq,s,1);
+        long[]dp=new long[(int)Math.pow(2,n)];
+        solve(dp,eq,1);
+        System.out.println(dp[1]);
+    }
+}
