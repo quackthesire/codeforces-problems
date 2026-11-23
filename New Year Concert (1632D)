@@ -1,0 +1,50 @@
+import java.util.*;
+public class Main{
+    static int gcd(int a,int b){
+        while(b!=0){
+            int temp=b;
+            b=a%b;
+            a=temp;
+        }
+        return a;
+    }
+    static class Node{
+        int l;
+        int r;
+        public Node(int l,int r){
+            this.l=l;
+            this.r=r;
+        }
+    }
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int n=scan.nextInt();
+        int[]array=new int[n];
+        for(int i=0;i<n;i++){
+            array[i]=scan.nextInt();
+        }
+        int ans=0;
+        HashMap<Integer,Node>map=new HashMap<>();
+        for(int i=0;i<n;i++){
+            Node node=map.getOrDefault(array[i],new Node(Integer.MAX_VALUE,-Integer.MAX_VALUE));
+            map.put(array[i],new Node(Math.min(i,node.l),Math.max(i,node.r)));
+            boolean work=true;
+            HashMap<Integer,Node>temp=new HashMap<>();
+            for(Map.Entry<Integer,Node>e:map.entrySet()){
+                int val=gcd(array[i],e.getKey());
+                Node range=temp.getOrDefault(val,new Node(Integer.MAX_VALUE,-Integer.MAX_VALUE));
+                temp.put(val,new Node(Math.min(e.getValue().l,range.l),Math.max(e.getValue().r,range.r)));
+            }
+            map=temp;
+            for(Map.Entry<Integer,Node>e:map.entrySet()){
+                if(i-e.getValue().l+1>=e.getKey()&&e.getKey()>=i-e.getValue().r+1)
+                    work=false;
+            }
+            if(!work){
+                map=new HashMap<>();
+                ans++;
+            }
+            System.out.print(ans+" ");
+        }
+    }
+}
