@@ -1,0 +1,80 @@
+import java.util.*;
+public class Main{
+    static long MOD=998244353;
+    static long modinv(long base){
+        long exp=MOD-2;
+        long res=1;
+        while(exp>0){
+            if(exp%2==1)
+                res=res*base%MOD;
+            base=base*base%MOD;
+            exp/=2;
+        }
+        return res;
+    }
+    static long choose(int n,int k,long[]fact){
+        if(k<0||k>n)
+            return 0;
+        return fact[n]*modinv(fact[k])%MOD*modinv(fact[n-k])%MOD;
+    }
+    static long choose2(int n,int k,long[]fact){
+        if(k<0||k>n)
+            return 0;
+        long res=1;
+        for(int i=n;i>=n-k+1;i--){
+            res=res*i%MOD;
+        }
+        res=res*modinv(fact[k])%MOD;
+        return res;
+    }
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int t=scan.nextInt();
+        int[]spf=new int[1000000];
+        for(int i=0;i<1000000;i++){
+            spf[i]=i;
+        }
+        for(int i=2;i*i<1000000;i++){
+            if(spf[i]!=i)
+                continue;
+            for(int j=i*i;j<1000000;j+=i){
+                if(spf[j]==j)
+                    spf[j]=i;
+            }
+        }
+        long[]fact=new long[100];
+        fact[0]=1;
+        for(int i=1;i<100;i++){
+            fact[i]=fact[i-1]*i%MOD;
+        }
+        for(int tempvar=0;tempvar<t;tempvar++){
+            int k=scan.nextInt();
+            int n=scan.nextInt();
+            for(int val=1;val<=k;val++){
+                int tot=0;
+                int temp=val;
+                HashMap<Integer,Integer>map=new HashMap<>();
+                while(temp>1){
+                    map.put(spf[temp],map.getOrDefault(spf[temp],0)+1);
+                    tot++;
+                    temp/=spf[temp];
+                }
+                long ans=(val==1?n:0);
+                for(int i=1;i<=Math.min(n,tot);i++){
+                    long count=0;
+                    for(int j=1;j<=i;j++){
+                        long mult=((i-j)%2==0?1:-1)*choose(i,j,fact);
+                        for(Map.Entry<Integer,Integer>e:map.entrySet()){
+                            mult=mult*choose(e.getValue()+j-1,j-1,fact);
+                        }
+                        count=((count+mult)%MOD+MOD)%MOD;
+                    }
+                    count=count*choose2(n+1,i+1,fact)%MOD;
+                    ans=(ans+count)%MOD;
+                }
+                System.out.print(ans+" ");
+            }
+            System.out.println();
+        }
+    }
+}
