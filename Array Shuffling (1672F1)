@@ -1,0 +1,67 @@
+import java.util.*;
+public class Main{
+    static class Segtree{
+        int n;
+        int[]tree;
+        public Segtree(int[]array){
+            this.n=array.length;
+            this.tree=new int[4*n];
+            build(array,1,0,n-1);
+        }
+        public void build(int[]array,int node,int l,int r){
+            if(l==r){
+                tree[node]=array[l];
+                return;
+            }
+            int m=(l+r)/2;
+            build(array,2*node,l,m);
+            build(array,2*node+1,m+1,r);
+            tree[node]=Math.max(tree[2*node],tree[2*node+1]);
+        }
+        public int query(int node,int l,int r,int ll,int rr,int k){
+            if(rr<l||r<ll||tree[node]<k)
+                return -1;
+            if(l==r)
+                return l;
+            int m=(l+r)/2;
+            int left=query(2*node,l,m,ll,rr,k);
+            if(left!=-1)
+                return left;
+            int right=query(2*node+1,m+1,r,ll,rr,k);
+            return right;
+        }
+    }
+  	public static void main(String[]args){
+    		Scanner scan=new Scanner(System.in);
+    		int t=scan.nextInt();
+    		for(int temp=0;temp<t;temp++){
+            int n=scan.nextInt();
+            int[]array=new int[n];
+            int[]count=new int[n+1];
+            int[]index=new int[n+1];
+            ArrayList<Integer>[]pos=new ArrayList[n+1];
+            for(int i=1;i<=n;i++){
+                pos[i]=new ArrayList<>();
+            }
+            for(int i=0;i<n;i++){
+                array[i]=scan.nextInt();
+                count[array[i]]++;
+                pos[array[i]].add(i);
+            }
+            int[]ans=new int[n];
+            Segtree segtree=new Segtree(count);
+            for(int i=1;i<=n;i++){
+                for(int j=0;j<pos[i].size();j++){
+                    int val=segtree.query(1,0,n,i+1,n,j+1);
+                    if(val==-1)
+                        val=segtree.query(1,0,n,0,n,j+1);
+                    ans[pos[i].get(j)]=val;
+                }
+            }
+            for(int i=0;i<n;i++){
+                System.out.print(ans[i]+" ");
+            }
+            System.out.println();
+    		}
+  	}
+}
