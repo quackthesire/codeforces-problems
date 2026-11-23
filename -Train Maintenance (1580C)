@@ -1,0 +1,90 @@
+import java.util.*;
+public class Main{
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int n=scan.nextInt();
+        int m=scan.nextInt();
+        int[]x=new int[n];
+        int[]y=new int[n];
+        int[]mod=new int[n];
+        for(int i=0;i<n;i++){
+            x[i]=Math.min(m,scan.nextInt());
+            y[i]=Math.min(m,scan.nextInt());
+            mod[i]=x[i]+y[i];
+        }
+        int[]q=new int[m+1];
+        int[]index=new int[m+1];
+        for(int i=1;i<=m;i++){
+            q[i]=scan.nextInt();
+            index[i]=scan.nextInt()-1;
+        }
+        int limit=(int)Math.sqrt(m)+1;
+        int[]add=new int[n];
+        int[]ans=new int[m+1];
+        int[]cur=new int[limit];
+        int[][]start=new int[limit][limit];
+        int[][]end=new int[limit][limit];
+        Arrays.fill(add,-1);
+        for(int i=1;i<=m;i++){
+            for(int j=1;j<limit;j++){
+                cur[j]+=start[j][i%j];
+                cur[j]-=end[j][i%j];
+            }
+            int curmod=mod[index[i]];
+            if(q[i]==1){
+                add[index[i]]=i;
+                if(curmod<limit){
+                    start[curmod][(i+x[index[i]])%curmod]++;
+                    end[curmod][(i+x[index[i]]+y[index[i]])%curmod]++;
+                }
+            }
+            else{
+                if(curmod<limit){
+                    if((add[index[i]]+x[index[i]]<=i)&&((i-add[index[i]]-x[index[i]])%curmod<y[index[i]]))
+                        cur[curmod]--;
+                    start[curmod][(add[index[i]]+x[index[i]])%curmod]--;
+                    end[curmod][(add[index[i]]+x[index[i]]+y[index[i]])%curmod]--;
+                }
+                add[index[i]]=-1;
+            }
+            for(int j=1;j<limit;j++){
+                ans[i]+=cur[j];
+            }
+        }
+        Arrays.fill(add,-1);
+        int[]diff=new int[m+2];
+        for(int i=1;i<=m;i++){
+            if(q[i]==1){
+                add[index[i]]=i;
+            }
+            else{
+                if(mod[index[i]]>=limit){
+                    for(int l=add[index[i]]+x[index[i]];l<i;l+=mod[index[i]]){
+                        int r=Math.min(i,l+y[index[i]]);
+                        if(l<r){
+                            diff[l]++;
+                            diff[r]--;
+                        }
+                    }
+                }
+                add[index[i]]=-1;
+            }
+        }
+        for(int i=0;i<n;i++){
+            if(add[i]!=-1&&mod[i]>=limit){
+                for(int l=add[i]+x[i];l<=m;l+=mod[i]){
+                    int r=Math.min(m+1,l+y[i]);
+                    if(l<r){
+                        diff[l]++;
+                        diff[r]--;
+                    }
+                }
+            }
+        }
+        int curans=0;
+        for(int i=1;i<=m;i++){
+            curans+=diff[i];
+            System.out.println(ans[i]+curans);
+        }
+    }
+}
