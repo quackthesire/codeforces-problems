@@ -1,0 +1,30 @@
+import java.util.*;
+public class Main{
+    static int MOD=998244353;
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int n=scan.nextInt();
+        int k=scan.nextInt();
+        long[]dp=new long[n+1];
+        long[]ans=new long[n+1];
+        dp[0]=1;
+        int sum=0;
+        for(int i=k;i<=n;i++){
+            long[]pre=new long[n+1];
+            sum+=i;
+            if(sum>n)
+                break;
+            for(int j=sum;j<=n;j++){
+                pre[j]=(pre[j]+dp[j-i])%MOD;
+                pre[j]=(pre[j]+pre[j-i])%MOD;
+            }
+            for(int j=0;j<=n;j++){
+                dp[j]=pre[j]%MOD;
+                ans[j]=(ans[j]+dp[j])%MOD;
+            }
+        }
+        for(int i=1;i<=n;i++){
+            System.out.print(ans[i]+" ");
+        }
+    }
+}
