@@ -1,0 +1,62 @@
+import java.util.*;
+public class Main{
+    static class App implements Comparable<App>{
+        int d;
+        int s;
+        int index;
+        public App(int d,int s,int index){
+            this.d=d;
+            this.s=s;
+            this.index=index;
+        }
+        public int compareTo(App other){
+            return (other.d-other.s)-(this.d-this.s);
+        }
+    }
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int n=scan.nextInt();
+        int c=scan.nextInt();
+        App[]array=new App[n];
+        for(int i=0;i<n;i++){
+            array[i]=new App(scan.nextInt(),scan.nextInt(),i+1);
+        }
+        Arrays.sort(array);
+        int[][]dp=new int[n+1][c+1];
+        for(int i=0;i<n+1;i++){
+            Arrays.fill(dp[i],-1);
+        }
+        dp[0][0]=0;
+        for(int i=1;i<n+1;i++){
+            for(int j=0;j<c+1;j++){
+                if(dp[i-1][j]!=-1)
+                    dp[i][j]=dp[i-1][j];
+                if(j>=array[i-1].s&&c-(j-array[i-1].s)>=array[i-1].d&&dp[i-1][j-array[i-1].s]!=-1)
+                    dp[i][j]=Math.max(dp[i][j],dp[i-1][j-array[i-1].s]+1);
+            }
+        }
+        int best=-1;
+        int index=0;
+        for(int i=0;i<c+1;i++){
+            if(dp[n][i]>best){
+                best=dp[n][i];
+                index=i;;
+            }
+        }
+        System.out.println(best);
+        if(best!=0){
+            ArrayList<Integer>order=new ArrayList<Integer>();
+            int cnt=0;
+            for(int i=n;i>=1&&index>0;i--){
+                if(index>=array[i-1].s&&dp[i][index]==dp[i-1][index-array[i-1].s]+1){
+                    order.add(array[i-1].index);
+                    index-=array[i-1].s;
+                }
+            }
+            Collections.reverse(order);
+            for(int i:order){
+                System.out.print(i+" ");
+            }
+        }
+    }
+}
