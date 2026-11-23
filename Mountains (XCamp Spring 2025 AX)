@@ -1,0 +1,57 @@
+import java.util.*;
+public class solution{
+    static boolean better(long[]array,int index,int i,int j){
+        return (array[j]-array[index])*Math.abs(index-i)>=(array[i]-array[index])*Math.abs(index-j);
+    }
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int n=scan.nextInt();
+        long[]array=new long[n];
+        TreeSet<Integer>[]set=new TreeSet[n];
+        for(int i=0;i<n;i++){
+            array[i]=scan.nextLong();
+            set[i]=new TreeSet<>();
+        }
+        for(int i=0;i<n;i++){
+            for(int j=i+1;j<n;j++){
+                if(set[i].isEmpty()||better(array,i,set[i].last(),j))
+                    set[i].add(j);
+            }
+        }
+        int ans=0;
+        for(int i=0;i<n;i++){
+            ans+=set[i].size();
+        }
+        int q=scan.nextInt();
+        for(int i=0;i<q;i++){
+            int x=scan.nextInt()-1;
+            int y=scan.nextInt();
+            array[x]+=y;
+            for(int j=0;j<x;j++){
+                boolean work=false;
+                if(set[j].ceiling(x)!=null&&set[j].ceiling(x)==x)
+                    work=true;
+                else if(set[j].floor(x)!=null&&better(array,j,set[j].floor(x),x)){
+                    set[j].add(x);
+                    ans++;
+                    work=true;
+                }
+                if(work){
+                    while(set[j].higher(x)!=null&&!better(array,j,x,set[j].higher(x))){
+                        set[j].remove(set[j].higher(x));
+                        ans--;
+                    }
+                }
+            }
+            ans-=set[x].size();
+            set[x].clear();
+            for(int j=x+1;j<n;j++){
+                if(set[x].isEmpty()||better(array,x,set[x].last(),j)){
+                    set[x].add(j);
+                    ans++;
+                }
+            }
+            System.out.println(ans);
+        }
+    }
+}
