@@ -1,0 +1,60 @@
+import java.util.*;
+public class Main{
+    static int a;
+    static int b;
+    static boolean[]visited;
+    static int[][]dp;
+    static void dfs(ArrayList<Integer>[]adj,int u,int p){
+        visited[u]=true;
+        for(int v:adj[u]){
+            if(v==p)
+                continue;
+            if(visited[v]){
+                a=u;
+                b=v;
+            }
+            else
+                dfs(adj,v,u);
+        }
+    }
+    static void dp(ArrayList<Integer>[]adj,int u,int p){
+        dp[u][0]=0;
+        dp[u][1]=1;
+        for(int v:adj[u]){
+            if(v==p)
+                continue;
+            dp(adj,v,u);
+            dp[u][0]+=Math.max(dp[v][0],dp[v][1]);
+            dp[u][1]+=dp[v][0];
+        }
+    }
+	public static void main(String[]args){
+	    Scanner scan=new Scanner(System.in);
+	    int n=scan.nextInt();
+	    ArrayList<Integer>[]adj=new ArrayList[n];
+	    for(int i=0;i<n;i++){
+	        adj[i]=new ArrayList<>();
+	    }
+	    for(int i=0;i<n;i++){
+	        int p=scan.nextInt()-1;
+	        adj[p].add(i);
+	        adj[i].add(p);
+	    }
+	    int ans=0;
+	    visited=new boolean[n];
+	    dp=new int[n][2];
+	    for(int i=0;i<n;i++){
+	        if(!visited[i]){
+	            dfs(adj,i,-1);
+	            adj[a].remove((Integer)b);
+	            adj[b].remove((Integer)a);
+	            dp(adj,a,-1);
+	            int temp=dp[a][0];
+	            dp(adj,b,-1);
+	            temp=Math.max(temp,dp[b][0]);
+	            ans+=temp;
+	        }
+	    }
+	    System.out.println(ans);
+	}
+}
