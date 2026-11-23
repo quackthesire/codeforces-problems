@@ -1,0 +1,58 @@
+import java.util.*;
+public class Main{
+    static long MOD=1000000007;
+    static long[][] pow(long[][]matrix,long n){
+        long[][]res=new long[2][2];
+        res[0][0]=1;
+        res[1][1]=1;
+        while(n>0){
+            if(n%2==1)
+                res=mult(res,matrix);
+            matrix=mult(matrix,matrix);
+            n/=2;
+        }
+        return res;
+    }
+    static long[][] mult(long[][]a,long[][]b){
+        long[][]c=new long[2][2];
+        c[0][0]=(a[0][0]*b[0][0]+a[0][1]*b[1][0])%MOD;
+        c[0][1]=(a[0][0]*b[0][1]+a[0][1]*b[1][1])%MOD;
+        c[1][0]=(a[1][0]*b[0][0]+a[1][1]*b[1][0])%MOD;
+        c[1][1]=(a[1][0]*b[0][1]+a[1][1]*b[1][1])%MOD;
+        return c;
+    }
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int m=scan.nextInt();
+        long n=scan.nextLong();
+        long[]s=new long[m];
+        long[]l=new long[m];
+        for(int i=0;i<m;i++){
+            s[i]=scan.nextLong();
+        }
+        for(int i=0;i<m;i++){
+            l[i]=scan.nextLong();
+        }
+        long[][]matrix=new long[2][2];
+        for(int i=0;i<m;i++){
+            matrix[0][0]+=(s[i]+l[i])*s[i];
+            matrix[0][1]+=(s[i]+l[i])*l[i];
+            matrix[1][0]+=s[i]*s[i];
+            matrix[1][1]+=s[i]*l[i];
+        }
+        matrix[0][0]%=MOD;
+        matrix[0][1]%=MOD;
+        matrix[1][0]%=MOD;
+        matrix[1][1]%=MOD;
+        long[][]res=pow(matrix,n-1);
+        //System.out.println(res[0][0]+" "+res[0][1]+" "+res[1][0]+" "+res[1][1]);
+        long ans=0;
+        for(int i=0;i<m;i++){
+            ans=(ans+s[0]*res[0][0]*(s[i]+l[i]))%MOD;
+            ans=(ans+s[0]*res[0][1]*s[i])%MOD;
+            ans=(ans+l[0]*res[1][0]*(s[i]+l[i]))%MOD;
+            ans=(ans+l[0]*res[1][1]*s[i])%MOD;
+        }
+        System.out.print(ans);
+    }
+}
