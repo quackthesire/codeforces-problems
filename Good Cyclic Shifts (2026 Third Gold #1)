@@ -1,0 +1,83 @@
+import java.util.*;
+public class Main{
+    static class BIT{
+        int n;
+        long[]tree;
+        public BIT(int n){
+            this.n=n;
+            tree=new long[n+1];
+        }
+        public void add(int index,long x){
+            for(int i=index;i<=n;i+=i&-i){
+                tree[i]+=x;
+            }
+        }
+        public long query(int index){
+            long ans=0;
+            for(int i=index;i>0;i-=i&-i){
+                ans+=tree[i];
+            }
+            return ans;
+        }
+    }
+    static long inv(int[]array){
+        long count=0;
+        BIT bit=new BIT(array.length-1);
+        for(int i=array.length-1;i>=1;i--){
+            count+=bit.query(array[i]-1);
+            bit.add(array[i],1);
+        }
+        return count;
+    }
+	public static void main(String[]args){
+		Scanner scan=new Scanner(System.in);
+		int t=scan.nextInt();
+		for(int temp=0;temp<t;temp++){
+    		int n=scan.nextInt();
+    		int[]array=new int[n+1];
+    		int[]pos=new int[n+1];
+    		int[]dist=new int[n+1];
+    		for(int i=1;i<=n;i++){
+    		    array[i]=scan.nextInt();
+    		    pos[array[i]]=i;
+    		}
+    		long count=inv(array);
+    		long prev=0;
+    		for(int i=1;i<=n;i++){
+                prev+=Math.abs(pos[i]-i);
+            }
+            long slope=0;
+            int[]diff=new int[n+2];
+            for(int i=1;i<=n;i++){
+                if(pos[i]>=i){
+                    slope++;
+                    diff[n-pos[i]+i+1]+=2;
+                }
+                else{
+                    slope--;
+                    diff[i-pos[i]+1]+=2;
+                }
+            }
+            ArrayList<Integer>ans=new ArrayList<>();
+            if(count<=prev/2)
+                ans.add(0);
+    		for(int i=1;i<n;i++){
+    		    count+=2*array[n-i+1]-n-1;
+    		    slope+=diff[i];
+    		    slope--;
+                prev+=slope+2*array[n-i+1]-n-1;
+                slope--;
+                if(count<=prev/2)
+                    ans.add(i);
+    		}
+    		System.out.println(ans.size());
+    		for(int i=0;i<ans.size()-1;i++){
+    		    System.out.print(ans.get(i)+" ");
+    		}
+    		if(ans.size()>0)
+    		    System.out.println(ans.get(ans.size()-1));
+    		else
+    		    System.out.println();
+		}
+	}
+}
