@@ -1,0 +1,23 @@
+import java.util.*;
+public class Main{
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int n=scan.nextInt();
+        long cur=0;
+        long cur2=0;
+        long best=0;
+        long[]array=new long[n];
+        for(int i=0;i<n;i++){
+            array[i]=scan.nextLong();
+        }
+        Arrays.sort(array);
+        for(int i=0;i<n;i++){
+            cur=(array.length-i)*array[i];
+            if(cur>best){
+                best=cur;
+                cur2=array[i];
+            }
+        }
+        System.out.println(best+" "+cur2);
+    }
+}
