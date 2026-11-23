@@ -1,0 +1,127 @@
+import java.util.*;
+public class Main{
+    static class Segtree{
+        int n;
+        long[]tree;
+        public Segtree(int n){
+            this.n=n;
+            tree=new long[4*n];
+        }
+        public long query(int l,int r){
+            return query(1,0,n-1,l,r);
+        }
+        public long query(int node,int l,int r,int ll,int rr){
+            if(ll>r||rr<l)
+                return 0;
+            if(ll<=l&&r<=rr)
+                return tree[node];
+            int m=(l+r)/2;
+            long left=query(node*2,l,m,ll,rr);
+            long right=query(node*2+1,m+1,r,ll,rr);
+            return left+right;
+        }
+        public void update(int i,long val){
+            update(1,0,n-1,i,val);
+        }
+        public void update(int node,int l,int r,int i,long val){
+            if(l==r){
+                tree[node]+=val;
+                return;
+            }
+            int m=(l+r)/2;
+            if(i<=m)
+                update(node*2,l,m,i,val);
+            else
+                update(node*2+1,m+1,r,i,val);
+            tree[node]=tree[node*2]+tree[node*2+1];
+        }
+    }
+    static int t=0;
+    static void dfs(int u,int p,ArrayList<Integer>[]adj,long[]array,int[]parent,int[]depth,int[]tin,int[]tout,long[]val,int[]order){
+        parent[u]=p;
+        tin[u]=t;
+        order[t]=u;
+        t++;
+        for(int v:adj[u]){
+            if(v==p)
+                continue;
+            depth[v]=depth[u]+1;
+            val[v]=val[u]+array[v];
+            dfs(v,u,adj,array,parent,depth,tin,tout,val,order);
+        }
+        tout[u]=t;
+    }
+    static int lca(int u,int v,int[]depth,int[][]up){
+        if(depth[u]<depth[v]){
+            int temp=u;
+            u=v;
+            v=temp;
+        }
+        int diff=depth[u]-depth[v];
+        for(int i=0;i<20;i++){
+            if(((diff>>i)&1)==1)
+                u=up[u][i];
+        }
+        if(u==v)
+            return u;
+        for(int i=19;i>=0;i--){
+            if(up[u][i]!=up[v][i]){
+                u=up[u][i];
+                v=up[v][i];
+            }
+        }
+        return up[u][0];
+    }
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int n=scan.nextInt();
+        int q=scan.nextInt();
+        long[]array=new long[n];
+        for(int i=0;i<n;i++){
+            array[i]=Math.abs(scan.nextLong());
+        }
+        ArrayList<Integer>[]adj=new ArrayList[n];
+        for(int i=0;i<n;i++){
+            adj[i]=new ArrayList<>();
+        }
+        for(int i=0;i<n-1;i++){
+            int u=scan.nextInt()-1;
+            int v=scan.nextInt()-1;
+            adj[u].add(v);
+            adj[v].add(u);
+        }
+        int[]parent=new int[n];
+        int[]depth=new int[n];
+        int[]tin=new int[n];
+        int[]tout=new int[n];
+        int[]order=new int[n];
+        long[]val=new long[n];
+        val[0]=array[0];
+        dfs(0,0,adj,array,parent,depth,tin,tout,val,order);
+        int[][]up=new int[n][20];
+        for(int i=0;i<n;i++){
+            up[order[i]][0]=parent[order[i]];
+            for(int j=1;j<20;j++){
+                up[order[i]][j]=up[up[order[i]][j-1]][j-1];
+            }
+        }
+        Segtree segtree=new Segtree(n);
+        for(int i=0;i<q;i++){
+            if(scan.nextInt()==1){
+                int u=scan.nextInt()-1;
+                long v=Math.abs(scan.nextLong());
+                segtree.update(tin[u],v-array[u]);
+                if(tout[u]!=n)
+                    segtree.update(tout[u],array[u]-v);
+                array[u]=v;
+            }
+            else{
+                int u=scan.nextInt()-1;
+                int v=scan.nextInt()-1;
+                int lca=lca(u,v,depth,up);
+                long sum=val[u]+segtree.query(0,tin[u])+val[v]+segtree.query(0,tin[v])-(val[lca]+segtree.query(0,tin[lca]))*2+array[lca];
+                System.out.println(sum*2-array[u]-array[v]);
+            }
+        }
+    }
+}
