@@ -1,0 +1,96 @@
+import java.util.*;
+public class solution{
+    static void dfs(int u,int count,LinkedList<Integer>[]child,int[]depth){
+        depth[u]=count;
+        for(int v:child[u])
+            dfs(v,count+1,child,depth);
+    }
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int t=scan.nextInt();
+        for(int temp=0;temp<t;temp++){
+            int n=scan.nextInt();
+            int root=-1;
+            int[]depth=new int[n];
+            int[]parent=new int[n];
+            boolean[]visited=new boolean[n];
+            LinkedList<Integer>[]child=new LinkedList[n];
+            for(int i=0;i<n;i++){
+                child[i]=new LinkedList<>();
+            }
+            for(int i=0;i<n-1;i++){
+                int a=scan.nextInt()-1;
+                int b=scan.nextInt()-1;
+                visited[a]=true;
+                child[b].add(a);
+                parent[a]=b;
+            }
+            for(int i=0;i<n;i++){
+                if(!visited[i]){
+                    root=i;
+                    break;
+                }
+            }
+            dfs(root,0,child,depth);
+            int m=scan.nextInt();
+            System.out.println(n-m);
+            boolean[]exist=new boolean[n];
+            LinkedList<Integer>[]child2=new LinkedList[n];
+            for(int i=0;i<n;i++){
+                child2[i]=new LinkedList<>();
+            }
+            for(int i=0;i<m-1;i++){
+                int a=scan.nextInt()-1;
+                int b=scan.nextInt()-1;
+                child2[b].add(a);
+                exist[a]=true;
+                exist[b]=true;
+            }
+            exist[root]=true;
+            boolean[][]work=new boolean[n][n];
+            for(int i=n;i>=0;i--){
+                for(int j=0;j<n;j++){
+                    if(depth[j]!=i)
+                        continue;
+                    for(int k=j;k<n;k++){
+                        if(!exist[k]||(exist[j]&&j!=k))
+                            continue;
+                        work[j][k]=true;
+                        for(int u:child[j]){
+                            boolean found=false;
+                            for(int v:child2[k]){
+                                if(work[u][v]){
+                                    found=true;
+                                    break;
+                                }
+                            }
+                            if(!found){
+                                work[j][k]=false;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+            int[]merge=new int[n];
+            Arrays.fill(merge,-1);
+            merge[root]=root;
+            for(int i=0;i<=n;i++){
+                for(int j=0;j<n;j++){
+                    if(depth[j]!=i)
+                        continue;
+                    if(merge[parent[j]]!=-1){
+                        for(int u:child2[merge[parent[j]]]){
+                            if(work[j][u]){
+                                merge[j]=u;
+                                if(merge[j]!=j)
+                                    System.out.println((j+1)+" "+(u+1));
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
