@@ -1,0 +1,46 @@
+import java.util.*;
+public class Main{
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int t=scan.nextInt();
+        for(int temp=0;temp<t;temp++){
+            int n=scan.nextInt();
+            boolean work=true;
+            int[]array=new int[n];
+            boolean[]visited=new boolean[n+1];
+            for(int i=0;i<n;i++){
+                array[i]=scan.nextInt();
+                if(array[i]<=n)
+                    visited[array[i]]=true;
+                if(array[i]<n-i-1||array[i]>n)
+                    work=false;
+                if(i>0&&array[i]>array[i-1])
+                    work=false;
+            }
+            if(!work){
+                System.out.println("NO");
+                continue;
+            }
+            int index=n-1;
+            int prev=n;
+            int[]ans=new int[n];
+            for(int i=0;i<n;i++){
+                if(array[i]<prev)
+                    ans[i]=10000000;
+                else{
+                    while(visited[index]){
+                        index--;
+                    }
+                    ans[i]=index;
+                    index--;
+                }
+                prev=array[i];
+            }
+            System.out.println("YES");
+            for(int i=0;i<n;i++){
+                System.out.print(ans[i]+" ");
+            }
+            System.out.println();
+        }
+    }
+}
