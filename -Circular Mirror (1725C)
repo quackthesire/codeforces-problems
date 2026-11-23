@@ -1,0 +1,50 @@
+import java.util.*;
+public class Main{
+    static int MOD=998244353;
+    static long pow(long base,long exp){
+        long res=1;
+        while(exp>0){
+            if(exp%2==1)
+                res=(res*base)%MOD;
+            base=(base*base)%MOD;
+            exp/=2;
+        }
+        return res;
+    }
+    static long modinv(long base){
+        return pow(base,MOD-2);
+    }
+    static long choose(int n,int k,long[]fact){
+        return ((fact[n]*modinv(fact[k]))%MOD*modinv(fact[n-k]))%MOD;
+    }
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int n=scan.nextInt();
+        int m=scan.nextInt();
+        long[]fact=new long[Math.max(n,m)+1];
+        fact[0]=1;
+        for(int i=1;i<fact.length;i++){
+            fact[i]=(fact[i-1]*i)%MOD;
+        }
+        long[]array=new long[n];
+        for(int i=0;i<n;i++){
+            array[i]=(i==0?0:array[i-1])+scan.nextLong();
+        }
+        int count=0;
+        long size=array[n-1];
+        for(int i=0;i<n;i++){
+            int cand=Arrays.binarySearch(array,array[i]+size/2);
+            if(cand>0)
+                count++;
+        }
+        long ans=0;
+        for(int i=0;i<=Math.min(count,m);i++){
+            long val=(choose(count,i,fact)*choose(m,i,fact))%MOD;
+            val=(val*fact[i])%MOD;
+            val=(val*pow((long)(m-i)*(m-i-1),count-i))%MOD;
+            val=(val*pow(m-i,n-2*count))%MOD;
+            ans=(ans+val)%MOD;
+        }
+        System.out.println(ans);
+    }
+}
