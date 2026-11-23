@@ -1,0 +1,64 @@
+import java.util.*;
+public class Main{
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int t=scan.nextInt();
+        for(int temp=0;temp<t;temp++){
+            int n=scan.nextInt();
+            int m=scan.nextInt();
+            int q=scan.nextInt();
+            ArrayList<Integer>[]adj=new ArrayList[n];
+            ArrayList<Integer>[]rev=new ArrayList[n];
+            for(int i=0;i<n;i++){
+                adj[i]=new ArrayList<>();
+                rev[i]=new ArrayList<>();
+            }
+            for(int i=0;i<m;i++){
+                int u=scan.nextInt()-1;
+                int v=scan.nextInt()-1;
+                adj[u].add(v);
+                rev[v].add(u);
+            }
+            HashSet<Integer>[]count=new HashSet[n];
+            for(int i=0;i<n;i++){
+                count[i]=new HashSet<>();
+            }
+            boolean[]dpc=new boolean[n];
+            boolean[]dpr=new boolean[n];
+            Arrays.fill(dpc,true);
+            Arrays.fill(dpr,true);
+            for(int i=0;i<q;i++){
+                if(scan.nextInt()==1){
+                    int u=scan.nextInt()-1;
+                    dpc[u]=false;
+                    dpr[u]=false;
+                    Queue<Integer>queue=new LinkedList<>();
+                    queue.add(u);
+                    while(!queue.isEmpty()){
+                        int node=queue.poll();
+                        for(int v:rev[node]){
+                            boolean change=false;
+                            if(!dpc[node]){
+                                dpr[v]=false;
+                                change=true;
+                            }
+                            if(!dpr[node]){
+                                if(count[v].add(node)){
+                                    change=true;
+                                    if(count[v].size()==adj[v].size()&&dpc[v]){
+                                        dpc[v]=false;
+                                        change=true;
+                                    }
+                                }
+                            }
+                            if(change)
+                                queue.add(v);
+                        }
+                    }
+                }
+                else
+                    System.out.println(dpc[scan.nextInt()-1]?"YES":"NO");
+            }
+        }
+    }
+}
