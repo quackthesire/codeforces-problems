@@ -1,0 +1,74 @@
+import java.util.*;
+public class Main{
+    static class Subway{
+        int v;
+        int c;
+        int p;
+        public Subway(int v,int c,int p){
+            this.v=v;
+            this.c=c;
+            this.p=p;
+        }
+    }
+    static class Node implements Comparable<Node>{
+        int u;
+        long dist;
+        int p;
+        public Node(int u,long dist,int p){
+            this.u=u;
+            this.dist=dist;
+            this.p=p;
+        }
+        public int compareTo(Node other){
+            return Long.compare(this.dist,other.dist);
+        }
+    }
+	public static void main(String[]args){
+	    Scanner scan=new Scanner(System.in);
+	    int n=scan.nextInt();
+	    int m=scan.nextInt();
+	    int p=scan.nextInt();
+	    ArrayList<Subway>[]adj=new ArrayList[n];
+	    for(int i=0;i<n;i++){
+	        adj[i]=new ArrayList<>();
+	    }
+	    for(int i=0;i<m;i++){
+	        adj[scan.nextInt()-1].add(new Subway(scan.nextInt()-1,scan.nextInt(),scan.nextInt()-1));
+	    }
+	    long[][][]dist=new long[n][n][(int)Math.pow(2,p)];
+	    for(int i=0;i<n;i++){
+	        for(int j=0;j<n;j++){
+	            Arrays.fill(dist[i][j],Integer.MAX_VALUE);
+	        }
+	        dist[i][i][0]=0;
+            boolean[][]visited=new boolean[n][(int)Math.pow(2,p)];
+            PriorityQueue<Node>pq=new PriorityQueue<>();
+            pq.add(new Node(i,0,0));
+            while(!pq.isEmpty()){
+                Node node=pq.poll();
+                if(visited[node.u][node.p])
+                    continue;
+                visited[node.u][node.p]=true;
+                for(Subway sub:adj[node.u]){
+                    int temp=node.p|((int)Math.pow(2,sub.p));
+                    if(dist[i][node.u][node.p]+sub.c<dist[i][sub.v][temp]){
+                        dist[i][sub.v][temp]=dist[i][node.u][node.p]+sub.c;
+                        pq.add(new Node(sub.v,dist[i][node.u][node.p]+sub.c,temp));
+                    }
+                }
+            }
+	    }
+	    int q=scan.nextInt();
+	    for(int i=0;i<q;i++){
+	        int u=scan.nextInt()-1;
+	        int v=scan.nextInt()-1;
+	        int k=scan.nextInt();
+	        long min=Integer.MAX_VALUE;
+	        for(int j=0;j<(int)Math.pow(2,p);j++){
+	            if(Integer.bitCount(j)<=k)
+	                min=Math.min(min,dist[u][v][j]);
+	        }
+	        System.out.println(min==Integer.MAX_VALUE?"NO WAY":min);
+	    }
+	}
+}
