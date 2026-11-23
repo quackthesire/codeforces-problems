@@ -1,0 +1,62 @@
+import java.util.*;
+public class Main{
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int t=scan.nextInt();
+        for(int temp=0;temp<t;temp++){
+            int n=scan.nextInt();
+            int m=scan.nextInt();
+            long[][]array=new long[n][2];
+            for(int i=0;i<n;i++){
+                long[]dpn=new long[2];
+                long[]dpm=new long[2];
+                dpn[1]=1;
+                dpm[1]=1;
+                for(int j=30;j>=0;j--){
+                    long[]tempn=new long[2];
+                    long[]tempm=new long[2];
+                    if(n-i-1>=0){
+                        for(int k=0;k<2;k++){
+                            for(int l=0;l<2;l++){
+                                if(((i>>j)&1)==1&&l==1)
+                                    continue;
+                                if(k==1&&l>((((n-i-1)/2)>>j)&1))
+                                    continue;
+                                if(k==1&&l<((((n-i-1)/2)>>j)&1))
+                                    tempn[0]+=dpn[k];
+                                else
+                                    tempn[k]+=dpn[k];
+                            }
+                        }
+                    }
+                    if(m-i-1>=0){
+                        for(int k=0;k<2;k++){
+                            for(int l=0;l<2;l++){
+                                if(((i>>j)&1)==1&&l==1)
+                                    continue;
+                                if(k==1&&l>((((m-i-1)/2)>>j)&1))
+                                    continue;
+                                if(k==1&&l<((((m-i-1)/2)>>j)&1))
+                                    tempm[0]+=dpm[k];
+                                else
+                                    tempm[k]+=dpm[k];
+                            }
+                        }
+                    }
+                    dpn=tempn;
+                    dpm=tempm;
+                }
+                if(n-i-1>=0)
+                    array[i][0]=(dpn[0]+dpn[1])*(1L<<Integer.bitCount(i));
+                if(m-i-1>=0)
+                    array[i][1]=(dpm[0]+dpm[1])*(1L<<Integer.bitCount(i));
+            }
+            int best=0;
+            for(int i=1;i<n;i++){
+                if(array[i][1]<array[best][1])
+                    best=i;
+            }
+            System.out.println(1+" "+(n-best));
+        }
+    }
+}
