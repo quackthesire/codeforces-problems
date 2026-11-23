@@ -1,0 +1,79 @@
+import java.util.*;
+public class Main{
+  	public static void main(String[]args){
+  	    Scanner scan=new Scanner(System.in);
+  	    int n=scan.nextInt();
+  	    int q=scan.nextInt();
+  	    int[]array=new int[n];
+  	    for(int i=0;i<n;i++){
+  	        array[i]=scan.nextInt();
+  	    }
+  	    int[]next=new int[n];
+  	    Arrays.fill(next,n);
+  	    ArrayList<Integer>[]factors=new ArrayList[n];
+  	    ArrayList<Integer>[]index=new ArrayList[100005];
+  	    for(int i=0;i<n;i++){
+  	        factors[i]=new ArrayList<>();
+  	    }
+  	    for(int i=0;i<100005;i++){
+  	        index[i]=new ArrayList<>();
+  	    }
+  	    for(int i=0;i<n;i++){
+  	        ArrayList<Integer>less=new ArrayList<>();
+  	        ArrayList<Integer>greater=new ArrayList<>();
+  	        for(int j=1;j*j<=array[i];j++){
+  	            if(array[i]%j==0){
+  	                if(j!=1)
+  	                    less.add(j);
+  	                if(j!=array[i]/j)
+  	                    greater.add(array[i]/j);
+  	            }
+  	        }
+  	        for(int j:less){
+  	            factors[i].add(j);
+  	            index[j].add(i);
+  	        }
+  	        Collections.reverse(greater);
+  	        for(int j:greater){
+  	            factors[i].add(j);
+  	            index[j].add(i);
+  	        }
+  	    }
+  	    for(int i=0;i<n;i++){
+  	        for(int j:factors[i]){
+  	            int temp=Collections.binarySearch(index[j],i);
+  	            next[i]=Math.min(next[i],(temp<index[j].size()-1)?index[j].get(temp+1):n);
+  	        }
+  	    }
+  	    int cap=n;
+  	    for(int i=n-1;i>=0;i--){
+  	        cap=Math.min(cap,next[i]);
+  	        next[i]=cap;
+  	    }
+  	    int[][]sparse=new int[n+1][15];
+          for(int i=0;i<n;i++){
+              sparse[i][0]=next[i];
+          }
+  	    Arrays.fill(sparse[n],n);
+  	    for(int j=1;j<15;j++){
+  	        for(int i=0;i<n;i++){
+  	            sparse[i][j]=sparse[sparse[i][j-1]][j-1];
+  	        }
+  	    }
+  	    for(int i=0;i<q;i++){
+            int l=scan.nextInt()-1;
+            int r=scan.nextInt()-1;
+            int cur=l;
+            int count=0;
+            for(int j=14;j>=0;j--){
+                if(sparse[cur][j]<=r){
+                    cur=sparse[cur][j];
+                    count+=(1<<j);
+                }
+            }
+            if(cur<=r)
+                count++;
+            System.out.println(count);
+        }
+  	}
+}
