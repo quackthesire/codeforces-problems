@@ -1,0 +1,50 @@
+import java.util.*;
+public class Main{
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int n=scan.nextInt();
+        for(int i=0;i<n;i++){
+            String scann=scan.next();
+            if(scann.length()<3){
+                System.out.println("-1");
+            }
+            else{
+                boolean exist=false;
+                int min=Integer.MAX_VALUE;
+                for(int j=0;j<scann.length()-2;j++){
+                    String sub=scann.substring(j,j+3);
+                    if(sub.equals("MOM")){
+                        exist=true;
+                        if(scann.length()-2<min){
+                            min=scann.length()-2;
+                        }
+                    }
+                    if(sub.equals("MOO")){
+                        exist=true;
+                        if(scann.length()-3<min){
+                            min=scann.length()-3;
+                        }
+                    }
+                    if(sub.equals("OOM")){
+                        exist=true;
+                        if(scann.length()-1<min){
+                            min=scann.length()-1;
+                        }
+                    }
+                    if(sub.equals("OOO")){
+                        exist=true;
+                        if(scann.length()-2<min){
+                            min=scann.length()-2;
+                        }
+                    }
+                }
+                if(exist==false){
+                    System.out.println("-1");
+                }
+                else{
+                    System.out.println(min);
+                }
+            }
+        }
+    }
+}
