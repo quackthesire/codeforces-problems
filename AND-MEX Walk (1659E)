@@ -1,0 +1,93 @@
+import java.util.*;
+public class Main{
+    static class DSU{
+        int[]parent;
+        int[]size;
+        boolean[]good;
+        public DSU(int n){
+            parent=new int[n];
+            size=new int[n];
+            good=new boolean[n];
+            for(int i=0;i<n;i++){
+                parent[i]=i;
+                size[i]=1;
+            }
+        }
+        public int find(int u){
+            if(parent[u]!=u)
+                parent[u]=find(parent[u]);
+            return parent[u];
+        }
+        public void merge(int u,int v){
+            u=find(u);
+            v=find(v);
+            if(u==v)
+                return;
+            if(size[u]>size[v]){
+                int t=u;
+                u=v;
+                v=t;
+            }
+            parent[u]=v;
+            size[v]+=size[u];
+        }
+        public boolean same(int u,int v){
+            return find(u)==find(v);
+        }
+    }
+    public static void main(String[]args){
+        Scanner scan=new Scanner(System.in);
+        int n=scan.nextInt();
+        int m=scan.nextInt();
+        DSU[]dsu=new DSU[30];
+        ArrayList<Integer>good=new ArrayList<>();
+        for(int i=0;i<30;i++){
+            dsu[i]=new DSU(n);
+        }
+        for(int i=0;i<m;i++){
+            int u=scan.nextInt()-1;
+            int v=scan.nextInt()-1;
+            long w=scan.nextLong();
+            for(int j=0;j<30;j++){
+                if((w&(1<<j))!=0)
+                    dsu[j].merge(u,v);
+            }
+            if((w&1)==0){
+                good.add(u);
+                good.add(v);
+            }
+        }
+        for(int i=1;i<30;i++){
+            for(int j:good){
+                dsu[i].good[dsu[i].find(j)]=true;
+            }
+        }
+        int q=scan.nextInt();
+        for(int i=0;i<q;i++){
+            int u=scan.nextInt()-1;
+            int v=scan.nextInt()-1;
+            boolean zero=false;
+            for(int j=0;j<30;j++){
+                if(dsu[j].same(u,v)){
+                    zero=true;
+                    break;
+                }
+            }
+            if(zero){
+                System.out.println(0);
+                continue;
+            }
+            boolean one=false;
+            for(int j=1;j<30;j++){
+                if(dsu[j].good[dsu[j].find(u)]){
+                    one=true;
+                    break;
+                }
+            }
+            if(one)
+                System.out.println(1);
+            else
+                System.out.println(2);
+        }
+    }
+}
