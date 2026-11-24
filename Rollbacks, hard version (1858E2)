@@ -1,0 +1,80 @@
+#include <bits/stdc++.h>
+using namespace std;
+using ll=long long;
+struct BIT{
+    vector<int>bit;
+    BIT(int n){
+        bit.resize(n+1);
+    }
+    int query(int pos){
+        int ans=0;
+        for(int i=pos;i>0;i-=i&-i){
+            ans+=bit[i];
+        }
+        return ans;
+    }
+    void update(int pos,int val){
+        int cur=query(pos)-query(pos-1);
+        for(int i=pos;i<(int)bit.size();i+=i&-i){
+            bit[i]+=val-cur;
+        }
+    }
+};
+int main(){
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+    int q;
+    cin>>q;
+    int len=0;
+    BIT bit(q+5);
+    vector<int>array(q+5);
+    vector<set<int>>pos(1000001);
+    stack<pair<int,int>>hist;
+    while(q--){
+        char s;
+        cin>>s;
+        if(s=='+'){
+            int val;
+            cin>>val;
+            hist.push({len,array[len+1]});
+            pos[array[len+1]].erase(len+1);
+            bit.update(len+1,0);
+            if(!pos[array[len+1]].empty())
+                bit.update(*pos[array[len+1]].begin(),1);
+            if(!pos[val].empty())
+                bit.update(*pos[val].begin(),0);
+            pos[val].insert(len+1);
+            bit.update(*pos[val].begin(),1);
+            array[len+1]=val;
+            len++;
+        }
+        if(s=='-'){
+            int val;
+            cin>>val;
+            hist.push({len,-1});
+            len-=val;
+        }
+        if(s=='!'){
+            pair<int,int>prev=hist.top();
+            hist.pop();
+            if(prev.second!=-1){
+                pos[array[prev.first+1]].erase(prev.first+1);
+                bit.update(prev.first+1,0);
+                if(!pos[array[prev.first+1]].empty())
+                    bit.update(*pos[array[prev.first+1]].begin(),1);
+                if(prev.second!=0){
+                    if(!pos[prev.second].empty())
+                        bit.update(*pos[prev.second].begin(),0);
+                    pos[prev.second].insert(prev.first+1);
+                    bit.update(*pos[prev.second].begin(),1);
+                }
+                array[prev.first+1]=prev.second;
+            }
+            len=prev.first;
+        }
+        if(s=='?'){
+            cout<<bit.query(len)<<'\n';
+            cout.flush();
+        }
+    }
+}
