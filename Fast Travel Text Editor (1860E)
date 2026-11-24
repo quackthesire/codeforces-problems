@@ -1,0 +1,58 @@
+#include <bits/stdc++.h>
+using namespace std;
+using ll=long long;
+int index(string&s,int pos){
+    return (s[pos]-'a')*26+s[pos+1]-'a';
+}
+int main(){
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+    string s;
+    cin>>s;
+    int n=s.size();
+    vector<vector<pair<int,int>>>adj(n+676);//after ith
+    for(int i=0;i<n-2;i++){
+        adj[i].push_back(make_pair(i+1,1));
+        adj[i+1].push_back(make_pair(i,1));
+        adj[i].push_back(make_pair(n+index(s,i),1));
+        adj[n+index(s,i)].push_back(make_pair(i,0));
+    }
+    adj[n-2].push_back(make_pair(n+index(s,n-2),1));
+    adj[n+index(s,n-2)].push_back(make_pair(n-2,0));
+    vector<vector<int>>dist(676,vector<int>(n+676,INT_MAX/4));
+    for(int i=0;i<n-1;i++){
+        if(dist[index(s,i)][n+index(s,i)]==0)
+            continue;
+        int start=index(s,i);
+        dist[start][n+start]=0;
+        deque<int>q;
+        q.push_back(n+start);
+        while(!q.empty()){
+            int u=q.front();
+            q.pop_front();
+            for(pair<int,int> v:adj[u]){
+                if(dist[start][u]+v.second<dist[start][v.first]){
+                    dist[start][v.first]=dist[start][u]+v.second;
+                    if(v.second==0)
+                        q.push_front(v.first);
+                    else
+                        q.push_back(v.first);
+                }
+            }
+        }
+    }
+    int q;
+    cin>>q;
+    for(int i=0;i<q;i++){
+        int l;
+        int r;
+        cin>>l>>r;
+        l--;
+        r--;
+        int ans=abs(r-l);
+        for(int j=0;j<676;j++){
+            ans=min(ans,dist[j][l]+dist[j][r]+1);
+        }
+        cout<<ans<<"\n";
+    }
+}
