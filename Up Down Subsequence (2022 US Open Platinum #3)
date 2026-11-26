@@ -1,0 +1,53 @@
+#include <bits/stdc++.h>
+using namespace std;
+using ll=long long;
+pair<int,int> find(int start,int maxlen,vector<int>&array,bool pos){
+    vector<int>tails;
+    int last=array.size();
+    for(int i=start;i<array.size();i++){
+        auto it=lower_bound(tails.begin(),tails.end(),array[i],(pos?function<bool(int,int)>(less<int>()):function<bool(int,int)>(greater<int>())));
+        if(it==tails.end())
+            tails.push_back(array[i]);
+        else
+            tails[it-tails.begin()]=array[i];
+        if(tails.size()==maxlen){
+            last=i;
+            break;
+        }
+    }
+    return make_pair(tails.size()-1,last);
+}
+int main(){
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+    int n;
+    cin>>n;
+    vector<int>array(n);
+    for(int i=0;i<n;i++){
+        cin>>array[i];
+    }
+    string s;
+    cin>>s;
+    int cur=-1;
+    int len=0;
+    vector<pair<int,int>>vals;
+    for(int i=0;i<n-1;i++){
+        if(s[i]!=cur&&cur!=-1){
+            vals.push_back(make_pair(len,(cur=='U'?1:0)));
+            len=0;
+        }
+        cur=s[i];
+        len++;
+    }
+    vals.push_back(make_pair(len,(cur=='U'?1:0)));
+    int ans=0;
+    int pos=0;
+    for(int i=0;i<vals.size();i++){
+        pair<int,int>cur=find(pos,vals[i].first+1,array,vals[i].second);
+        pos=cur.second;
+        ans+=cur.first;
+        if(pos==array.size())
+            break;
+    }
+    cout<<ans;
+}
